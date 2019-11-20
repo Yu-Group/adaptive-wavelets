@@ -6,25 +6,31 @@ from scipy.special import expit as sigmoid
 from cd_propagate import *
 
 
-def cd(mask, im_torch: torch.Tensor, model, model_type=None, device='cuda'):
+def cd(im_torch: torch.Tensor, model, mask=None, model_type=None, device='cuda', transform=None):
     '''Get contextual decomposition scores for blob
     
     Params
     ------
-        mask: array_like (values in {0, 1})
-            array with 1s marking the locations of relevant pixels, 0s marking the background
-            shape should match the shape of im_torch or just H x W
-        im_torch: torch.Tensor
-            example to interpret - usually has shape (batch_size, num_channels, height, width)
-        model_type: str, optional
-            if this is == 'mnist', uses CD for a specific mnist model
-            usually should just leave this blank
+    mask: array_like (values in {0, 1})
+        required unless transform is supplied
+        array with 1s marking the locations of relevant pixels, 0s marking the background
+        shape should match the shape of im_torch or just H x W
+    im_torch: torch.Tensor
+        example to interpret - usually has shape (batch_size, num_channels, height, width)
+    model_type: str, optional
+        if this is == 'mnist', uses CD for a specific mnist model
+        usually should just leave this blank
+    device: str, optional
+    transform: function
+        transform should be a function which transforms the original image
+        only used if mask is not passed
+        
     Returns
     -------
-        relevant: torch.Tensor
-            class-wise scores for relevant mask
-        irrelevant: torch.Tensor
-            class-wise scores for everything but the relevant mask 
+    relevant: torch.Tensor
+        class-wise scores for relevant mask
+    irrelevant: torch.Tensor
+        class-wise scores for everything but the relevant mask 
     '''
     
     # set up model
@@ -32,9 +38,17 @@ def cd(mask, im_torch: torch.Tensor, model, model_type=None, device='cuda'):
     im_torch = im_torch.to(device)
     
     # set up masks
-    mask = torch.FloatTensor(mask).to(device)
-    relevant = mask * im_torch
-    irrelevant = (1 - mask) * im_torch
+    if not mask is None:
+        mask = torch.FloatTensor(mask).to(device)
+        relevant = mask * im_torch
+        irrelevant = (1 - mask) * im_torch
+    elif not transform is None:
+        relevant = transform(im_torch).to(device)
+        irrelevant = im_torch - relevant
+    else:
+        print('invalid arguments')
+    relevant = relevant.to(device)
+    irrelevant = irrelevant.to(device)
 
     
     if model_type == 'mnist':

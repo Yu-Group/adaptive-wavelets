@@ -59,7 +59,7 @@ def ig_scores_2d(model, im_torch, num_classes=10, im_size=28, sweep_dim=1, ind=N
 
 #         input_vecs = input_vecs
 
-        out = F.softmax(model(input_vecs))[:, class_to_explain]
+        out = F.softmax(model(input_vecs), dim=1)[:, class_to_explain]
         loss = criterion(out, torch.zeros(M).to(device))
         loss.backward()
 
@@ -137,7 +137,9 @@ def get_scores_2d(model, method, ims, im_torch=None, pred_ims=None, model_type='
     scores = []
     if method == 'cd':
         for i in tqdm(range(ims.shape[0])):  # can use tqdm here, need to use batches
-            scores.append(cd.cd(np.expand_dims(ims[i], 0), im_torch, model, model_type, device=device)[0].data.cpu().numpy())
+            scores.append(cd.cd(mask=np.expand_dims(ims[i], 0), im_torch=im_torch, 
+                                model=model, model_type=model_type, 
+                                device=device)[0].data.cpu().numpy())
         scores = np.squeeze(np.array(scores))
     elif method == 'build_up':
         for i in tqdm(range(ims.shape[0])):  # can use tqdm here, need to use batches
