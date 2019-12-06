@@ -9,13 +9,6 @@ from scipy.ndimage import gaussian_filter
 
 import sys
 sys.path.append('../visualization')
-sys.path.append('../acd/util')
-sys.path.append('../acd/scores')
-sys.path.append('../acd/agglomeration')
-from tqdm import tqdm
-import viz_2d as viz
-import cd
-import score_funcs
 import bandpass_filter
 
 def visualize(im_orig, transform):

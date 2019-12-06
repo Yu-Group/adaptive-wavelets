@@ -3,3 +3,5 @@
 **ubyte*
 max-activation*
 **slurm*
+**.pkl
+**.DS_Store

@@ -1,4 +1,3 @@
-from __future__ import print_function, division
 import os
 import torch
 from skimage import io, transform
@@ -7,73 +6,23 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from astropy.io import fits
-
-# Ignore warnings
-import warnings
-warnings.filterwarnings("ignore")
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-import foolbox
-import torch
 import torch
 import random
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 from scipy.ndimage import gaussian_filter
 from os.path import join as oj
 import sys
-sys.path.append('../visualization')
-sys.path.append('../acd/util')
-sys.path.append('../acd/scores')
-sys.path.append('../acd/agglomeration')
 from tqdm import tqdm
-import viz_2d as viz
-import cd
-import score_funcs
-import bandpass_filter
-# plt.style.use('dark_background')
-
-
-from data import *
-data_path = '/scratch/users/vision/data/cosmo'
-mnu_dataset = MassMapsDataset(oj(data_path, 'cosmological_parameters.txt'),  oj(data_path, 'z1_256'))
-
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
-
 import torchvision
 import torch.nn as nn
 from torchvision import datasets, models, transforms
 import time
 import os
 import copy
+import torch.optim as optim
+from torch.optim import lr_scheduler
+from data import *
 
-# model_ft = models.resnet18(pretrained=False)
-model_ft = models.vgg16(pretrained=False)
-
-# Modifying the model to predict the three cosmological parameters from single channel images
-# model_ft.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-# num_ftrs = model_ft.fc.in_features
-# model_ft.fc = nn.Linear(num_ftrs, 3)
-# model_ft = model_ft.to(device)
-
-# Modifying the model to predict the three cosmological parameters from single channel images
-model_ft.features[0] = nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-num_ftrs = 4096 # model_ft.fc.n_features
-model_ft.classifier[6] = nn.Linear(num_ftrs, 3)
-model_ft = model_ft.to(device)
-
-
-data_transform = transforms.Compose([
-        ToTensor()
-    ])
-mnu_dataset = MassMapsDataset(oj(data_path, 'cosmological_parameters.txt'),  
-                              oj(data_path, 'z1_256'),
-                              transform=data_transform)
-dataloader = torch.utils.data.DataLoader(mnu_dataset, batch_size=16, 
-                                         shuffle=True, num_workers=1)
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=35):
     since = time.time()
@@ -151,21 +100,52 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=35):
     # model.load_state_dict(best_model_wts)
     return model
 
-import torch.optim as optim
-from torch.optim import lr_scheduler
+if __name__ == '__main__':
 
-criterion = torch.nn.L1Loss()
-
-# Observe that all parameters are being optimized
-# optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
-optimizer_ft = optim.Adam(model_ft.parameters(), lr=0.0001)
+    data_path = '/scratch/users/vision/data/cosmo'
+    mnu_dataset = MassMapsDataset(oj(data_path, 'cosmological_parameters.txt'),  oj(data_path, 'z1_256'))
 
 
-# Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=3, gamma=0.1)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=10)
+    # model_ft = models.resnet18(pretrained=False)
+    model_ft = models.vgg16(pretrained=False)
 
-# model_ft = model_ft.load_state_dict()
+    # Modifying the model to predict the three cosmological parameters from single channel images
+    # model_ft.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    # num_ftrs = model_ft.fc.in_features
+    # model_ft.fc = nn.Linear(num_ftrs, 3)
+    # model_ft = model_ft.to(device)
+
+    # Modifying the model to predict the three cosmological parameters from single channel images
+    model_ft.features[0] = nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    num_ftrs = 4096 # model_ft.fc.n_features
+    model_ft.classifier[6] = nn.Linear(num_ftrs, 3)
+    model_ft = model_ft.to(device)
+
+
+    data_transform = transforms.Compose([
+            ToTensor()
+        ])
+    mnu_dataset = MassMapsDataset(oj(data_path, 'cosmological_parameters.txt'),  
+                                  oj(data_path, 'z1_256'),
+                                  transform=data_transform)
+    dataloader = torch.utils.data.DataLoader(mnu_dataset, batch_size=16, 
+                                             shuffle=True, num_workers=1)
+
+
+    criterion = torch.nn.L1Loss()
+
+    # Observe that all parameters are being optimized
+    # optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+    optimizer_ft = optim.Adam(model_ft.parameters(), lr=0.0001)
+
+
+    # Decay LR by a factor of 0.1 every 7 epochs
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=3, gamma=0.1)
+
+    model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
+                           num_epochs=10)
+
+    # model_ft = model_ft.load_state_dict()
 
