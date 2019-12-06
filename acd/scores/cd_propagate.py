@@ -20,6 +20,20 @@ def propagate_conv_linear(relevant, irrelevant, module, device='cuda'):
     prop_irrel = torch.div(prop_irrel, prop_sum)
     return rel + torch.mul(prop_rel, bias), irrel + torch.mul(prop_irrel, bias)
 
+# propagate batchnorm2d operation
+def propagate_batchnorm2d(relevant, irrelevant, module, device='cuda'):
+    bias = module(torch.zeros(irrelevant.size()).to(device))
+    rel = module(relevant) - bias
+    irrel = module(irrelevant) - bias
+    prop_rel = torch.abs(rel)
+    prop_irrel = torch.abs(irrel)
+    prop_sum = prop_rel + prop_irrel
+    prop_rel = torch.div(prop_rel, prop_sum)
+    prop_rel[torch.isnan(prop_rel)] = 0
+    rel = rel + torch.mul(prop_rel, bias)
+    irrel = module(relevant + irrelevant) - rel
+    return rel, irrel
+
 def propagate_pooling(relevant, irrelevant, pooler):
     '''propagate pooling operation
     '''

@@ -44,17 +44,25 @@ def cd(im_torch: torch.Tensor, model, mask=None, model_type=None, device='cuda',
         irrelevant = (1 - mask) * im_torch
     elif not transform is None:
         relevant = transform(im_torch).to(device)
+        if len(relevant.shape) < 4:
+            relevant = relevant.reshape(1, 1, relevant.shape[0], relevant.shape[1])
         irrelevant = im_torch - relevant
     else:
         print('invalid arguments')
     relevant = relevant.to(device)
     irrelevant = irrelevant.to(device)
 
-    
+#     print('shapes', im_torch.shape, relevant.shape, irrelevant.shape)
     if model_type == 'mnist':
         return cd_propagate_mnist(relevant, irrelevant, model)
+    elif model_type == 'resnet18':
+        return cd_propagate_resnet(relevant, irrelevant, model)
     
     mods = list(model.modules())
+    relevant, irrelevant = cd_generic(mods, relevant, irrelevant)
+    return relevant, irrelevant
+
+def cd_generic(mods, relevant, irrelevant):
     for i, mod in enumerate(mods):
         t = str(type(mod))
         if 'Conv2d' in t:
@@ -65,12 +73,102 @@ def cd(im_torch: torch.Tensor, model, mask=None, model_type=None, device='cuda',
             relevant, irrelevant = propagate_conv_linear(relevant, irrelevant, mod)
         elif 'ReLU' in t:
             relevant, irrelevant = propagate_relu(relevant, irrelevant, mod)
-        elif 'MaxPool2d' in t:
+        elif 'Pool' in t:
             relevant, irrelevant = propagate_pooling(relevant, irrelevant, mod)
         elif 'Dropout' in t:
             relevant, irrelevant = propagate_dropout(relevant, irrelevant, mod)
-                
+        elif 'BatchNorm2d' in t:
+            relevant, irrelevant = propagate_batchnorm2d(relevant, irrelevant, mod)
     return relevant, irrelevant
+
+def cd_propagate_resnet(rel, irrel, model):
+    # each BasicBlock passes its input through to its output (might need to downsample)
+    # note: the bigger resnets use BottleNeck instead of BasicBlock
+    mods = list(model.modules())
+    '''
+    # mods[1:5]
+    x = self.conv1(x)
+    x = self.bn1(x)
+    x = self.relu(x)
+    x = self.maxpool(x)
+
+    # mods[5, 18, 34, 50]
+    x = self.layer1(x)  
+    x = self.layer2(x)
+    x = self.layer3(x)
+    x = self.layer4(x)
+
+    x = self.avgpool(x)
+    x = torch.flatten(x, 1)
+    x = self.fc(x)
+    '''
+    
+    rel, irrel = cd_generic(mods[1:5], rel, irrel)
+#     print(rel.flatten()[:5], irrel.flatten()[:5])
+
+    lay_nums = [5, 18, 34, 50]
+    for lay_num in lay_nums:
+#         print(mods[lay_num])
+        for basic_block in mods[lay_num]:
+#             print('in shape', rel.shape, irrel.shape)
+#             print(basic_block)            
+            rel, irrel = propagate_basic_block(rel, irrel, basic_block)
+#             print('out shape', rel.shape, irrel.shape)
+    
+    # this is written super hacky
+#     print('before avgpool')
+    rel = rel.mean(axis=-1)
+    irrel = irrel.mean(axis=-1)
+    
+    rel = rel.mean(axis=-1)
+    irrel = irrel.mean(axis=-1)
+    
+#     rel, irrel = cd_generic(mods[-2:-1], rel, irrel)
+#     print('after avgpool')
+    
+    
+    
+#     print(rel.shape)
+#     rel = rel.flatten()
+#     irrel = irrel.flatten()
+    rel, irrel = cd_generic(mods[-1:], rel, irrel)
+    
+#     print(rel.shape)
+    return rel, irrel
+
+
+def propagate_basic_block(rel, irrel, module):
+    
+    '''This is what the forward pass of the basic block looks like
+    identity = x
+
+    out = self.conv1(x) # 1
+    out = self.bn1(out) # 2
+    out = self.relu(out) # 3
+    out = self.conv2(out) # 4
+    out = self.bn2(out) # 5
+
+    if self.downsample is not None:
+        identity = self.downsample(x)
+
+    out += identity
+    out = self.relu(out)
+    '''
+#     for mod in module.modules():
+#         print('\tm', mod)
+    rel_identity, irrel_identity = deepcopy(rel), deepcopy(irrel)
+    rel, irrel = cd_generic(list(module.modules())[1:6], rel, irrel)
+    
+    
+    if module.downsample is not None:
+        rel_identity, irrel_identity = cd_generic(module.downsample.modules(), rel_identity, irrel_identity)
+
+    
+    rel += rel_identity
+    irrel += irrel_identity
+    rel, irrel = propagate_relu(rel, irrel, module.relu)  
+    
+    return rel, irrel
 
 
 

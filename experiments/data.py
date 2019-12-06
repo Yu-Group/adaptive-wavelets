@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 class MassMapsDataset(Dataset):
     """Mass Maps Landmarks dataset."""
 
-    def __init__(self, parameter_file, root_dir, transform=None, ncosmo=3):
+    def __init__(self, parameter_file, root_dir, transform=None, ncosmo=10):
         """
         Args:
             parameter_file (string): Path to the txt file with cosmological parameters.
