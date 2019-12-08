@@ -5,3 +5,4 @@ max-activation*
 **slurm*
 **.pkl
 **.DS_Store
+**.pt
