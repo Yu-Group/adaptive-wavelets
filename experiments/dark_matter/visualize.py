@@ -21,3 +21,8 @@ def visualize(im_orig, transform):
         plt.ylabel('frequency y')
 
     plt.tight_layout()
+    
+    
+def cshow(im):
+    plt.imshow(im, cmap='magma', vmax=0.15, vmin=-0.05)
+    plt.axis('off')
