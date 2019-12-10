@@ -1,7 +1,9 @@
 import numpy as np
 
-def to_np(x):
-    return x.cpu().detach().numpy().squeeze()
+def to_freq(x):
+    x =  x.cpu().detach().numpy().squeeze()
+    return np.fft.fftshift(mag(x))
+
 
 def mag(x):
     '''Magnitude
