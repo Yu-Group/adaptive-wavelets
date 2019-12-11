@@ -2,7 +2,8 @@ Calculating importances for different transformations of the input.
 
 # dependencies
 - for the acd module, pip install from [here](https://github.com/csinva/hierarchical-dnn-interpretations)
-- for max_activation methods, pip install from [here](https://github.com/csinva/max-activation-interpretation-pytorch)
+- (optional) for max_activation methods, pip install from [here](https://github.com/csinva/max-activation-interpretation-pytorch)
+- (optional) pytorch wavelets https://github.com/fbcotter/pytorch_wavelets
 
 # related work
 - extends methods in ACD from the paper "[Hierarchical interpretations for neural network predictions](https://openreview.net/pdf?id=SkEqro0ctQ)" (ICLR 2019)
