@@ -15,12 +15,14 @@ import scipy.signal as signal
 #     if transform_type == 'fft':
 #         return fft2(im)
 
-def bandpass_filter(im: np.ndarray, band_center=0.3, band_width=0.1, sample_spacing=None):
+def bandpass_filter(im: np.ndarray, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
     '''Bandpass filter the image (assumes the image is square)
     
     Returns
     -------
     im_bandpass: np.ndarray
+    mask: np.ndarray
+        if mask is present, use this mask to set things to 1 instead of bandpass
     '''
     
     # find freqs
@@ -41,12 +43,16 @@ def bandpass_filter(im: np.ndarray, band_center=0.3, band_width=0.1, sample_spac
     '''
 
     # bandpass
-    mask_bandpass = np.zeros(im_f.shape)
-    for r in range(im_f.shape[0]):
-        for c in range(im_f.shape[1]):
-            dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
-            if dist > band_center - band_width / 2 and dist < band_center + band_width / 2:
-                mask_bandpass[r, c] = 1
+    if mask is not None:
+        assert mask.shape == im_f.shape, 'mask shape does not match shape in freq domain'
+        mask_bandpass = mask
+    else:
+        mask_bandpass = np.zeros(im_f.shape)
+        for r in range(im_f.shape[0]):
+            for c in range(im_f.shape[1]):
+                dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
+                if dist > band_center - band_width / 2 and dist < band_center + band_width / 2:
+                    mask_bandpass[r, c] = 1
 
 
     im_f_masked = np.multiply(im_f, mask_bandpass)

@@ -1,29 +1,22 @@
 import transforms_np
 import torch
-'''
-im = torch.Tensor(mnu_dataset[0]['image'].astype(np.float32))
-cshow(im)
-
-# im_new = torch.zeros(list(im.shape) + [2]) # add imag dim
-# im_new[:, :, 0] = im
-# im_f = torch.fft(im_new, signal_ndim=2)
-'''
 
 
-def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_spacing=None):
+def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
     '''Bandpass filter the image (assumes the image is square)
     
     Returns
     -------
     im_bandpass: torch.Tensor
+        H, W
     '''
     im_np = im.squeeze().cpu().detach().numpy()
     
-    im_bandpass = transforms_np.bandpass_filter_norm_fast(im_np, 
-                                                          cutoff_low=band_center - band_width / 2, 
-                                                          cutoff_high=band_center + band_width / 2, 
-                                                          kernel_length=25)
-#     im_bandpass = transforms_np.bandpass_filter(im_np, band_center, band_width, sample_spacing)
+#     im_bandpass = transforms_np.bandpass_filter_norm_fast(im_np, 
+#                                                           cutoff_low=band_center - band_width / 2, 
+#                                                           cutoff_high=band_center + band_width / 2, 
+#                                                           kernel_length=25, mask=mask)
+    im_bandpass = transforms_np.bandpass_filter(im_np, band_center, band_width, sample_spacing, mask=mask)
     
     
     return torch.Tensor(im_bandpass).reshape(1, 1, im_np.shape[0], im_np.shape[1])
