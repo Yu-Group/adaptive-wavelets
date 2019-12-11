@@ -1,25 +1,42 @@
 import transforms_np
 import torch
+from copy import deepcopy
 
 
 def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
     '''Bandpass filter the image (assumes the image is square)
-    
+
     Returns
     -------
     im_bandpass: torch.Tensor
         H, W
     '''
     im_np = im.squeeze().cpu().detach().numpy()
-    
-#     im_bandpass = transforms_np.bandpass_filter_norm_fast(im_np, 
-#                                                           cutoff_low=band_center - band_width / 2, 
-#                                                           cutoff_high=band_center + band_width / 2, 
+
+#     im_bandpass = transforms_np.bandpass_filter_norm_fast(im_np,
+#                                                           cutoff_low=band_center - band_width / 2,
+#                                                           cutoff_high=band_center + band_width / 2,
 #                                                           kernel_length=25, mask=mask)
     im_bandpass = transforms_np.bandpass_filter(im_np, band_center, band_width, sample_spacing, mask=mask)
-    
-    
+
+
     return torch.Tensor(im_bandpass).reshape(1, 1, im_np.shape[0], im_np.shape[1])
+
+
+def bandpass_filter_augment(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
+    '''Return the bandpass-filtered images given the batch of images
+
+    Returns
+    -------
+    im: torch.Tensor
+        B, H, W
+    '''
+    batch_size = im.size()[0]
+    im_copy = deepcopy(data)
+    for i in range(batch_size):
+        im_bandpass = bandpass_filter(im[i], band_center, band_width, sample_spacing, mask)
+        im_copy = torch.cat((im_copy,im_bandpass), dim=0)
+    return im_copy
 
 '''This code from https://github.com/tomrunia/PyTorchSteerablePyramid
 '''
