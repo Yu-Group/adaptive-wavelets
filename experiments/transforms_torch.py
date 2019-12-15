@@ -37,7 +37,7 @@ def bandpass_filter_augment(im: torch.Tensor, band_center=0.3, band_width=0.1, s
     im_copy = deepcopy(im)
     for i in range(batch_size):
         im_bandpass = bandpass_filter(im[i], band_center, band_width, sample_spacing, mask)
-        im_copy = torch.cat((im_copy,im_copy-im_bandpass), dim=0)
+        im_copy = torch.cat((im_copy,im[i]-im_bandpass), dim=0)
     return im_copy
 
 '''This code from https://github.com/tomrunia/PyTorchSteerablePyramid
