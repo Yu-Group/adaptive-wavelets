@@ -51,15 +51,16 @@ class NormLayer(nn.Module):
 
 class ReshapeLayer(nn.Module):
     def __init__(self, shape):
+        super(ReshapeLayer, self).__init__()
         self.shape = shape
 
     def forward(self, x):
-        return x.reshape(*self.shape)
+        return x.reshape(x.shape[0], *self.shape)
     
 class Net_with_transform(nn.Module):
     '''Prepends transformation onto network (with optional normalizaiton after the transform)
     '''
-    def __init__(self, model, transform, norm=None):
+    def __init__(self, model, transform, norm=None, reshape=None):
         '''
         Params
         ------
@@ -68,6 +69,7 @@ class Net_with_transform(nn.Module):
         super(Net_with_transform, self).__init__()
         self.transform = transform
         self.norm = norm
+        self.reshape = reshape
         self.model = model
 
     def forward(self, x):
@@ -82,6 +84,8 @@ class Net_with_transform(nn.Module):
         x = self.transform(x)
         if self.norm is not None:
             x = self.norm(x)
+        if self.reshape is not None:
+            x = self.reshape(x)
         print('post transform', x.shape)
         
         # should be 4d before inputting to the model

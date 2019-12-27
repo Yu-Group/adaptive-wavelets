@@ -21,7 +21,7 @@ class Net(nn.Module):
     def logits(self, x):
         x = self.relu1(self.pool1(self.conv1(x)))
         x = self.relu2(self.pool2(self.conv2_drop(self.conv2(x))))
-        x = x.view(-1, 320)
+        x = x.reshape(-1, 320)
         x = self.relu3(self.fc1(x))
         x = self.dropout(x)
         x = self.fc2(x)
@@ -39,35 +39,7 @@ class Net(nn.Module):
         return pred.item() #data[0]
 
 
-# Convnet with 2 classes
-class Net2c(nn.Module):
+class Net2c(Net):
     def __init__(self):
         super(Net2c, self).__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
         self.fc2 = nn.Linear(50, 2)
-
-    def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
-
-    def logits(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return x
-
-    def predicted_class(self, x):
-        pred = self.forward(x)
-        _, pred = pred[0].max(0)
-        return pred.item() #data[0]
