@@ -3,7 +3,8 @@
 **ubyte*
 max-activation*
 **wooseok*
-**/data
+**/cosmo
+**/model
 **slurm*
 **.pkl
 **.DS_Store

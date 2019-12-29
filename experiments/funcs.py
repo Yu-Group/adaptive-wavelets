@@ -6,6 +6,10 @@ def prox_positive(x):
     return torch.nn.functional.threshold(x,0,0)
 
 
+def prox_identity(x):
+    return x
+
+
 def prox_soft_threshold(x,lamb):
     return torch.sign(x)*torch.nn.functional.threshold(torch.abs(x)-lamb,0,0)
 
@@ -34,6 +38,13 @@ def L1Norm(params: list):
     return norm
 
 
+def L2Norm(params: list):
+    norm_sq = 0
+    for param in params:
+        norm_sq += np.linalg.norm(param.data.cpu().numpy())**2
+    return norm_sq
+
+
 def conv_sparse_coder(im: torch.Tensor, atoms: list, comp_idx: list):
     x = 0
     for indx in comp_idx:
@@ -47,3 +58,10 @@ def get_atoms(convs: list, maps: list):
     for indx in range(n_components):
         atoms.append(convs[indx](maps[indx]))
     return atoms
+
+
+def get_residual(im: torch.Tensor, atoms: list):
+    recon = 0
+    for atom in atoms:
+        recon += atom
+    return im - recon    

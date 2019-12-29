@@ -6,10 +6,10 @@ from torch.optim.optimizer import required
 from funcs import *
 
 class Filter(nn.Module):
-    def __init__(self, kernel_size, n_comp):
+    def __init__(self, kernel_size, n_comp, stride=1):
         super(Filter, self).__init__()
         torch.manual_seed(10)
-        self.convs = nn.ModuleList([nn.Conv2d(1,1,kernel_size,bias=False) for i in range(n_comp)])
+        self.convs = nn.ModuleList([nn.Conv2d(1,1,kernel_size=kernel_size,stride=stride,bias=False) for i in range(n_comp)])
 
         # normalization
         for conv in self.convs:
@@ -36,9 +36,9 @@ class FeatureMap(nn.Module):
 
 
 class Optimizer(SGD):
-    def __init__(self, params, proxs, lr=required, momentum=0, dampening=0, nesterov=False):
+    def __init__(self, params, proxs, lr=required, momentum=0, weight_decay=0, dampening=0, nesterov=False):
 
-        kwargs = dict(lr=lr, momentum=momentum, dampening=dampening, weight_decay=0, nesterov=nesterov)
+        kwargs = dict(lr=lr, momentum=momentum, dampening=dampening, weight_decay=weight_decay, nesterov=nesterov)
         super().__init__(params, **kwargs)
 
         if len(proxs) != len(self.param_groups):
