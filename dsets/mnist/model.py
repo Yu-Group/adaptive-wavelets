@@ -17,6 +17,7 @@ class Net(nn.Module):
         self.relu3 = nn.ReLU()
         self.dropout = nn.Dropout()
         self.fc2 = nn.Linear(50, 10)
+#         self.log_softmax = nn.LogSoftmax(dim=1) # might not need this
 
     def logits(self, x):
         x = self.relu1(self.pool1(self.conv1(x)))
@@ -31,6 +32,7 @@ class Net(nn.Module):
         # print('forward', x.shape)
         x = self.logits(x)
         # print('later', x.shape)
+#         return self.log_softmax(x)
         return F.log_softmax(x, dim=1)
 
     def predicted_class(self, x):
