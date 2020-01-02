@@ -64,4 +64,11 @@ def get_residual(im: torch.Tensor, atoms: list):
     recon = 0
     for atom in atoms:
         recon += atom
-    return im - recon    
+    return im - recon
+
+
+def get_recon(im: torch.Tensor, atoms: list):
+    recon = 0
+    for atom in atoms:
+        recon += atom
+    return recon
