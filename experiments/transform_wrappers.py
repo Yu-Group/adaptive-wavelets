@@ -59,8 +59,22 @@ class ReshapeLayer(nn.Module):
     
 class Net_with_transform(nn.Module):
     '''Prepends transformation onto network (with optional normalizaiton after the transform)
+    
+    Params
+    ------
+    model: nn.Module
+        model after all the transformations
+    transform: nn.Module
+        the inverse transform
+    norm: nn.Module
+        normalization to apply after the inverse transform
+    reshape: nn.Module
+        reshape to apply after the normalization
+    use_logits: bool, optional
+        whether to use the logits (if the model has it) or the forward function
+    
     '''
-    def __init__(self, model, transform, norm=None, reshape=None):
+    def __init__(self, model, transform, norm=None, reshape=None, use_logits=False):
         '''
         Params
         ------
@@ -71,6 +85,7 @@ class Net_with_transform(nn.Module):
         self.norm = norm
         self.reshape = reshape
         self.model = model
+        self.use_logits = use_logits
 
     def forward(self, x):
         '''
@@ -86,7 +101,7 @@ class Net_with_transform(nn.Module):
             x = self.norm(x)
         if self.reshape is not None:
             x = self.reshape(x)
-        print('post transform', x.shape)
+#         print('post transform', x.shape)
         
         # should be 4d before inputting to the model
         if x.ndim == 2:
@@ -94,6 +109,9 @@ class Net_with_transform(nn.Module):
             x = x.reshape(s[0], 1, 28, 28)
         elif x.ndim == 3:
             x = x.unsqueeze(1)
-        print('pre model', x.shape)
-        x = self.model(x)
+#         print('pre model', x.shape)
+        if self.use_logits:
+            x = self.model.logits(x)
+        else:
+            x = self.model.forward(x)
         return x
