@@ -5,6 +5,7 @@ max-activation*
 **wooseok*
 **/cosmo
 **/model
+**/data
 **slurm*
 **.pkl
 **.DS_Store
