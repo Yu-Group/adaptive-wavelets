@@ -1,3 +1,3 @@
-- code + data from [here](https://github.com/chen0040/keras-fake-news-generator-and-detector)
-    - put csv in [this folder](https://github.com/chen0040/keras-fake-news-generator-and-detector/tree/master/demo/data) into the data folder
-    - will automatically download the glove file
+- uses code from [this repo](https://github.com/rockash/Fake-news-Detection)
+    - download datasets into datasets folder
+    - may have to download nltk stopwords...

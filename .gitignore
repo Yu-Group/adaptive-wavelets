@@ -15,3 +15,6 @@ max-activation*
 experiments/fake_news/very_large_data
 **.h5
 **.npy
+**.csv
+**.txt
+**.zip
