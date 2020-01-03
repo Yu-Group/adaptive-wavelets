@@ -12,3 +12,6 @@ max-activation*
 **.DS_Store
 **.pt
 **.pdf
+experiments/fake_news/very_large_data
+**.h5
+**.npy
