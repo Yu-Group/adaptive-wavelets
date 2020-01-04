@@ -50,6 +50,13 @@ class NormLayer(nn.Module):
         return (x - self.mean) / self.std
 
 class ReshapeLayer(nn.Module):
+    '''Reshapes input after transformation, before feeding to network
+    
+    Params
+    ------
+    shape: tuple
+        shape excluding batch size
+    '''
     def __init__(self, shape):
         super(ReshapeLayer, self).__init__()
         self.shape = shape
@@ -66,7 +73,7 @@ class Net_with_transform(nn.Module):
         model after all the transformations
     transform: nn.Module
         the inverse transform
-    norm: nn.Module
+    norm: nn.Module (Norm_Layer)
         normalization to apply after the inverse transform
     reshape: nn.Module
         reshape to apply after the normalization
@@ -75,11 +82,6 @@ class Net_with_transform(nn.Module):
     
     '''
     def __init__(self, model, transform, norm=None, reshape=None, use_logits=False):
-        '''
-        Params
-        ------
-        norm: Norm_Layer
-        '''
         super(Net_with_transform, self).__init__()
         self.transform = transform
         self.norm = norm
@@ -92,10 +94,10 @@ class Net_with_transform(nn.Module):
         Params
         ------
         x: torch.Tensor
-            (batch_size, H, W)
+            (batch_size, C, H, W) for images
+            (batch_size, C, seq_length) for audio
         '''
 #         print('forwarding', x.shape)
-#         x = torch.ifft(x, signal_ndim=2)
         x = self.transform(x)
         if self.norm is not None:
             x = self.norm(x)
@@ -104,11 +106,13 @@ class Net_with_transform(nn.Module):
 #         print('post transform', x.shape)
         
         # should be 4d before inputting to the model
+        '''
         if x.ndim == 2:
-            s = x.shape
-            x = x.reshape(s[0], 1, 28, 28)
+            x = x.reshape(x.shape[0], 1, 28, 28)
         elif x.ndim == 3:
             x = x.unsqueeze(1)
+        '''
+
 #         print('pre model', x.shape)
         if self.use_logits:
             x = self.model.logits(x)

@@ -5,7 +5,6 @@ import torch.optim as optim
 import sys
 sys.path.append('../dsets/mnist')
 import dset
-from model import Net2c
 from transforms_torch import bandpass_filter_augment
 from tqdm import tqdm
 
@@ -24,6 +23,7 @@ def mag(x):
 
 # train Net2c for classifying original images vs filtered images
 def train_Net2c(train_loader, args, band_center=0.3, band_width=0.1, save_path='models/cnn_vanilla.pth'):
+    from model import Net2c
     # set seed
     torch.manual_seed(args.seed)
     if args.cuda:
