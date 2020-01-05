@@ -45,6 +45,24 @@ def L2Norm(params: list):
     return norm_sq
 
 
+def unfreeze(module, param='dict'):
+    if param == 'dict':
+        module.convs.requires_grad_(True)
+        module.maps.requires_grad_(False)
+    elif param == 'map':
+        module.convs.requires_grad_(False)
+        module.maps.requires_grad_(True)
+    else:
+        print('invalid arguments')
+
+
+def L1Reg_loss(module, X, lamb):
+    X_ = module()
+    reg_loss = (torch.norm(X-X_)**2/2).data.item()
+    reg_loss += lamb*L1Norm(module.maps.parameters())
+    return reg_loss            
+
+
 def conv_sparse_coder(im: torch.Tensor, atoms: list, comp_idx: list):
     x = 0
     for indx in comp_idx:
