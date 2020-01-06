@@ -1,6 +1,10 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import sys
+from functools import partial
+sys.path.append('..')
+from acd_wooseok.acd.scores import cd
 
 def prox_positive(x):
     return torch.nn.functional.threshold(x,0,0)
@@ -26,8 +30,6 @@ def prox_hard_threshold(x,k):
 
 def prox_normalization(x):
     norm = torch.norm(x, p=2).detach().item()
-#     if norm >= 1:
-#         return x/norm
     return x/norm
 
 
@@ -56,37 +58,40 @@ def unfreeze(module, param='dict'):
         print('invalid arguments')
 
 
-def L1Reg_loss(module, X, lamb):
+def L1Reg_loss(module, X, lamb, lamb_cd=0, model=None, comp_indx=None):
     X_ = module()
     reg_loss = (torch.norm(X-X_)**2/2).data.item()
     reg_loss += lamb*L1Norm(module.maps.parameters())
-    return reg_loss            
+    if lamb_cd > 0:
+        atoms = get_atoms(module)
+        reg_loss += lamb_cd * cd.cd(X, model=model, mask=None, model_type='resnet18', device='cuda',
+                            transform=partial(conv_transform, atoms=atoms, comp_indx=comp_indx))[0].flatten()[1].item()
+    return reg_loss
 
 
-def conv_sparse_coder(im: torch.Tensor, atoms: list, comp_idx: list):
+def get_atoms(module):
+    atoms = []
+    n_components = len(module.convs)
+    for indx in range(n_components):
+        atoms.append(module.convs[indx](module.maps[indx]))
+    return atoms
+
+
+def conv_transform(im: torch.Tensor, atoms: list, comp_indx: list):
     x = 0
-    for indx in comp_idx:
+    for indx in comp_indx:
         x += atoms[indx]
     return x
 
 
-def get_atoms(convs: list, maps: list):
-    atoms = []
-    n_components = len(convs)
-    for indx in range(n_components):
-        atoms.append(convs[indx](maps[indx]))
-    return atoms
-
-
-def get_residual(im: torch.Tensor, atoms: list):
-    recon = 0
-    for atom in atoms:
-        recon += atom
-    return im - recon
-
-
-def get_recon(im: torch.Tensor, atoms: list):
+def get_recon(module):
+    atoms = get_atoms(module)
     recon = 0
     for atom in atoms:
         recon += atom
     return recon
+
+
+def get_residual(im: torch.Tensor, module):
+    recon = get_recon(module)
+    return im - recon
