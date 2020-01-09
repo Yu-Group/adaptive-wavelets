@@ -11,7 +11,7 @@ import acd
 from copy import deepcopy
 sys.path.append('..')
 from transforms_torch import bandpass_filter
-plt.style.use('dark_background')
+# plt.style.use('dark_background')
 sys.path.append('../../dsets/mnist')
 import dset
 from model import Net
@@ -47,11 +47,12 @@ class NormLayer(nn.Module):
 
     def forward(self, x):
         # unfortunately we don't have automatic broadcasting yet
+        # return (x - self.mean) / self.std
         return (x - self.mean) / self.std
 
 class ReshapeLayer(nn.Module):
     '''Reshapes input after transformation, before feeding to network
-    
+
     Params
     ------
     shape: tuple
@@ -63,10 +64,10 @@ class ReshapeLayer(nn.Module):
 
     def forward(self, x):
         return x.reshape(x.shape[0], *self.shape)
-    
+
 class Net_with_transform(nn.Module):
     '''Prepends transformation onto network (with optional normalizaiton after the transform)
-    
+
     Params
     ------
     model: nn.Module
@@ -79,7 +80,7 @@ class Net_with_transform(nn.Module):
         reshape to apply after the normalization
     use_logits: bool, optional
         whether to use the logits (if the model has it) or the forward function
-    
+
     '''
     def __init__(self, model, transform, norm=None, reshape=None, use_logits=False):
         super(Net_with_transform, self).__init__()
@@ -104,7 +105,7 @@ class Net_with_transform(nn.Module):
         if self.reshape is not None:
             x = self.reshape(x)
 #         print('post transform', x.shape)
-        
+
         # should be 4d before inputting to the model
         '''
         if x.ndim == 2:
@@ -118,4 +119,39 @@ class Net_with_transform(nn.Module):
             x = self.model.logits(x)
         else:
             x = self.model.forward(x)
+        return x
+
+
+class TransformLayers(nn.Module):
+    def __init__(self, D):
+        super(TransformLayers, self).__init__()
+        self.transform = lay_from_w(D)
+        self.norm_nmf = NormLayer(mu=0.0, std=0.3081)
+        self.norm_img = NormLayer(mu=0.1307, std=0.3081)
+        self.reshape = ReshapeLayer(shape=(1, 28, 28))
+
+    def forward(self, x):
+        '''
+        Params
+        ------
+        x: torch.Tensor
+            (batch_size, C, H, W) for images
+            (batch_size, C, seq_length) for audio
+        '''
+#         print('forwarding', x.shape)
+        x = self.transform(x)
+        x = self.norm_nmf(x)
+        x = self.reshape(x)
+        return x
+        # should be 4d before inputting to the model
+        '''
+        if x.ndim == 2:
+            x = x.reshape(x.shape[0], 1, 28, 28)
+        elif x.ndim == 3:
+            x = x.unsqueeze(1)
+        '''
+
+    def norm_reshape(self, x):
+        x = self.norm_img(x)
+        x = self.reshape(x)
         return x

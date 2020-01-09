@@ -4,8 +4,9 @@
 max-activation*
 **wooseok*
 **/cosmo
-**/model
+**/models
 **/data
+**/results
 **/old
 **slurm*
 **.pkl
