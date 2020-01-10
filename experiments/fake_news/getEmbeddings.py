@@ -45,8 +45,8 @@ def getEmbeddings(path,vector_dimension=300):
     x = constructLabeledSentences(data['text'])
     y = data['label'].values
 
-    text_model = Doc2Vec(min_count=1, window=5, vector_size=vector_dimension, sample=1e-4, negative=5, workers=7, epochs=10,
-                         seed=1)
+    text_model = Doc2Vec(min_count=1, window=5, vector_size=vector_dimension, 
+                         sample=1e-4, negative=5, workers=7, epochs=10, seed=1)
     text_model.build_vocab(x)
     text_model.train(x, total_examples=text_model.corpus_count, epochs=text_model.iter)
 
