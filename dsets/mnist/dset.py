@@ -105,6 +105,42 @@ def pred_ims(model, ims, layer='softmax', device='cuda'):
     return preds.data.cpu().numpy()
 
 
+# mnist dataset with return index
+# dataset
+def dataset_with_indices(cls):
+    """
+    Modifies the given Dataset class to return a tuple data, target, index
+    instead of just data, target.
+    """
+    def __getitem__(self, index):
+        data, target = cls.__getitem__(self, index)
+        return data, target, index
+
+    return type(cls.__name__, (cls,), {
+        '__getitem__': __getitem__,
+    })
+
+
+# load data
+def load_data_with_indices(train_batch_size, test_batch_size, device, data_dir='data', shuffle=False):
+    kwargs = {'num_workers': 1, 'pin_memory': True} if device == 'cuda' else {}
+    MNISTWithIndices = dataset_with_indices(datasets.MNIST)
+    train_loader = torch.utils.data.DataLoader(
+        MNISTWithIndices(data_dir, train=True, download=True,
+                       transform=transforms.Compose([
+                           transforms.ToTensor(),
+                           transforms.Normalize((0.1307,), (0.3081,))
+                       ])),
+        batch_size=train_batch_size, shuffle=shuffle, **kwargs)
+    test_loader = torch.utils.data.DataLoader(
+        MNISTWithIndices(data_dir, train=False, transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])),
+        batch_size=test_batch_size, shuffle=shuffle, **kwargs)
+    return train_loader, test_loader
+
+
 if __name__ == '__main__':
     from model import Net
     args = get_args()
