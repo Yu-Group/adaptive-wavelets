@@ -5,6 +5,7 @@ import sys
 from functools import partial
 sys.path.append('..')
 from acd_wooseok.acd.scores import cd
+from copy import deepcopy
 
 def prox_positive(x):
     return torch.nn.functional.threshold(x,0,0)
@@ -47,13 +48,21 @@ def L2Norm(params: list):
     return norm_sq
 
 
-def unfreeze(module, param='dict'):
-    if param == 'dict':
-        module.convs.requires_grad_(True)
-        module.maps.requires_grad_(False)
-    elif param == 'map':
-        module.convs.requires_grad_(False)
-        module.maps.requires_grad_(True)
+def unfreeze(module, param='dict', obj_type='csc'):
+    if obj_type == 'csc':
+        if param == 'dict':
+            module.convs.requires_grad_(True)
+            module.maps.requires_grad_(False)
+        elif param == 'map':
+            module.convs.requires_grad_(False)
+            module.maps.requires_grad_(True)
+    if obj_type == 'nmf':
+        if param == 'dict':
+            module.D.requires_grad_(True)
+            module.W.requires_grad_(False)
+        elif param == 'map':
+            module.D.requires_grad_(False)
+            module.W.requires_grad_(True)
     else:
         print('invalid arguments')
 
@@ -95,3 +104,10 @@ def get_recon(module):
 def get_residual(im: torch.Tensor, module):
     recon = get_recon(module)
     return im - recon
+
+
+def evaluate_mods(inputs, mods):
+    x = deepcopy(inputs)
+    for mod in mods:
+        x = mod(x)
+    return x

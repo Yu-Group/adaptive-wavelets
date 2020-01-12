@@ -24,6 +24,26 @@ class Conv_SpCoding(nn.Module):
         return x
 
 
+class NMF(nn.Module):
+    def __init__(self, n_obs, n_dim, n_comp):
+        super(NMF, self).__init__()
+        torch.manual_seed(10)
+        self.D = nn.Parameter(torch.randn(n_comp, n_dim))
+        torch.manual_seed(10)
+        self.W = nn.Parameter(torch.randn(n_obs, n_comp))
+
+        # positivity
+        self.D.data = prox_positive(self.D.data)
+        self.W.data = prox_positive(self.W.data)
+
+    def forward(self, indices=None):
+        if indices is None:
+            X = torch.matmul(self.W, self.D)
+        else:
+            X = torch.matmul(self.W[indices], self.D)
+        return X
+
+
 class Blockwise_SGD(SGD):
     def __init__(self, params, lr=required, momentum=0, dampening=0, weight_decay=0, nesterov=False):
 
