@@ -122,22 +122,30 @@ def dataset_with_indices(cls):
 
 
 # load data
-def load_data_with_indices(train_batch_size, test_batch_size, device, data_dir='data', shuffle=False):
+def load_data_with_indices(train_batch_size,
+                            test_batch_size,
+                            device,
+                            data_dir='data',
+                            shuffle=False,
+                            subset_index=None):
     kwargs = {'num_workers': 1, 'pin_memory': True} if device == 'cuda' else {}
-    MNISTWithIndices = dataset_with_indices(datasets.MNIST)
+    MNISTWithIndices = dataset_with_indices(datasets.MNIST)(data_dir, train=True, download=True,
+                   transform=transforms.Compose([
+                       transforms.ToTensor(),
+                       transforms.Normalize((0.1307,), (0.3081,))
+                   ]))
+    MNISTWithIndices_t = dataset_with_indices(datasets.MNIST)(data_dir, train=False, download=True,
+                   transform=transforms.Compose([
+                       transforms.ToTensor(),
+                       transforms.Normalize((0.1307,), (0.3081,))
+                   ]))
+    if not subset_index is None:
+        MNISTWithIndices = torch.utils.data.Subset(MNISTWithIndices, subset_index[0])
+        MNISTWithIndices_t = torch.utils.data.Subset(MNISTWithIndices_t, subset_index[1])
     train_loader = torch.utils.data.DataLoader(
-        MNISTWithIndices(data_dir, train=True, download=True,
-                       transform=transforms.Compose([
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.1307,), (0.3081,))
-                       ])),
-        batch_size=train_batch_size, shuffle=shuffle, **kwargs)
+        MNISTWithIndices, batch_size=train_batch_size, shuffle=shuffle, **kwargs)
     test_loader = torch.utils.data.DataLoader(
-        MNISTWithIndices(data_dir, train=False, transform=transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])),
-        batch_size=test_batch_size, shuffle=shuffle, **kwargs)
+        MNISTWithIndices_t, batch_size=test_batch_size, shuffle=shuffle, **kwargs)
     return train_loader, test_loader
 
 
