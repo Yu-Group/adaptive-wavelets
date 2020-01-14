@@ -151,7 +151,7 @@ class TransformLayers(nn.Module):
             x = x.unsqueeze(1)
         '''
 
-    def norm_reshape(self, x):
+    def im_reshape(self, x):
         x = self.norm_img(x)
         x = self.reshape(x)
         return x
