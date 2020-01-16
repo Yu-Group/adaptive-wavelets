@@ -149,35 +149,4 @@ for n_iter in range(nmf.n_components):
     list_of_results['saliency'].append(np.vstack(results['saliency']))
     list_of_results['input_x_gradient'].append(np.vstack(results['input_x_gradient']))
 
-    # nmf transform layers
-    nmf_transformer = transform_wrappers.TransformLayers(D).to(device)
-
-    # # convert nmf weight to tensor
-    W_test_t = torch.Tensor(W_test).to(device)
-    sweep_dim = 1
-    tiles = torch.Tensor(tiling_2d.gen_tiles(W_test[0:1], fill=0, method='cd', sweep_dim=sweep_dim)).to(device)
-
-    # interp modules
-    saliency = Saliency(model)
-    ig = IntegratedGradients(model)
-
-    # store results
-    results['dot_product'] = []
-
-    for batch_indx, (data, target, data_indx) in enumerate(test_loader):
-        # set requires_grad
-        data = data.to(device).requires_grad_(True)
-        # comp gradient
-        attribution = saliency.attribute(data, target=0, abs=False)
-        # loop over nmf basis
-        scores = []
-        for basis_indx in range(nmf.n_components):
-            im_parts = nmf_transformer(W_test_t[data_indx]*tiles[basis_indx])
-            scores.append(torch.sum(attribution * im_parts, axis=(1,2,3)).cpu().detach().numpy())
-
-            print('\r iter, batch index: {}, {} [component index: {}]'.format(n_iter, batch_indx, basis_indx), end='')
-
-        scores = np.vstack(scores).T
-        results['dot_product'].append(scores)
-    list_of_results['dot_product'].append(np.vstack(results['dot_product']))
     pkl.dump(list_of_results, open('../results/baselines_nmf.pkl', 'wb'))
