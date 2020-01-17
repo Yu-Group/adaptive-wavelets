@@ -1,43 +1,45 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def viz_basis(D, save=False, titles=None):
-    R, C = 4,8
+def viz_basis(D):
+    R, C = 5,6
     i = 0
     vmin = np.min(D)
     vmax = np.max(D)
     plt.figure(figsize=(C * 3, R * 3), dpi=200)
     for r in range(R):
         for c in range(C):
-            if i >= D.shape[0]:
-                break
             plt.subplot(R, C, i + 1)
-            plt.imshow(D[i], vmin=vmin, vmax=vmax, cmap='gray')
+            plt.imshow(D[i], vmin=vmin, vmax=vmax, cmap='viridis')
             plt.axis('off')
-            col = 'black' if save else 'white'
-            if titles is not None:
-                plt.title(str(titles[i]), fontsize=25, color=col)
             i += 1
     plt.tight_layout()
-    if save:
-        plt.savefig('fig_basis.pdf', facecolor='w')
-    else:
-        plt.show()
-        
-def plot_scores_across_bases(results):
-    
-    print('shapes', preds_all.shape, scores_all.shape)
-    class_num = 0
-    R, C = 6, 5
-    plt.figure(dpi=200)
-    basis_num = 0
-    for r in range(R):
-        for c in range(C):
-            plt.subplot(R, C, basis_num + 1)
-    #         plt.plot(scores_all[:, basis_num, class_num]) / preds_all[:, 0, class_num])
-            plt.plot(np.divide(scores_all[:, basis_num, class_num], preds_all[:, 0, class_num]))
-            basis_num += 1
-    #         plt.xaxis('off')
+    plt.show()
 
+
+def viz_interp_scores(list_of_x, interp_modules, results, basis_indx=0):
+    num_modules = len(interp_modules)
+    i = 0
+    plt.figure(figsize=(num_modules * 3, num_modules * 1.5))
+    for c in range(num_modules):
+        interp_scores = results[interp_modules[i]]
+        plt.subplot(2, num_modules, i + 1)
+        plt.plot(list_of_x, interp_scores.mean(axis=0), alpha=0.5, color='blue', linewidth=4.0)
+        plt.fill_between(list_of_x, interp_scores.mean(axis=0)-interp_scores.std(axis=0),
+                    interp_scores.mean(axis=0)+interp_scores.std(axis=0), color='#888888', alpha=0.4)
+        plt.axvline(x=basis_indx, linestyle='--', color='green', label='true basis', linewidth=2.0)
+        plt.legend()
+        plt.xlabel('basis index')
+        plt.ylabel('interp score')
+        plt.title(interp_modules[i])
+
+        plt.subplot(2, num_modules, i + 1 + num_modules)
+        plt.hist(np.argmax(interp_scores,axis=1), bins=list_of_x-0.5, alpha=0.4)
+        plt.axvline(x=basis_indx, linestyle='--', color='green', label='true basis', linewidth=2.0)
+        plt.legend()
+        plt.xlabel('basis index')
+        plt.ylabel('frequency')
+        plt.title('Max basis index')
+        i += 1
     plt.tight_layout()
     plt.show()

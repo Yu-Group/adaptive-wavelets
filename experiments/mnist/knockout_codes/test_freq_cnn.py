@@ -70,7 +70,7 @@ scores_orig = torch.zeros(true_band_num, test_num, band_num) # cd score for clas
 scores_filtered = torch.zeros(true_band_num, test_num, band_num) # cd score for class 1 (bandpass img)
 
 for n_iter, true_band_center in enumerate(true_band_centers):
-    if n_iter <= 9:
+    if n_iter <= 17:
         pass
     else:
         # load model
@@ -104,4 +104,4 @@ for n_iter, true_band_center in enumerate(true_band_centers):
                     print('\r band index: {} [data {}th]'.format(band_idx, data_idx+batch_idx*args.test_batch_size), end='')
 
 # save
-pkl.dump([scores_orig, scores_filtered], open('./results/scores_cd_ver2-2', 'wb'))
+pkl.dump([scores_orig, scores_filtered], open('./results/scores_cd_ver2-3', 'wb'))

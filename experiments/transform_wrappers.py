@@ -82,13 +82,14 @@ class Net_with_transform(nn.Module):
         whether to use the logits (if the model has it) or the forward function
 
     '''
-    def __init__(self, model, transform, norm=None, reshape=None, use_logits=False):
+    def __init__(self, model, transform, norm=None, reshape=None, use_logits=False, n_components=None):
         super(Net_with_transform, self).__init__()
         self.transform = transform
         self.norm = norm
         self.reshape = reshape
         self.model = model
         self.use_logits = use_logits
+        self.n_components = n_components
 
     def forward(self, x):
         '''
@@ -99,7 +100,11 @@ class Net_with_transform(nn.Module):
             (batch_size, C, seq_length) for audio
         '''
 #         print('forwarding', x.shape)
-        x = self.transform(x)
+        if self.n_components is not None:
+            res = x[:,self.n_components:]
+            x = self.transform(x[:,:self.n_components]) + res
+        else:
+            x = self.transform(x)
         if self.norm is not None:
             x = self.norm(x)
         if self.reshape is not None:
