@@ -27,7 +27,10 @@ def viz_interp_scores(list_of_x, interp_modules, results, basis_indx=0):
         plt.plot(list_of_x, interp_scores.mean(axis=0), alpha=0.5, color='blue', linewidth=4.0)
         plt.fill_between(list_of_x, interp_scores.mean(axis=0)-interp_scores.std(axis=0),
                     interp_scores.mean(axis=0)+interp_scores.std(axis=0), color='#888888', alpha=0.4)
-        plt.axvline(x=basis_indx, linestyle='--', color='green', label='true basis', linewidth=2.0)
+        if 'list' not in str(type(basis_indx)):
+            basis_indx = [basis_indx]
+        for j in basis_indx:
+            plt.axvline(x=j, linestyle='--', color='green', label='true basis{}'.format(j), linewidth=2.0)
         plt.legend()
         plt.xlabel('basis index')
         plt.ylabel('interp score')
@@ -35,7 +38,10 @@ def viz_interp_scores(list_of_x, interp_modules, results, basis_indx=0):
 
         plt.subplot(2, num_modules, i + 1 + num_modules)
         plt.hist(np.argmax(interp_scores,axis=1), bins=list_of_x-0.5, alpha=0.4)
-        plt.axvline(x=basis_indx, linestyle='--', color='green', label='true basis', linewidth=2.0)
+        if 'list' not in str(type(basis_indx)):
+            basis_indx = [basis_indx]
+        for j in basis_indx:
+            plt.axvline(x=j, linestyle='--', color='green', label='true basis{}'.format(j), linewidth=2.0)
         plt.legend()
         plt.xlabel('basis index')
         plt.ylabel('frequency')
