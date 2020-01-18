@@ -11,6 +11,7 @@ from astropy.io import fits
 # Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
+classes = ['Mnu', 'Omegam', 'As']
 
 # Build PyTorch Dataset to read the fits files
 class MassMapsDataset(Dataset):
