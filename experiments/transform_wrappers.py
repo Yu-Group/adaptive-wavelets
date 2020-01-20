@@ -33,8 +33,6 @@ def lay_from_w(D: np.ndarray):
     lay.weight.data = torch.tensor(D.astype(np.float32)).T
     return lay
 
-
-
 class NormLayer(nn.Module):
     '''Normalizes images (assumes only 1 channel)
     image = (image - mean) / std
@@ -46,8 +44,6 @@ class NormLayer(nn.Module):
         self.std = std
 
     def forward(self, x):
-        # unfortunately we don't have automatic broadcasting yet
-        # return (x - self.mean) / self.std
         return (x - self.mean) / self.std
 
 class ReshapeLayer(nn.Module):
@@ -80,7 +76,6 @@ class Net_with_transform(nn.Module):
         reshape to apply after the normalization
     use_logits: bool, optional
         whether to use the logits (if the model has it) or the forward function
-
     '''
     def __init__(self, model, transform, norm=None, reshape=None, use_logits=False, n_components=None):
         super(Net_with_transform, self).__init__()
