@@ -12,7 +12,6 @@ sys.path.append('../..')
 from os.path import join as oj
 sys.path.append('../../dsets/mnist')
 import dset
-from model import Net, Net2c
 from util import *
 from numpy.fft import *
 from torch import nn
@@ -21,9 +20,8 @@ from style import *
 from captum.attr import *
 import pickle as pkl
 from torchvision import datasets, transforms
-from sklearn.decomposition import NMF
-from transform_wrappers import *
-import visualize as viz
+from sklearn.decomposition import NMF, LatentDirichletAllocation
+import transform_wrappers
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from skorch import NeuralNetClassifier
@@ -40,9 +38,14 @@ class p:
     n = 50000
     p = 100
     idx_knockout = 12
+    transform = 'lda' # 'fft', 'nmf', 'lda'
+    lr = 0.01 # 0.01 works for nmf, 0.1 works for fft
+    data_distr = 'uniform' # 'normal', 'uniform'
     window = 0
-    n_test = 1000
-    out_dir = '/scratch/users/vision/data/cosmo/sim'
+    n_test = 500
+    num_epochs_train = 12
+    num_components = 30
+    out_dir = '/scratch/users/vision/data/cosmo/sim/lda_unif'
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
     def _str(self):
@@ -59,7 +62,6 @@ class s:
     results = None
     acc_test = None
     net = None
-    transform = None
     
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
@@ -70,47 +72,82 @@ class s:
 np.random.seed(13)
 torch.manual_seed(13)
 
+if p.data_distr == 'normal':
+    X = np.random.randn(p.n, p.p).astype(np.float32)
+elif p.data_distr == 'uniform':
+    X = np.random.rand(p.n, p.p).astype(np.float32)
+
+# define transformations (Tensor -> Tensor)
+if p.transform == 'fft':
+    t = lambda x: torch.rfft(x, signal_ndim=1)
+    transform_i = transform_wrappers.modularize(lambda x: torch.irfft(x, signal_ndim=1)[:, :-1])
+elif p.transform in ['nmf', 'lda']:
+    X = X - np.min(X)
+    if p.transform == 'nmf':
+        decomp = NMF(n_components=p.num_components)
+    else:
+        decomp = LatentDirichletAllocation(n_components=p.num_components)
+    
+    fname = f'{p.transform}_{p.num_components}.pkl'
+    if os.path.exists(fname):
+        decomp = pkl.load(open(fname, 'rb'))
+    else:
+        print('fitting decomp...')
+        decomp.fit(X)
+        pkl.dump(decomp, open(fname, 'wb'))
+    t = lambda x: torch.Tensor(decomp.transform(x))
+    transform_i = transform_wrappers.lay_from_w(decomp.components_)
+
+
 # generate data
-X = np.random.randn(p.n, p.p).astype(np.float32)
-X_t = torch.rfft(torch.Tensor(X), signal_ndim=1)
+def define_y(X_t, p):
+    if p.transform == 'fft':
+        band = X_t[:, p.idx_knockout - p.window: p.idx_knockout + p.window + 1]
+        band_mag = torch.pow(band[..., 0]**2 + band[..., 1]**2, 0.5)
+        band_mag_mean = torch.mean(band_mag, axis=1)
+        thresh = np.nanpercentile(band_mag_mean, 50)
+        y = band_mag_mean > thresh
+    else:
+        thresh = np.nanpercentile(X_t[:, p.idx_knockout], 50)
+        y = X_t[:, p.idx_knockout] > thresh
+    if 'Tensor' in str(type(y)):
+        y = y.cpu().detach().numpy()
+    return y.astype(np.int)
+X_t = t(torch.Tensor(X))
+y = define_y(X_t, p)
 
-# define y
-band = X_t[:, p.idx_knockout - p.window: p.idx_knockout + p.window + 1]
-band_mag = torch.pow(band[..., 0]**2 + band[..., 1]**2, 0.5)
-band_mag_mean = torch.mean(band_mag, axis=1)
-thresh = np.nanpercentile(band_mag_mean, 50)
-y = (band_mag_mean > thresh).cpu().detach().numpy().astype(np.int)
-
+    
 # data split
 X_train, X_test, y_train, y_test = train_test_split(X, y)
+
 
 # fit model
 net = NeuralNetClassifier(
     FNN(p=p.p),
-    max_epochs=10,
-    lr=0.1,
+    max_epochs=p.num_epochs_train,
+    lr=p.lr,
     # Shuffle training data on each epoch
     iterator_train__shuffle=True,
     train_split=None,
 )
 net.fit(X_train, y_train)
-transform = modularize(lambda x: torch.irfft(x, signal_ndim=1)[:, :-1])
-mt = Net_with_transform(model=net.module_, transform=transform).to('cpu')
+mt = transform_wrappers.Net_with_transform(model=net.module_, transform=transform_i).to('cpu')
 s.acc_test = net.score(X_test, y_test)
+print('test acc', s.acc_test)
 s.net = net.module_
-s.transform = 'irfft'
 
 # example look at attributions for one example
 # x_torch = torch.Tensor(X_test[0].reshape(1, -1))
 # x_t = torch.rfft(x_torch, signal_ndim=1).squeeze()
 # results_individual = attributions.get_attributions(x_t, mt)
 
+
 # calculate scores
 print('calculating scores...')
 results = []
 for i in tqdm(range(p.n_test)):
     x_torch = torch.Tensor(X_test[i].reshape(1, -1))
-    x_t = torch.rfft(x_torch, signal_ndim=1).squeeze()
+    x_t = t(x_torch).squeeze()
     results.append(attributions.get_attributions(x_t, mt))
 s.results = pd.DataFrame(results)
 

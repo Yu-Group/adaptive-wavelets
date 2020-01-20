@@ -28,7 +28,8 @@ def get_attributions(x_t, mt, class_num=1):
         if name == 'CD':
             sweep_dim = 1
             tiles = acd.tiling_2d.gen_tiles(x_t.unsqueeze(0), fill=0, method='cd', sweep_dim=sweep_dim)
-            tiles = np.repeat(np.expand_dims(tiles, axis=-1), repeats=2, axis=3).squeeze()
+            if x_t.shape[-1] == 2: # check for imaginary representations
+                tiles = np.repeat(np.expand_dims(tiles, axis=-1), repeats=2, axis=3).squeeze()
             attributions = acd.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[:, class_num]
         else:
             baseline = torch.zeros(x.shape).to(device_captum)
@@ -36,6 +37,7 @@ def get_attributions(x_t, mt, class_num=1):
             attributions, delta = attributer.attribute(deepcopy(x), deepcopy(baseline),
                                                  target=class_num, return_convergence_delta=True)
             attributions = attributions.cpu().detach().numpy().squeeze()
-            attributions = mag(attributions)
+            if x_t.shape[-1] == 2: # check for imaginary representations
+                attributions = mag(attributions)
         results[name] = attributions
     return results
