@@ -46,6 +46,17 @@ class NormLayer(nn.Module):
     def forward(self, x):
         return (x - self.mean) / self.std
 
+def modularize(f):
+    '''Turns any function into a module
+    '''
+    class Transform(nn.Module):
+        def __init__(self, f):
+            super(Transform, self).__init__()
+            self.f = f
+        def forward(self, x):
+            return self.f(x)
+    return Transform(f)    
+    
 class ReshapeLayer(nn.Module):
     '''Reshapes input after transformation, before feeding to network
 
