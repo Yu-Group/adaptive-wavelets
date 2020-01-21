@@ -21,9 +21,9 @@ def get_attributions(x_t, mt, class_num=1):
     x.requires_grad = True
     
     results = {}
-    attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD']
+    attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD', 'Saliency', 'InputXGradient']
     for name, func in zip(attr_methods,
-                          [IntegratedGradients, DeepLift, GradientShap, None]):
+                          [IntegratedGradients, DeepLift, GradientShap, None, Saliency, InputXGradient]):
 
         if name == 'CD':
             sweep_dim = 1
@@ -34,8 +34,11 @@ def get_attributions(x_t, mt, class_num=1):
         else:
             baseline = torch.zeros(x.shape).to(device_captum)
             attributer = func(mt.to(device_captum))
-            attributions, delta = attributer.attribute(deepcopy(x), deepcopy(baseline),
-                                                 target=class_num, return_convergence_delta=True)
+            if name in ['InputXGradient', 'Saliency']:
+                attributions = attributer.attribute(deepcopy(x), target=class_num)
+            else:
+                attributions = attributer.attribute(deepcopy(x), deepcopy(baseline),
+                                                 target=class_num)
             attributions = attributions.cpu().detach().numpy().squeeze()
             if x_t.shape[-1] == 2: # check for imaginary representations
                 attributions = mag(attributions)
