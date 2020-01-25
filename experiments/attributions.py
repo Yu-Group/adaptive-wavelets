@@ -13,15 +13,20 @@ from captum.attr import *
 from transform_wrappers import *
 
 
-def get_attributions(x_t, mt, class_num=1):
+def get_attributions(x_t: torch.Tensor, mt, class_num=1):
     '''Returns all scores in a dict assuming mt works with both grads + CD
+
+    Params
+    ------
+    mt: model
+    class_num: target class
     '''
     device_captum = 'cpu' # this only works with cpu
     x = x_t.unsqueeze(0).to(device_captum) # x is for the baseline
     x.requires_grad = True
     
     results = {}
-    attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD', 'Saliency', 'InputXGradient']
+    attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD', 'InputXGradient']
     for name, func in zip(attr_methods,
                           [IntegratedGradients, DeepLift, GradientShap, None, Saliency, InputXGradient]):
 
@@ -34,11 +39,10 @@ def get_attributions(x_t, mt, class_num=1):
         else:
             baseline = torch.zeros(x.shape).to(device_captum)
             attributer = func(mt.to(device_captum))
-            if name in ['InputXGradient', 'Saliency']:
+            if name in ['InputXGradient']:
                 attributions = attributer.attribute(deepcopy(x), target=class_num)
             else:
-                attributions = attributer.attribute(deepcopy(x), deepcopy(baseline),
-                                                 target=class_num)
+                attributions = attributer.attribute(deepcopy(x), deepcopy(baseline), target=class_num)
             attributions = attributions.cpu().detach().numpy().squeeze()
             if x_t.shape[-1] == 2: # check for imaginary representations
                 attributions = mag(attributions)

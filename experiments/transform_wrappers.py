@@ -87,6 +87,9 @@ class Net_with_transform(nn.Module):
         reshape to apply after the normalization
     use_logits: bool, optional
         whether to use the logits (if the model has it) or the forward function
+    n_components: int
+        right now this setup is kind of weird - if you want to pass a residual
+        pass x as a 1d vector whose last entries contain the residual [x, residual]
     '''
     def __init__(self, model, transform, norm=None, reshape=None, use_logits=False, n_components=None):
         super(Net_with_transform, self).__init__()
@@ -106,6 +109,7 @@ class Net_with_transform(nn.Module):
             (batch_size, C, seq_length) for audio
         '''
 #         print('forwarding', x.shape)
+        
         if self.n_components is not None:
             res = x[:,self.n_components:]
             x = self.transform(x[:,:self.n_components]) + res

@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def viz_basis(D):
-    R, C = 5,6
+def viz_basis(D, R=5, C=6):
     i = 0
     vmin = np.min(D)
     vmax = np.max(D)

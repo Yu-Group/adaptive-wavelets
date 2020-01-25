@@ -39,14 +39,14 @@ class p:
     n = 50000
     p = 100
     idx_knockout = 12
-    transform = 'nmf' # 'fft', 'nmf', 'lda'
+    transform = 'identity' # 'fft', 'nmf', 'lda', 'identity', wavelet not supported...
     lr = 0.01 # 0.01 works for nmf, 0.1 works for fft
     data_distr = 'uniform' # 'normal', 'uniform'
     window = 0
     n_test = 500
     num_epochs_train = 12
-    num_components = 30
-    out_dir = '/scratch/users/vision/data/cosmo/sim/test'
+    num_components = 50
+    out_dir = '/scratch/users/vision/data/cosmo/sim/identity_unif'
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
     def _str(self):
@@ -77,13 +77,18 @@ def get_transforms(X, p):
     if p.transform == 'fft':
         t = lambda x: torch.rfft(x, signal_ndim=1)
         transform_i = transform_wrappers.modularize(lambda x: torch.irfft(x, signal_ndim=1)[:, :-1])
+    elif p.transform == 'wavelet':
+        from pytorch_wavelets import DWTForward, DWTInverse # (or import DWT, IDWT)
+        print('not supported')
+    elif p.transform == 'identity':
+        t = lambda x: x
+        transform_i = lambda x: x
     elif p.transform in ['nmf', 'lda']:
         X = X - np.min(X)
         if p.transform == 'nmf':
             decomp = NMF(n_components=p.num_components)
         else:
             decomp = LatentDirichletAllocation(n_components=p.num_components)
-
         fname = f'{p.transform}_{p.num_components}_{p.data_distr}.pkl'
         if os.path.exists(fname):
             decomp = pkl.load(open(fname, 'rb'))
