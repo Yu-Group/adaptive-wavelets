@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import random
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import sys
 from tqdm import tqdm
 from functools import partial
@@ -30,7 +29,7 @@ import pandas as pd
 from models import FNN
 import attributions
 import os
-device = 'cuda'
+import pywt
 
 
 class p:
@@ -39,14 +38,14 @@ class p:
     n = 50000
     p = 100
     idx_knockout = 12
-    transform = 'identity' # 'fft', 'nmf', 'lda', 'identity', wavelet not supported...
-    lr = 0.01 # 0.01 works for nmf, 0.1 works for fft
+    transform = 'db2' # 'fft', 'nmf', 'lda', 'identity'
+    lr = 0.1 # 0.01 works for nmf, 0.1 works for fft
     data_distr = 'uniform' # 'normal', 'uniform'
     window = 0
     n_test = 500
     num_epochs_train = 12
     num_components = 50
-    out_dir = '/scratch/users/vision/data/cosmo/sim/identity_unif'
+    out_dir = '/scratch/users/vision/data/cosmo/sim/db2_unif'
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
     def _str(self):
@@ -77,9 +76,23 @@ def get_transforms(X, p):
     if p.transform == 'fft':
         t = lambda x: torch.rfft(x, signal_ndim=1)
         transform_i = transform_wrappers.modularize(lambda x: torch.irfft(x, signal_ndim=1)[:, :-1])
-    elif p.transform == 'wavelet':
-        from pytorch_wavelets import DWTForward, DWTInverse # (or import DWT, IDWT)
-        print('not supported')
+    elif p.transform in ['db2']:
+        assert X.ndim == 2, 'only 1-D data currently supported'
+        t = lambda x: torch.Tensor(np.hstack(pywt.dwt(x.cpu().detach().numpy(), p.transform, 'smooth')))
+        
+        # get dict
+        (cA, cD) = pywt.dwt(X[0], 'db2', 'smooth')
+        coefs = np.hstack((cA, cD))
+        D = np.zeros((coefs.size, X.shape[1]))
+        for i in range(coefs.size):
+            ca = cA * 0
+            cd = cD * 0
+            if i < cA.size:
+                ca[i] = 1
+            else:
+                cd[i - cA.size] = 1
+            D[i, :X.shape[1]] = pywt.idwt(ca, cd, p.transform, 'smooth')[:X.shape[1]]
+        transform_i = transform_wrappers.lay_from_w(D)       
     elif p.transform == 'identity':
         t = lambda x: x
         transform_i = lambda x: x
