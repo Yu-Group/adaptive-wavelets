@@ -222,7 +222,7 @@ def comp_cd_scores(model, nmf, interp_loader, data_dict, cd_mode='cd', device='c
         scores_cd = []
         for basis_indx in range(nmf.n_components):
             im_parts = nmf_transformer(data_dict['W_test_t'][data_indx]*tiles[basis_indx])
-            scores_cd.append(acd.cd(data, model, mask=None, model_type=None, device='cuda', transform=None,
+            scores_cd.append(cd.cd(data, model, mask=None, model_type=None, device='cuda', transform=None,
                                      relevant=im_parts)[0].data.cpu().numpy()[:,0])
 
             print('\r batch index: {} [basis component index: {}]'.format(batch_indx, basis_indx), end='')
