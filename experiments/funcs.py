@@ -56,7 +56,7 @@ def unfreeze(module, param='dict', obj_type='csc'):
         elif param == 'map':
             module.convs.requires_grad_(False)
             module.maps.requires_grad_(True)
-    if obj_type == 'nmf':
+    elif obj_type == 'nmf':
         if param == 'dict':
             module.D.requires_grad_(True)
             module.W.requires_grad_(False)
@@ -69,7 +69,8 @@ def unfreeze(module, param='dict', obj_type='csc'):
 
 def L1Reg_loss(module, X, lamb, lamb_cd=0, model=None, comp_indx=None):
     X_ = module()
-    reg_loss = (torch.norm(X-X_)**2/2).data.item()
+    n_batch = X.shape[0]
+    reg_loss = (torch.norm(X-X_)**2/(2*n_batch)).data.item()
     reg_loss += lamb*L1Norm(module.maps.parameters())
     if lamb_cd > 0:
         atoms = get_atoms(module)
