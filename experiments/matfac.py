@@ -8,20 +8,25 @@ from funcs import *
 class Conv_SpCoding(nn.Module):
     def __init__(self, kernel_size, n_dim, n_comp, stride=1):
         super(Conv_SpCoding, self).__init__()
+        self.kernel_size = kernel_size
+        self.n_dim = n_dim
+        self.n_comp = n_comp
+        
+        # initialize filters
         torch.manual_seed(10)
         self.convs = nn.ModuleList([nn.Conv2d(1,1,kernel_size=kernel_size,stride=stride,bias=False) for i in range(n_comp)])
-        torch.manual_seed(10)
-        self.maps = nn.ParameterList([nn.Parameter(torch.randn(1,1,n_dim,n_dim)) for i in range(n_comp)])
-
         # normalization
         for conv in self.convs:
-            conv.weight.data = prox_normalization(conv.weight.data)
+            conv.weight.data = prox_normalization(conv.weight.data)        
 
     def forward(self):
         x = 0
         for i in range(len(self.convs)):
             x += self.convs[i](self.maps[i])
         return x
+    
+    def init_maps(self, n_batch):
+        self.maps = nn.ParameterList([nn.Parameter(torch.zeros(n_batch,1,self.n_dim,self.n_dim)) for i in range(self.n_comp)])
 
 
 class NMF(nn.Module):
@@ -116,3 +121,11 @@ class Optimizer(Blockwise_SGD):
         # apply the proximal operator to each parameter in a group
         for p in group['params']:
             p.data = prox(p.data)
+
+            
+def csc_optimizer(csc, lr_c, lr_w, lamb):
+    param_list = [{'params': csc.convs.parameters(), 'lr': lr_c},
+                  {'params': csc.maps.parameters(), 'lr': lr_w}]
+    prox_list = [prox_normalization, partial(prox_soft_threshold, lamb=lr_w*lamb)]
+    optimizer = Optimizer(param_list, prox_list, momentum=0.0)   
+    return optimizer
