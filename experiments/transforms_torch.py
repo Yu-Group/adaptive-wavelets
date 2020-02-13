@@ -26,8 +26,7 @@ def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_sp
 
 
 def bandpass_filter_augment(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
-    '''Return the bandpass-filtered images given the batch of images
-
+    '''
     Returns
     -------
     im: torch.Tensor
@@ -39,6 +38,34 @@ def bandpass_filter_augment(im: torch.Tensor, band_center=0.3, band_width=0.1, s
         im_bandpass = bandpass_filter(im[i], band_center, band_width, sample_spacing, mask)
         im_copy = torch.cat((im_copy,im[i]-im_bandpass), dim=0)
     return im_copy
+
+
+def perturb_wt(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
+    '''Perturb center of highpass wavelet coeffs  
+
+    Params
+    ------
+    im  : torch.Tensor 
+    idx : detail coefficients ('LH':0, 'HL':1, 'HH':2)
+    p   : prop to perturb coeffs
+    '''
+    im_t = t(im)
+    mask = torch.bernoulli((1-p) * torch.ones(im.shape[0], 5, 5))
+    im_t[1][0][:,0,idx,6:11,6:11] = im_t[1][0][:,0,idx,6:11,6:11] * mask
+    return transform_i(im_t)
+
+
+def perturb_wt_augment(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
+    '''
+    Returns
+    -------
+    im: torch.Tensor
+        B, H, W
+    '''
+    im_copy = deepcopy(im)
+    im_p = perturb_wt(im, t, transform_i, idx, p)
+    return torch.cat((im_copy,im_p), dim=0)
+
 
 '''This code from https://github.com/tomrunia/PyTorchSteerablePyramid
 '''

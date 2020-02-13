@@ -58,7 +58,7 @@ def load_data(train_batch_size,
 
 def train(epoch, train_loader, model, args):
     model.train()
-    for batch_idx, (data, target, _) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(train_loader):
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
@@ -78,7 +78,7 @@ def test(model, test_loader, args):
     model.eval()
     test_loss = 0
     correct = 0
-    for data, target, _ in test_loader:
+    for data, target in test_loader:
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         output = model(data)
@@ -87,7 +87,7 @@ def test(model, test_loader, args):
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
