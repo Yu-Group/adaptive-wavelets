@@ -47,8 +47,8 @@ def tensor_t_augment(im: torch.Tensor, t):
     return torch.cat((im_copy,im_p), dim=0)  
 
 
-def perturb_wt(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
-    '''Perturb center of highpass wavelet coeffs  
+def wavelet_filter(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
+    '''Filter center of highpass wavelet coeffs  
 
     Params
     ------
@@ -62,17 +62,6 @@ def perturb_wt(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
     # im_t[1][0][:,0,idx,6:11,6:11] = 0
     return transform_i(im_t)
 
-
-def perturb_wt_augment(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
-    '''
-    Returns
-    -------
-    im: torch.Tensor
-        B, H, W
-    '''
-    im_copy = deepcopy(im)
-    im_p = perturb_wt(im, t, transform_i, idx, p)
-    return torch.cat((im_copy,im_p), dim=0)
 
 
 '''This code from https://github.com/tomrunia/PyTorchSteerablePyramid
