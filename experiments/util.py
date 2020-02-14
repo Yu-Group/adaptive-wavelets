@@ -5,7 +5,6 @@ import torch.optim as optim
 import sys
 sys.path.append('../dsets/mnist')
 import dset
-from transforms_torch import bandpass_filter_augment
 from tqdm import tqdm
 from model import Net2c
 

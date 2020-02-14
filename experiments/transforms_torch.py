@@ -4,26 +4,6 @@ import numpy as np
 from numpy.fft import *
 from copy import deepcopy
 
-# def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
-#    '''Bandpass filter the image (assumes the image is square)
-#
-#    Returns
-#    -------
-#    im_bandpass: torch.Tensor
-#        H, W
-#    '''
-#    im_np = im.squeeze().cpu().detach().numpy()
-#    if mask is None:
-#        im_bandpass = transforms_np.bandpass_filter_norm_fast(im_np,
-#                                                              cutoff_low=band_center - band_width / 2,
-#                                                              cutoff_high=band_center + band_width / 2,
-#                                                              kernel_length=25)
-#    else:
-#        im_bandpass = transforms_np.bandpass_filter(im_np, band_center, band_width, sample_spacing, mask=mask)
-#
-#
-#    return torch.Tensor(im_bandpass).reshape(1, 1, im_np.shape[0], im_np.shape[1])
-
 
 def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1):
     '''Bandpass filter the image (assumes the image is square)
@@ -31,12 +11,13 @@ def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1):
     Returns
     -------
     im_bandpass: torch.Tensor
-        H, W
+        B, C, H, W
     '''
     freq_arr = fftshift(fftfreq(n=im.shape[-1]))
     freq_arr /= np.max(np.abs(freq_arr))
 
-    im_f = batch_fftshift2d(torch.rfft(im, 2, onesided=False))    
+    im_c = torch.stack((im, torch.zeros_like(im)),dim=4) 
+    im_f = batch_fftshift2d(torch.fft(im_c, 2))
     mask_bandpass = torch.zeros(im_f.shape)
 
     for r in range(im_f.shape[2]):
@@ -45,20 +26,24 @@ def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1):
             if dist > band_center - band_width / 2 and dist < band_center + band_width / 2:
                 mask_bandpass[:, :, r, c, :] = 1
     im_f_masked = torch.mul(im_f, mask_bandpass)
-    im_bandpass = torch.irfft(batch_ifftshift2d(im_f_masked), 2, onesided=False)
+    im_bandpass = torch.ifft(batch_ifftshift2d(im_f_masked), 2)[...,0]
 
     return im_bandpass
-    
 
-def bandpass_filter_augment(im: torch.Tensor, band_center=0.3, band_width=0.1):
+
+def transform_bandpass(im: torch.Tensor, band_center=0.3, band_width=0.1):
+    return im - bandpass_filter(im, band_center, band_width)
+
+
+def tensor_t_augment(im: torch.Tensor, t):
     '''
     Returns
     -------
     im: torch.Tensor
-        B, H, W
-    '''
+        2*B, C, H, W
+    ''' 
     im_copy = deepcopy(im)
-    im_p = im_copy - bandpass_filter(im, band_center, band_width)
+    im_p = t(im)
     return torch.cat((im_copy,im_p), dim=0)  
 
 
