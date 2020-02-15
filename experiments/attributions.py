@@ -11,9 +11,11 @@ from torch import nn
 from style import *
 from captum.attr import *
 from transform_wrappers import *
+sys.path.append('../..')
+from acd_wooseok.acd.scores import cd, score_funcs, cd_propagate
 
 
-def get_attributions(x_t: torch.Tensor, mt, class_num=1):
+def get_attributions(x_t: torch.Tensor, mt, class_num=1, device='cuda'):
     '''Returns all scores in a dict assuming mt works with both grads + CD
 
     Params
@@ -21,30 +23,34 @@ def get_attributions(x_t: torch.Tensor, mt, class_num=1):
     mt: model
     class_num: target class
     '''
-    device_captum = 'cpu' # this only works with cpu
-    x = x_t.unsqueeze(0).to(device_captum) # x is for the baseline
-    x.requires_grad = True
-    
+    x_t = x_t.to(device)
+    x_t.requires_grad = True
+    mt = mt.to(device)
+    mt.eval()
+
     results = {}
     attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD', 'InputXGradient']
     for name, func in zip(attr_methods,
-                          [IntegratedGradients, DeepLift, GradientShap, None, Saliency, InputXGradient]):
+                          [IntegratedGradients, DeepLift, GradientShap, None, InputXGradient]):
 
         if name == 'CD':
-            sweep_dim = 1
-            tiles = acd.tiling_2d.gen_tiles(x_t.unsqueeze(0), fill=0, method='cd', sweep_dim=sweep_dim)
-            if x_t.shape[-1] == 2: # check for imaginary representations
-                tiles = np.repeat(np.expand_dims(tiles, axis=-1), repeats=2, axis=3).squeeze()
-            attributions = acd.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[:, class_num]
+            with torch.no_grad():
+                sweep_dim = 1
+                tiles = acd.tiling_2d.gen_tiles(x_t[0,0,...,0], fill=0, method='cd', sweep_dim=sweep_dim)
+                if x_t.shape[-1] == 2: # check for imaginary representations
+                    tiles = np.repeat(np.expand_dims(tiles, axis=-1), repeats=2, axis=3).squeeze()
+                tiles = torch.Tensor(tiles).unsqueeze(1)
+                attributions = acd.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[..., class_num].T.reshape(-1,28,28)
+                # attributions = score_funcs.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[..., class_num].T.reshape(-1,28,28)
         else:
-            baseline = torch.zeros(x.shape).to(device_captum)
-            attributer = func(mt.to(device_captum))
+            baseline = torch.zeros(x_t.shape).to(device)
+            attributer = func(mt)
             if name in ['InputXGradient']:
-                attributions = attributer.attribute(deepcopy(x), target=class_num)
+                attributions = attributer.attribute(deepcopy(x_t), target=class_num)
             else:
-                attributions = attributer.attribute(deepcopy(x), deepcopy(baseline), target=class_num)
+                attributions = attributer.attribute(deepcopy(x_t), deepcopy(baseline), target=class_num)
             attributions = attributions.cpu().detach().numpy().squeeze()
             if x_t.shape[-1] == 2: # check for imaginary representations
                 attributions = mag(attributions)
         results[name] = attributions
-    return results
+    return results    
