@@ -57,9 +57,9 @@ def wavelet_filter(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
     p   : prop to perturb coeffs
     '''
     im_t = t(im)
-    mask = torch.bernoulli((1-p) * torch.ones(im.shape[0], 5, 5))
-    im_t[1][0][:,0,idx,6:11,6:11] = im_t[1][0][:,0,idx,6:11,6:11] * mask
-    # im_t[1][0][:,0,idx,6:11,6:11] = 0
+    # mask = torch.bernoulli((1-p) * torch.ones(im.shape[0], 5, 5))
+    # im_t[1][0][:,0,idx,6:11,6:11] = im_t[1][0][:,0,idx,6:11,6:11] * mask
+    im_t[1][0][:,0,idx,6:11,6:11] = 0
     return transform_i(im_t)
 
 
