@@ -1,0 +1,3 @@
+- uses code from [this repo](https://github.com/rockash/Fake-news-Detection)
+    - download datasets into datasets folder
+    - may have to download nltk stopwords...
