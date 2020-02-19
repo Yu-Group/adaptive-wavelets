@@ -12,9 +12,6 @@ from copy import deepcopy
 sys.path.append('..')
 from transforms_torch import bandpass_filter
 # plt.style.use('dark_background')
-sys.path.append('../../dsets/mnist')
-import dset
-from model import Net
 from util import *
 from numpy.fft import *
 from torch import nn

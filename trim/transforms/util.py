@@ -4,10 +4,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 import sys
-sys.path.append('../dsets/mnist')
-import dset
 from tqdm import tqdm
-from model import Net2c
 
 def to_freq(x):
     x =  x.cpu().detach().numpy().squeeze()

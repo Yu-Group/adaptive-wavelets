@@ -1,4 +1,6 @@
-Calculating importances for different transformations of the input.
+Official code for using / reproducing TRIM from the paper "Transformation Importance with Applications to Cosmology". This code shows examples for how to calculate importance in a transformed feature space.
+
+*Note: this repo is actively maintained. For any questions please file an issue.*
 
 # dependencies
 - for the acd module, pip install from [here](https://github.com/csinva/hierarchical-dnn-interpretations)
