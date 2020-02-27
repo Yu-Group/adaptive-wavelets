@@ -1,16 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def viz_basis(D, R=5, C=6):
+def viz_basis(D, R=5, C=6, titles=None):
     i = 0
     vmin = np.min(D)
     vmax = np.max(D)
-    plt.figure(figsize=(C * 3, R * 3), dpi=200)
+    plt.figure(figsize=(C * 3, R * 3), dpi=300)
     for r in range(R):
         for c in range(C):
             plt.subplot(R, C, i + 1)
-            plt.imshow(D[i], vmin=vmin, vmax=vmax, cmap='viridis')
+            if titles is not None:
+                plt.title(titles[i])
+            plt.imshow(D[i], vmin=vmin, vmax=vmax, cmap='gray')
             plt.axis('off')
+            plt.xticks([])
+            plt.yticks([])
             i += 1
     plt.tight_layout()
     plt.show()
