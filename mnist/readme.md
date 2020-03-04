@@ -1,0 +1,1 @@
+- (optional) for max_activation methods, pip install from [here](https://github.com/csinva/max-activation-interpretation-pytorch)

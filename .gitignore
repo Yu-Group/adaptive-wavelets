@@ -19,3 +19,5 @@ experiments/fake_news/very_large_data
 **.csv
 **.txt
 **.zip
+**Icon*
+.idea
