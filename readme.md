@@ -1,28 +1,28 @@
-Official code for using / reproducing TRIM from the paper "Transformation Importance with Applications to Cosmology" (ICLR 2020 Workshop). This code shows examples and provides useful wrappers for calculating importance in a transformed feature space.
+Official code for using / reproducing TRIM from the paper [Transformation Importance with Applications to Cosmology](https://arxiv.org/abs/2003.01926) (ICLR 2020 Workshop). This code shows examples and provides useful wrappers for calculating importance in a transformed feature space.
 
 *This repo is actively maintained. For any questions please file an issue.*
 
-![trim](trim.png)
+![trim](trim/trim.png)
 
 # examples/documentation
 
 - **dependencies**: depends on the pip-installable [acd package](https://github.com/csinva/hierarchical-dnn-interpretations)
-- **examples**: different folders (e.g. [cosmology](cosmology), [fake_news](fake_news), [mnist](mnist), [urban_sound](urban_sound) contain examples for using TRIM in different settings)
-- **src**: the core code is in the [trim](trim) folder, containing wrappers and codes for different transformations
+- **examples**: different folders (e.g. [ex_cosmology](ex_cosmology), [ex_fake_news](ex_fake_news), [ex_mnist](ex_mnist), [ex_urban_sound](ex_urban_sound) contain examples for using TRIM in different settings)
+- **src**: the core code is in the [trim](trim) folder, containing wrappers and code for different transformations
 - **requirements**: tested with python 3.7 and pytorch > 1.0
 
 
 | Attribution to different scales in cosmological images | Fake news attribution to different topics |
 | ------------------------------------------------------ | ----------------------------------------- |
-| ![](cosmology/fig_omegam_curves.png)                   | ![](fake_news/fig_fakenews.png)           |
+| ![](ex_cosmology/fig_omegam_curves.png)                | ![](ex_fake_news/fig_fakenews.png)        |
 
 | Attribution to different NMF components in MNIST classification | Attribution to different frequencies in audio classification |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![](mnist/fig_nmf.png)                                       | ![](urban_sound/fig_audio.png)                               |
+| ![](ex_mnist/fig_nmf.png)                                    | ![](ex_urban_sound/fig_audio.png)                            |
 
 # sample usage
 
-
+- see notebooks
 
 # related work
 
@@ -37,12 +37,11 @@ Official code for using / reproducing TRIM from the paper "Transformation Import
 - if you find this code useful for your research, please cite the following:
 
   ```c
-    @inproceedings{
-    singh2018hierarchical,
-    title={Hierarchical interpretations for neural network predictions},
-    author={Chandan Singh and W. James Murdoch and Bin Yu},
-    booktitle={International Conference on Learning Representations},
-    year={2019},
-    url={https://openreview.net/forum?id=SkEqro0ctQ},
-    }
+    @article{singh2020transformation,
+    title={Transformation Importance with Applications to Cosmology},
+    author={Singh, Chandan and Ha, Wooseok and Lanusse, Francois, and Boehm, Vanessa, and Liu, Jia and Yu, Bin},
+    journal={arXiv preprint arXiv:2003.01926},
+    year={2020},
+    url={https://arxiv.org/abs/2003.01926},
+	  }
   ```
