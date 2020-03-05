@@ -22,7 +22,29 @@ Official code for using / reproducing TRIM from the paper [Transformation Import
 
 # sample usage
 
-- see notebooks
+```python
+import torch
+import torch.nn as nn
+from trim import TrimModel
+from functools import partial
+
+# setup a trim model
+model = nn.Sequential(nn.Linear(10, 10), nn.ReLU(), nn.Linear(10, 1)) # orig model
+transform = partial(torch.rfft, signal_ndim=1, onesided=False) # fft
+inv_transform = partial(torch.irfft, signal_ndim=1, onesided=False) # inverse fft
+model_trim = TrimModel(model=model, inv_transform=inv_transform) # trim model
+
+# get a data point
+x = torch.randn(1, 10)
+s = transform(x)
+
+# can now use any attribution method on the trim model
+# get (input_x_gradient) attribution in the fft space
+s.requires_grad = True
+model_trim(s).backward()
+input_x_gradient = s.grad * s
+```
+- see notebooks for more detailed usage
 
 # related work
 
@@ -33,15 +55,14 @@ Official code for using / reproducing TRIM from the paper [Transformation Import
 # reference
 
 - feel free to use/share this code openly
-
 - if you find this code useful for your research, please cite the following:
 
-  ```c
-    @article{singh2020transformation,
+```r
+@article{singh2020transformation,
     title={Transformation Importance with Applications to Cosmology},
     author={Singh, Chandan and Ha, Wooseok and Lanusse, Francois, and Boehm, Vanessa, and Liu, Jia and Yu, Bin},
     journal={arXiv preprint arXiv:2003.01926},
     year={2020},
     url={https://arxiv.org/abs/2003.01926},
-	  }
-  ```
+}
+```

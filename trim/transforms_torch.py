@@ -66,7 +66,6 @@ def wavelet_filter(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
 
 '''This code from https://github.com/tomrunia/PyTorchSteerablePyramid
 '''
-
 def roll_n(X, axis, n):
     f_idx = tuple(slice(None, None, None) if i != axis else slice(0, n, None) for i in range(X.dim()))
     b_idx = tuple(slice(None, None, None) if i != axis else slice(n, None, None) for i in range(X.dim()))

@@ -2,19 +2,6 @@ import numpy as np
 from numpy.fft import *
 import scipy.signal as signal
 
-
-# def transform_preprocess(im: np.ndarray, transform_type='fft'):
-#     '''Preprocess the domain to a new domain
-#     '''
-#     if transform_type == 'fft':
-#         return fft2(im)
-    
-# def transform_unprocess(im_freq: np.ndarray, transform_type='fft'):
-#     '''Convert the transformed domain back to the original domain
-#     '''
-#     if transform_type == 'fft':
-#         return fft2(im)
-
 def bandpass_filter(im: np.ndarray, band_center=0.3, band_width=0.1, sample_spacing=None, mask=None):
     '''Bandpass filter the image (assumes the image is square)
     

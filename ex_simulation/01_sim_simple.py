@@ -37,7 +37,7 @@ class p:
     '''
     n = 50000
     p = 100
-    idx_knockout = 12
+    idx_knockout = 12 # should sweep over this
     transform = 'db2' # 'fft', 'nmf', 'lda', 'identity'
     lr = 0.1 # 0.01 works for nmf, 0.1 works for fft
     data_distr = 'uniform' # 'normal', 'uniform'

@@ -12,7 +12,6 @@ from style import *
 from captum.attr import *
 from transform_wrappers import *
 sys.path.append('../..')
-from acd_wooseok.acd.scores import cd, score_funcs, cd_propagate
 
 
 def get_attributions(x_t: torch.Tensor, mt, class_num=1, device='cuda'):
