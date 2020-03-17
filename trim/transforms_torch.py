@@ -5,7 +5,7 @@ from numpy.fft import *
 from copy import deepcopy
 
 
-def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1):
+def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
     '''Bandpass filter the image (assumes the image is square)
 
     Returns
@@ -23,16 +23,18 @@ def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width=0.1):
     for r in range(im_f.shape[2]):
         for c in range(im_f.shape[3]):
             dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
-            if dist > band_center - band_width / 2 and dist < band_center + band_width / 2:
+            if dist >= band_center - band_width_lower and dist < band_center + band_width_upper:
                 mask_bandpass[:, :, r, c, :] = 1
+    if im.is_cuda:
+        mask_bandpass = mask_bandpass.to("cuda")
     im_f_masked = torch.mul(im_f, mask_bandpass)
     im_bandpass = torch.ifft(batch_ifftshift2d(im_f_masked), 2)[...,0]
 
     return im_bandpass
 
 
-def transform_bandpass(im: torch.Tensor, band_center=0.3, band_width=0.1):
-    return im - bandpass_filter(im, band_center, band_width)
+def transform_bandpass(im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
+    return im - bandpass_filter(im, band_center, band_width_lower, band_width_upper)
 
 
 def tensor_t_augment(im: torch.Tensor, t):

@@ -19,7 +19,7 @@ def mag(x):
     return np.sqrt(np.square(x[..., 0]) + np.square(x[..., 1]))
 
 
-def freq_band(n=28, band_center=0.3, band_width=0.05):
+def freq_band(n=28, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
     freq_arr = fftshift(fftfreq(n))
     freq_arr /= np.max(np.abs(freq_arr))
     mask_bandpass = np.zeros((n,n))
@@ -27,7 +27,7 @@ def freq_band(n=28, band_center=0.3, band_width=0.05):
     for r in range(n):
         for c in range(n):
             dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
-            if dist > band_center - band_width / 2 and dist < band_center + band_width / 2:
+            if dist >= band_center - band_width_lower and dist < band_center + band_width_upper:
                 mask_bandpass[r, c] = 1
     
     return mask_bandpass

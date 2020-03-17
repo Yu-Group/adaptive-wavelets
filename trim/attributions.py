@@ -3,14 +3,11 @@ import torch
 import acd
 from copy import deepcopy
 import sys
-sys.path.append('../../dsets/mnist')
-import dset
 from util import *
 from numpy.fft import *
 from torch import nn
-from style import *
 from captum.attr import *
-from transform_wrappers import *
+from trim import *
 sys.path.append('../..')
 
 
@@ -39,8 +36,8 @@ def get_attributions(x_t: torch.Tensor, mt, class_num=1, device='cuda'):
                 if x_t.shape[-1] == 2: # check for imaginary representations
                     tiles = np.repeat(np.expand_dims(tiles, axis=-1), repeats=2, axis=3).squeeze()
                 tiles = torch.Tensor(tiles).unsqueeze(1)
-                # attributions = acd.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[..., class_num].T.reshape(-1,28,28)
-                attributions = score_funcs.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[..., class_num].T.reshape(-1,28,28)
+                attributions = acd.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[..., class_num].T.reshape(-1,28,28).squeeze()
+                # attributions = score_funcs.get_scores_2d(mt, method='cd', ims=tiles, im_torch=x_t)[..., class_num].T.reshape(-1,28,28)
         else:
             baseline = torch.zeros(x_t.shape).to(device)
             attributer = func(mt)
