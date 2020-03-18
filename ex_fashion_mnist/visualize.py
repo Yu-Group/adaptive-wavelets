@@ -28,7 +28,7 @@ def viz_filters(model):
     plt.show()        
     
     
-def viz_ims(im, im_r):
+def viz_im_r(im, im_r):
     im = im.data.squeeze().cpu()
     im_r = im_r.data.squeeze().cpu()
 
@@ -46,3 +46,16 @@ def viz_ims(im, im_r):
     plt.title('Difference')
     plt.axis('off')
     plt.show()    
+    
+    
+def viz_im_a(im, im_a):
+    plt.figure(figsize=(10,10))
+    plt.subplot(1, 2, 1)
+    plt.imshow(im, cmap='gray', vmax=1.0, vmin=0.0)
+    plt.title('Original')
+    plt.axis('off')
+    plt.subplot(1, 2, 2)
+    plt.imshow(im_a, cmap='gray', vmax=1.0, vmin=0.0)
+    plt.title('Adversarial')
+    plt.axis('off')
+    plt.show()        

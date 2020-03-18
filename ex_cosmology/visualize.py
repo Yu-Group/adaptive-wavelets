@@ -1,6 +1,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage.transform import rescale
+import sys
+sys.path.append('../util')
 from style import *
+
+def viz_filters(model):
+    n_row = 4
+    n_col = 5
+    plt.figure(figsize=(15,15))
+    # plot filters
+    mod = model.convt1
+    p = mod.kernel_size[0] + 2
+    mosaic = np.zeros((p*n_row,p*n_col))
+    indx = 0
+    for i in range(n_row):
+        for j in range(n_col):
+            im = mod.weight.data.cpu().squeeze().numpy()[indx]
+            im = (im-np.min(im))
+            im = im/np.max(im)
+            mosaic[i*p:(i+1)*p,j*p:(j+1)*p] = np.pad(im,(1,1),mode='constant')
+            indx += 1
+    plt.title("Filters")
+    plt.imshow(rescale(mosaic,4,mode='constant'), cmap='magma')
+    plt.axis('off')    
+    plt.show()  
 
 
 def visualize(im_orig, transform):
