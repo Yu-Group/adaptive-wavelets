@@ -8,6 +8,7 @@ max-activation*
 **/data
 **/results
 **/old
+**/experiments
 **slurm*
 **.pkl
 **.DS_Store
