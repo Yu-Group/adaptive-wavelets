@@ -25,6 +25,26 @@ def viz_filters(model):
     plt.imshow(rescale(mosaic,4,mode='constant'), cmap='magma')
     plt.axis('off')    
     plt.show()  
+    
+    
+def viz_im_r(im, im_r):
+    im = im.data.squeeze().cpu()
+    im_r = im_r.data.squeeze().cpu()
+
+    plt.figure(figsize=(10,10))
+    plt.subplot(1, 3, 1)
+    plt.imshow(im, cmap='magma', vmax=0.15, vmin=-0.05)
+    plt.title('Original')
+    plt.axis('off')
+    plt.subplot(1, 3, 2)
+    plt.imshow(im_r, cmap='magma', vmax=0.15, vmin=-0.05)
+    plt.title('Reconstructed')
+    plt.axis('off')
+    plt.subplot(1, 3, 3)
+    plt.imshow(im-im_r, cmap='magma')
+    plt.title('Difference')
+    plt.axis('off')
+    plt.show()        
 
 
 def visualize(im_orig, transform):
