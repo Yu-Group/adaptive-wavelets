@@ -28,6 +28,7 @@ class MassMapsDataset(Dataset):
                 on a sample.
             ncosmo (int): Number of cosmologies to include in dataset
         """
+        # m_nu, omega_m, A_s
         self.params = np.loadtxt(parameter_file)[:ncosmo]
         self.root_dir = root_dir
         self.transform = transform
