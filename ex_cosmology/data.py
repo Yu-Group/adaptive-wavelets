@@ -13,7 +13,7 @@ import random
 # Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
-classes = ['Mnu', 'Omegam', 'As']
+classes = ['Mnu', 'Omegam', 'As', 'Sigma8', 'Unknown']
 
 # Build PyTorch Dataset to read the fits files
 class MassMapsDataset(Dataset):
@@ -102,7 +102,7 @@ class MassMapsDatasetFilteredS8(Dataset):
 
         return sample
     
-class ToTensor(object):
+class RandomToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
