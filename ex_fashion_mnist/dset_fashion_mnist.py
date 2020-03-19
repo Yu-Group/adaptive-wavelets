@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 import numpy as np
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 # Training settings
@@ -57,8 +58,8 @@ def load_data(train_batch_size,
 def train(epoch, train_loader, model, args):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        if args.cuda:
-            data, target = data.cuda(), target.cuda()
+        if args.cuda == "True":
+            data, target = data.to(device), target.to(device)
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
         # optimizer = optim.Adam(model.parameters(), lr=args.lr)
         optimizer.zero_grad()
@@ -78,8 +79,8 @@ def test(model, test_loader, args):
     test_loss = 0
     correct = 0
     for data, target in test_loader:
-        if args.cuda:
-            data, target = data.cuda(), target.cuda()
+        if args.cuda == "True":
+            data, target = data.to(device), target.to(device)
         output = model(data)
         test_loss += F.nll_loss(output, target, reduction='sum').data.item() # sum up batch loss
         pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
