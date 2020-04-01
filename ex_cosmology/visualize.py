@@ -5,12 +5,15 @@ import sys
 sys.path.append('../util')
 from style import *
 
-def viz_filters(model):
-    n_row = 4
-    n_col = 5
+def viz_filters(model, mod='convt'):
+    n_row = 8
+    n_col = 8
     plt.figure(figsize=(15,15))
     # plot filters
-    mod = model.convt1
+    if mod == 'convt':
+        mod = model.convt1
+    else:
+        mod = model.conv1
     p = mod.kernel_size[0] + 2
     mosaic = np.zeros((p*n_row,p*n_col))
     indx = 0

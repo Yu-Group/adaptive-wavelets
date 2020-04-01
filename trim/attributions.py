@@ -11,7 +11,11 @@ from trim import *
 sys.path.append('../..')
 
 
-def get_attributions(x_t: torch.Tensor, mt, class_num=1, device='cuda'):
+def get_attributions(x_t: torch.Tensor, 
+                     mt, 
+                     class_num=1,
+                     attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD', 'InputXGradient'],
+                     device='cuda'):
     '''Returns all scores in a dict assuming mt works with both grads + CD
 
     Params
@@ -25,10 +29,12 @@ def get_attributions(x_t: torch.Tensor, mt, class_num=1, device='cuda'):
     mt.eval()
 
     results = {}
-    attr_methods = ['IG', 'DeepLift', 'SHAP', 'CD', 'InputXGradient']
-    for name, func in zip(attr_methods,
-                          [IntegratedGradients, DeepLift, GradientShap, None, InputXGradient]):
-
+    if 'CD' in attr_methods:
+        attr_funcs = [IntegratedGradients, DeepLift, GradientShap, None, InputXGradient]
+    else:
+        attr_funcs = [IntegratedGradients, DeepLift, GradientShap, InputXGradient]
+        
+    for name, func in zip(attr_methods, attr_funcs):
         if name == 'CD':
             with torch.no_grad():
                 sweep_dim = 1
