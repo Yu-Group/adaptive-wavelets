@@ -2,9 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import sys
-from functools import partial
 sys.path.append('..')
-from acd_wooseok.acd.scores import cd
 from copy import deepcopy
 
 def prox_positive(x):
