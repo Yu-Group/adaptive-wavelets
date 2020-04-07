@@ -68,9 +68,8 @@ class TrimModel(nn.Module):
         # take residuals into account
         if self.use_residuals:
             assert x is not None, "if using residuals, must also pass untransformed original image!"
-            with torch.no_grad():
-                res = x_orig - x
-            x = x + res
+            res = x_orig - x
+            x = x + res.detach()
         
         # normalize
         if self.norm is not None:
