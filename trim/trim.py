@@ -43,7 +43,7 @@ class TrimModel(nn.Module):
         pass x as a 1d vector whose last entries contain the residual [x, residual]
     '''
     def __init__(self, model, inv_transform, norm=None, reshape=None, 
-                 use_residuals=False, use_logits=False, n_components=None):
+                 use_residuals=False, use_logits=False, x_orig=None):
         super(TrimModel, self).__init__()
         self.inv_transform = inv_transform
         self.norm = norm
@@ -51,9 +51,9 @@ class TrimModel(nn.Module):
         self.model = model
         self.use_residuals = use_residuals
         self.use_logits = use_logits
-        self.n_components = n_components
+        self.x_orig = x_orig
 
-    def forward(self, s, x_orig=None):
+    def forward(self, s):
         '''
         Params
         ------
@@ -67,8 +67,8 @@ class TrimModel(nn.Module):
         
         # take residuals into account
         if self.use_residuals:
-            assert x is not None, "if using residuals, must also pass untransformed original image!"
-            res = x_orig - x
+            assert self.x_orig is not None, "if using residuals, must also pass untransformed original image!"
+            res = self.x_orig - x
             x = x + res.detach()
         
         # normalize
