@@ -3,7 +3,7 @@ from torch import nn
 from torchvision import models
 from os.path import join as oj
 
-def load_model(model_name='resnet18', device='cuda', inplace=True, data_path='/scratch/users/vision/data/cosmo'):
+def load_model(model_name='resnet18', device='cuda', num_params=3, inplace=True, data_path='/scratch/users/vision/data/cosmo'):
     '''Load a pretrained model and make shape alterations for cosmology
     '''
     
@@ -12,7 +12,7 @@ def load_model(model_name='resnet18', device='cuda', inplace=True, data_path='/s
         model_ft = models.resnet18(pretrained=False)
         model_ft.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs, 3)
+        model_ft.fc = nn.Linear(num_ftrs, num_params)
         
         if inplace == False:
             mods = list(model_ft.modules())
@@ -22,7 +22,8 @@ def load_model(model_name='resnet18', device='cuda', inplace=True, data_path='/s
                     mod.inplace = False   
 
             model_ft = model_ft.to(device)
-            model_ft.load_state_dict(torch.load(oj(data_path, 'resnet18_state_dict')))
+            if data_path is not None:
+                model_ft.load_state_dict(torch.load(oj(data_path, 'resnet18_state_dict')))
 
     elif model_name == 'vgg16':
         model_ft = models.vgg16(pretrained=False)

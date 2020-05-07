@@ -118,3 +118,25 @@ class RandomToTensor(object):
         image += torch.normal(image*0, image*0+0.001)
         return {'image': image,
                 'params': params}
+    
+# dataset
+class MyDataset(Dataset):
+    def __init__(self, data, targets, transform=None, return_indices=False):
+        self.data = data
+        self.targets = targets
+        self.transform = transform
+        self.return_indices = return_indices
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, index):
+        img, target = self.data[index], self.targets[index]
+        img = torch.from_numpy(img).unsqueeze(0)
+        target = torch.from_numpy(target)
+        if self.transform:
+            img = self.transform(img)
+        if self.return_indices:
+            return img, target, index
+        return img, target
+    
