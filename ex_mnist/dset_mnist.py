@@ -44,14 +44,16 @@ def load_data(train_batch_size,
     train_loader = torch.utils.data.DataLoader(
         MNIST_dataset(data_dir, train=True, download=True,
                    transform=transforms.Compose([
+                       transforms.Resize((32, 32)),
                        transforms.ToTensor(),
-                       transforms.Normalize((0.1307,), (0.3081,))
+                       # transforms.Normalize((0.1307,), (0.3081,))
                    ])), batch_size=train_batch_size, shuffle=shuffle, **kwargs)
     test_loader = torch.utils.data.DataLoader(
         MNIST_dataset(data_dir, train=False,
                    transform=transforms.Compose([
+                       transforms.Resize((32, 32)),
                        transforms.ToTensor(),
-                       transforms.Normalize((0.1307,), (0.3081,))
+                       # transforms.Normalize((0.1307,), (0.3081,))
                    ])), batch_size=test_batch_size, shuffle=shuffle, **kwargs)
     return train_loader, test_loader
 
