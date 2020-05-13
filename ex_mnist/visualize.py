@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.transform import rescale
 import matplotlib.pyplot as plt
 
 def viz_basis(D, R=5, C=6, titles=None):
@@ -19,6 +20,24 @@ def viz_basis(D, R=5, C=6, titles=None):
     plt.tight_layout()
     plt.show()
 
+def viz_tensors(tensors, n_row=4, n_col=8, normalize=True, vmax=None, vmin=None):
+    plt.figure(figsize=(15,15))
+    # plot filters
+    p = tensors.shape[2] + 2
+    mosaic = np.zeros((p*n_row,p*n_col))
+    indx = 0
+    for i in range(n_row):
+        for j in range(n_col):
+            im = tensors.data.cpu().squeeze().numpy()[indx]
+            if normalize:
+                im = (im-np.min(im))
+                im = im/np.max(im)
+            mosaic[i*p:(i+1)*p,j*p:(j+1)*p] = np.pad(im,(1,1),mode='constant')
+            indx += 1
+    plt.title("Filters")
+    plt.imshow(rescale(mosaic,4,mode='constant'), cmap='magma', vmax=vmax, vmin=vmin)
+    plt.axis('off')    
+    plt.show()  
 
 def viz_interp_scores(list_of_x, interp_modules, results, basis_indx=0):
     num_modules = len(interp_modules)
