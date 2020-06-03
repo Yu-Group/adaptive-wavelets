@@ -61,7 +61,7 @@ def load_data(train_batch_size,
 def train(epoch, train_loader, model, args):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        if args.cuda:
+        if not args.no_cuda:
             data, target = data.cuda(), target.cuda()
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
         optimizer.zero_grad()
@@ -81,7 +81,7 @@ def test(model, test_loader, args):
     test_loss = 0
     correct = 0
     for data, target in test_loader:
-        if args.cuda:
+        if not args.no_cuda:
             data, target = data.cuda(), target.cuda()
         output = model(data)
         test_loss += F.nll_loss(output, target, reduction='sum').data.item() # sum up batch loss
