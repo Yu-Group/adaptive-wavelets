@@ -34,7 +34,7 @@ def load_data(train_batch_size,
               test_batch_size,
               device,
               data_dir='data',
-              shuffle=False,
+              shuffle=True,
               return_indices=False):
     kwargs = {'num_workers': 1, 'pin_memory': True} if device == 'cuda' else {}
     MNIST_dataset = datasets.MNIST
@@ -54,7 +54,7 @@ def load_data(train_batch_size,
                        transforms.Resize((32, 32)),
                        transforms.ToTensor(),
                        # transforms.Normalize((0.1307,), (0.3081,))
-                   ])), batch_size=test_batch_size, shuffle=shuffle, **kwargs)
+                   ])), batch_size=test_batch_size, shuffle=False, **kwargs)
     return train_loader, test_loader
 
 
