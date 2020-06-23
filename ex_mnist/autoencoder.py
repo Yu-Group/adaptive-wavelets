@@ -32,9 +32,10 @@ def loss_function(data, model, trim_model, normalize=False):
     supervised_loss = criterion_CE(outputs, labels)        
     # TRIM regularization
     attributer = InputXGradient(trim_model)
+    s_ = deepcopy(s.detach())
     trim_loss = 0
     for label in range(10):            
-        attributions = attributer.attribute(s, target=label, additional_forward_args=deepcopy(inputs))
+        attributions = attributer.attribute(s_, target=label, additional_forward_args=deepcopy(inputs))
         if normalize is True:
             # standardization
             mean = attributions.mean(dim=1, keepdim=True)

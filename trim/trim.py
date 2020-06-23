@@ -131,3 +131,25 @@ class ReshapeLayer(nn.Module):
 
     def forward(self, x):
         return x.reshape(x.shape[0], *self.shape)
+    
+    
+class DecoderEncoder(nn.Module):
+    '''Prepends decoder onto encoder
+    '''
+    def __init__(self, model):
+        super(DecoderEncoder, self).__init__()
+        self.encoder = model.encoder
+        self.decoder = model.decoder
+
+    def forward(self, s):
+        '''
+        Params
+        ------
+        s: torch.Tensor
+            This should be the input in the transformed space which we want to interpret
+            (batch_size, C, H, W) for images
+            (batch_size, C, seq_length) for audio
+        '''
+        x = self.decoder(s)
+        x = self.encoder(x)[0]
+        return x
