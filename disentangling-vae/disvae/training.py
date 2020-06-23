@@ -77,6 +77,7 @@ class Trainer():
         self.trim_lamb = trim_lamb
         self.attr_lamb = attr_lamb
         self.L1Loss = torch.nn.L1Loss()
+        self.L2Loss = torch.nn.MSELoss()
         if self.classifier is not None and self.trim_lamb > 0:
             self._prepend_transformation()
         if self.attr_lamb > 0:
@@ -211,7 +212,7 @@ class Trainer():
                     gradients = torch.autograd.grad(s_output[:,i], s, grad_outputs=torch.ones_like(s_output[:,i]), 
                                                     retain_graph=True, create_graph=True, only_inputs=True)[0]
                     gradients_pairwise = gradients[:,col_idx]
-                    loss += self.attr_lamb * self.L1Loss(gradients_pairwise, torch.zeros_like(gradients_pairwise))                                                    
+                    loss += self.attr_lamb * self.L2Loss(gradients_pairwise, torch.zeros_like(gradients_pairwise))                                                    
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
