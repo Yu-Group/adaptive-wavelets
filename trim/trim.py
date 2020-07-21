@@ -136,12 +136,13 @@ class ReshapeLayer(nn.Module):
 class DecoderEncoder(nn.Module):
     '''Prepends decoder onto encoder
     '''
-    def __init__(self, model):
+    def __init__(self, model, use_residuals=False):
         super(DecoderEncoder, self).__init__()
         self.encoder = model.encoder
         self.decoder = model.decoder
+        self.use_residuals = use_residuals
 
-    def forward(self, s):
+    def forward(self, s, x_orig=None):
         '''
         Params
         ------
@@ -151,5 +152,12 @@ class DecoderEncoder(nn.Module):
             (batch_size, C, seq_length) for audio
         '''
         x = self.decoder(s)
+        
+        if self.use_residuals:
+            assert x_orig is not None, "if using residuals, must also pass untransformed original image!"
+            res = (x_orig - x).detach()
+            x = x + res            
         x = self.encoder(x)[0]
         return x
+    
+    

@@ -184,6 +184,39 @@ class DSprites(DisentangledDataset):
         dataset_zip = np.load(self.train_data)
         self.imgs = dataset_zip['imgs']
         self.lat_values = dataset_zip['latents_values']
+        ########################
+        ### subset of dataset ###
+        x_pos = self.lat_values[:,4]
+        y_pos = self.lat_values[:,5]
+        idx1 = np.logical_and(x_pos>=0, x_pos<=0.1)
+        idx2 = np.logical_and(y_pos>=0, y_pos<=0.1)
+        idx = np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.11, x_pos<=0.23)
+        idx2 = np.logical_and(y_pos>=0.11, y_pos<=0.23)
+        idx = idx + np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.24, x_pos<=0.36)
+        idx2 = np.logical_and(y_pos>=0.24, y_pos<=0.36)
+        idx = idx + np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.37, x_pos<=0.49)
+        idx2 = np.logical_and(y_pos>=0.37, y_pos<=0.49)
+        idx = idx + np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.50, x_pos<=0.62)
+        idx2 = np.logical_and(y_pos>=0.50, y_pos<=0.62)
+        idx = idx + np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.63, x_pos<=0.75)
+        idx2 = np.logical_and(y_pos>=0.63, y_pos<=0.75)
+        idx = idx + np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.76, x_pos<=0.88)
+        idx2 = np.logical_and(y_pos>=0.76, y_pos<=0.88)
+        idx = idx + np.logical_and(idx1, idx2)
+        idx1 = np.logical_and(x_pos>=0.9, x_pos<=1.0)
+        idx2 = np.logical_and(y_pos>=0.9, y_pos<=1.0)
+        idx = idx + np.logical_and(idx1, idx2)       
+#         slack = 0.07
+#         idx = np.logical_and(self.lat_values[:,5] <= self.lat_values[:,4] + slack, self.lat_values[:,5] >= self.lat_values[:,4] - slack)
+        self.imgs = self.imgs[idx,:]
+        self.lat_values = self.lat_values[idx,:]      
+        ########################        
 
     def download(self):
         """Download the dataset."""

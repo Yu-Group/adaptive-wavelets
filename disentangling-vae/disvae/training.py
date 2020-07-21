@@ -141,7 +141,7 @@ class Trainer():
         Parameters
         ----------
         """
-        self.latent_map = DecoderEncoder(self.model)
+        self.latent_map = DecoderEncoder(self.model, use_residuals=True)
 
     def _train_epoch(self, data_loader, storer, epoch):
         """
@@ -197,22 +197,20 @@ class Trainer():
             recon_batch, latent_dist, latent_sample = self.model(inputs)
             loss = self.loss_f(inputs, recon_batch, latent_dist, self.model.training,
                                storer, latent_sample=latent_sample)
-            # penalize trim score
-            if self.classifier is not None and self.trim_lamb > 0:
-                s = deepcopy(latent_dist[0].detach())
-                attributions = self.attributer.attribute(s, target=labels, additional_forward_args=deepcopy(inputs))
-                loss += self.trim_lamb * self.L1Loss(attributions, torch.zeros_like(attributions))    
-            # penalize change in one attribute wrt the other attributes
+            
             if self.attr_lamb > 0:
-                s = deepcopy(latent_dist[0].detach())
+#                 s = deepcopy(latent_sample.detach())
+                s = latent_sample
                 s = s.requires_grad_(True)
-                s_output = self.latent_map(s)
+                s_output = self.latent_map(s, deepcopy(inputs))
+                loss += 10 * self.L2Loss(s_output, s)
                 for i in range(self.model.latent_dim):
                     col_idx = np.arange(self.model.latent_dim)!=i
                     gradients = torch.autograd.grad(s_output[:,i], s, grad_outputs=torch.ones_like(s_output[:,i]), 
                                                     retain_graph=True, create_graph=True, only_inputs=True)[0]
                     gradients_pairwise = gradients[:,col_idx]
-                    loss += self.attr_lamb * self.L2Loss(gradients_pairwise, torch.zeros_like(gradients_pairwise))                                                    
+                    loss += self.attr_lamb * self.L2Loss(gradients_pairwise, torch.zeros_like(gradients_pairwise))                  
+    
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
