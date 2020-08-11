@@ -37,44 +37,44 @@ if __name__ == '__main__':
         p.hidden_dim = hidden_dims[0]
         p.seed = seeds[0]
  
-    # seed
-    random.seed(p.seed)
-    np.random.seed(p.seed)
-    torch.manual_seed(p.seed)
+        # seed
+        random.seed(p.seed)
+        np.random.seed(p.seed)
+        torch.manual_seed(p.seed)
 
-    # GET DATALOADERS
-    (train_loader, train_latents), (test_loader, test_latents) = define_dataloaders(p)
+        # GET DATALOADERS
+        (train_loader, train_latents), (test_loader, test_latents) = define_dataloaders(p)
 
-    # PREPARES MODEL
-    model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
-    model = model.to(device)
+        # PREPARES MODEL
+        model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
+        model = model.to(device)
 
-    # TRAINS
-    optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    beta = p.beta
-    attr = p.attr
-    alpha = p.alpha
-    gamma = p.gamma
-    tc = p.tc
-    num_epochs = p.num_epochs
-    
-    loss_f = Loss(beta=beta, attr=attr, alpha=alpha, gamma=gamma, tc=tc, is_mss=True)
-    trainer = Trainer(model, optimizer, loss_f, device=device)
-    trainer(train_loader, test_loader, epochs=num_epochs)
-    
-    # calculate losses
-    print('calculating losses and metric...')    
-    rec_loss, kl_loss, mi_loss, tc_loss, dw_kl_loss, attr_loss = calc_losses(model, test_loader, loss_f)
-    s.reconstruction_loss = rec_loss
-    s.kl_normal_loss = kl_loss
-    s.total_correlation = tc_loss
-    s.mutual_information = mi_loss
-    s.dimensionwise_kl_loss = dw_kl_loss
-    s.attribution_loss = attr_loss
-    s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean()
-    s.net = model    
-    
-    # save
-    os.makedirs(p.out_dir, exist_ok=True)
-    results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(p.out_dir, p._str(p) + '.pkl'), 'wb'))   
+        # TRAINS
+        optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
+        beta = p.beta
+        attr = p.attr
+        alpha = p.alpha
+        gamma = p.gamma
+        tc = p.tc
+        num_epochs = p.num_epochs
+
+        loss_f = Loss(beta=beta, attr=attr, alpha=alpha, gamma=gamma, tc=tc, is_mss=True)
+        trainer = Trainer(model, optimizer, loss_f, device=device)
+        trainer(train_loader, test_loader, epochs=num_epochs)
+
+        # calculate losses
+        print('calculating losses and metric...')    
+        rec_loss, kl_loss, mi_loss, tc_loss, dw_kl_loss, attr_loss = calc_losses(model, test_loader, loss_f)
+        s.reconstruction_loss = rec_loss
+        s.kl_normal_loss = kl_loss
+        s.total_correlation = tc_loss
+        s.mutual_information = mi_loss
+        s.dimensionwise_kl_loss = dw_kl_loss
+        s.attribution_loss = attr_loss
+        s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean()
+        s.net = model    
+
+        # save
+        os.makedirs(p.out_dir, exist_ok=True)
+        results = {**p._dict(p), **s._dict(s)}
+        pkl.dump(results, open(opj(p.out_dir, p._str(p) + '.pkl'), 'wb'))   
