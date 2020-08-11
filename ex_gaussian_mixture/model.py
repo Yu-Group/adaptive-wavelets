@@ -5,21 +5,20 @@ import numpy as np
 import torch
 from torch import nn
 
-def init_specific_model(orig_dim, latent_dim):
+def init_specific_model(orig_dim, latent_dim, hidden_dim=6):
     """Return an instance of a VAE with encoder and decoder from `model_type`."""
-    encoder = Encoder(orig_dim, latent_dim)
-    decoder = Decoder(orig_dim, latent_dim)
-    model = VAE(orig_dim, encoder, decoder, latent_dim)
+    encoder = Encoder(orig_dim, latent_dim, hidden_dim)
+    decoder = Decoder(orig_dim, latent_dim, hidden_dim)
+    model = VAE(encoder, decoder)
     return model
 
 
 class Encoder(nn.Module):
-    def __init__(self, orig_dim=10, latent_dim=2):
+    def __init__(self, orig_dim=10, latent_dim=2, hidden_dim=6):
         r"""Encoder of the model for GMM samples
         """
         super(Encoder, self).__init__()
         # Layer parameters
-        hidden_dim = 6
         self.orig_dim = orig_dim
         self.latent_dim = latent_dim
         
@@ -42,12 +41,11 @@ class Encoder(nn.Module):
     
         
 class Decoder(nn.Module):
-    def __init__(self, orig_dim=10, latent_dim=2):
+    def __init__(self, orig_dim=10, latent_dim=2, hidden_dim=6):
         r"""Decoder of the model for GMM samples
         """
         super(Decoder, self).__init__()
         # Layer parameters
-        hidden_dim = 6
         self.orig_dim = orig_dim
         self.latent_dim = latent_dim
         
@@ -66,14 +64,12 @@ class Decoder(nn.Module):
     
     
 class VAE(nn.Module):
-    def __init__(self, orig_dim, encoder, decoder, latent_dim):
+    def __init__(self, encoder, decoder):
         """
         Class which defines model and forward pass.
         """
         super(VAE, self).__init__()
 
-        self.latent_dim = latent_dim
-        self.orig_dim = orig_dim
         self.encoder = encoder
         self.decoder = decoder
 
@@ -110,7 +106,6 @@ class VAE(nn.Module):
         latent_dist = self.encoder(x)
         latent_sample = self.reparameterize(*latent_dist)
         reconstruct = self.decoder(latent_sample)
-#         reconstruct = self.decoder(latent_dist[0])
         return reconstruct, latent_dist, latent_sample
 
     def sample_latent(self, x):

@@ -19,14 +19,18 @@ class myDataset(torch.utils.data.Dataset):
         return data
 
 
-def get_dataloaders(n_samples_per_cluster=5000, 
+def get_dataloaders(n_samples_per_cluster,
+                    latent_means,
+                    latent_vars,     
+                    extra_dim=8,
+                    var=0.01,
                     batch_size=100, 
                     shuffle=True,
                     return_latents=False):
     """A generic data loader
     """
-    latent_samples = generate_latent_samples(nb_samples=n_samples_per_cluster)
-    data = generate_noisy_samples(latent_samples) 
+    latent_samples = generate_latent_samples(n_samples_per_cluster, latent_means, latent_vars)
+    data = generate_full_samples(latent_samples, extra_dim, var) 
     kwargs = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else {}
     data_loader = torch.utils.data.DataLoader(myDataset(data), batch_size=batch_size, shuffle=shuffle, **kwargs)  
     if return_latents:
@@ -50,37 +54,29 @@ def samples(mu, var, nb_samples=500):
     return torch.stack(out, dim=0)
 
 
-def generate_latent_samples(nb_samples=5000):
-    cluster1 = samples(
-        torch.Tensor([0.0, 0.0]),
-        torch.Tensor([0.1, 0.1]),
-        nb_samples=nb_samples
-    )
-
-    cluster2 = samples(
-        torch.Tensor([5.0, 5.0]),
-        torch.Tensor([0.1, 0.1]),
-        nb_samples=nb_samples
-    )
-
-    cluster3 = samples(
-        torch.Tensor([10.0, 10.0]),
-        torch.Tensor([0.1, 0.1]),
-        nb_samples=nb_samples
-    )
-
-    return torch.cat([cluster1, cluster2, cluster3])    
+def generate_latent_samples(nb_samples, latent_means, latent_vars):
+    latent_data = []
+    n_clusters = len(latent_means)
+    for i in range(n_clusters):
+        cluster = samples(
+            torch.Tensor(latent_means[i]),
+            torch.Tensor(latent_vars[i]),
+            nb_samples=nb_samples
+        )
+        latent_data.append(cluster)
+        
+    return torch.cat(latent_data, dim=0) 
 
 
-def generate_noisy_samples(latent_samples, extra_dim=8, var=0.1):
+def generate_full_samples(latent_samples, extra_dim, var):
     out = []
     nb_samples, dim = latent_samples.shape
     for i in range(nb_samples):
         zero = torch.zeros(extra_dim)
         mu = torch.cat([latent_samples[i], zero])
-        var = var * torch.ones(dim + extra_dim)
+        v = var * torch.ones(dim + extra_dim)
         out += [
-            torch.normal(mu, var.sqrt())
+            torch.normal(mu, v.sqrt())
         ]
     return torch.stack(out, dim=0)    
     

@@ -5,6 +5,7 @@ from tqdm import trange
 import torch
 from torch.nn import functional as F
 from copy import deepcopy
+from utils import *
 
 # trim modules
 sys.path.append('../trim')
@@ -16,15 +17,12 @@ class Trainer():
     """
     def __init__(self, model, optimizer, loss_f,
                  device=torch.device("cpu"),
-                 attr_lamb=0.0,
                  use_residuals=True):
 
         self.device = device
         self.model = model.to(self.device)
         self.loss_f = loss_f
         self.optimizer = optimizer
-        self.attr_lamb = attr_lamb
-        self.L2Loss = torch.nn.MSELoss()
         self.use_residuals = use_residuals
         self._create_latent_map()        
 
@@ -73,9 +71,10 @@ class Trainer():
         mean_epoch_loss: float
         """
         self.model.train()
+        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
         for batch_idx, data in enumerate(data_loader):
-            iter_loss = self._train_iteration(data)
+            iter_loss = self._train_iteration(data, n_data)
             epoch_loss += iter_loss
             
             if batch_idx % 10 == -1:
@@ -87,7 +86,7 @@ class Trainer():
         mean_epoch_loss = epoch_loss / len(data_loader)
         return mean_epoch_loss
 
-    def _train_iteration(self, data):
+    def _train_iteration(self, data, n_data):
         """
         Trains the model for one iteration on a batch of data.
 
@@ -100,11 +99,8 @@ class Trainer():
         data = data.to(self.device)
 
         recon_data, latent_dist, latent_sample = self.model(data)
-        loss = self.loss_f(data, recon_data, latent_dist, latent_sample)  
+        loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data)  
         
-        if self.attr_lamb > 0:
-            loss = loss + self.attr_lamb * self._comp_latent_pen(latent_sample, data)
-
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -127,31 +123,14 @@ class Trainer():
         mean_epoch_loss: float
         """
         self.model.eval()
+        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
         for batch_idx, data in enumerate(data_loader):
             data = data.to(self.device)
             recon_data, latent_dist, latent_sample = self.model(data)
-            loss = self.loss_f(data, recon_data, latent_dist, latent_sample)   
-            if self.attr_lamb > 0:
-                loss = loss + self.attr_lamb * self._comp_latent_pen(latent_sample, data)            
+            loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data)                  
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
         mean_epoch_loss = epoch_loss / len(data_loader)
         return mean_epoch_loss    
-    
-    def _comp_latent_pen(self, latent_sample, data):
-        s = latent_sample
-        s_output = self.latent_map(s, deepcopy(data))
-        pen = 0
-        for i in range(self.model.latent_dim):
-            col_idx = np.arange(self.model.latent_dim)!=i
-            gradients = torch.autograd.grad(s_output[:,i], s, grad_outputs=torch.ones_like(s_output[:,i]), 
-                                            retain_graph=True, create_graph=True, only_inputs=True)[0]
-            gradients_pairwise = gradients[:,col_idx]
-            pen += self.L2Loss(gradients_pairwise, torch.zeros_like(gradients_pairwise))    
-
-        return pen
-    
-    
-    
