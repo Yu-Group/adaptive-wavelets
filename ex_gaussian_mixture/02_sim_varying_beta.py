@@ -9,6 +9,7 @@ import acd
 from copy import deepcopy
 import itertools
 
+
 if __name__ == '__main__':
     
     params_to_vary = {
@@ -27,4 +28,5 @@ if __name__ == '__main__':
         param_str = 'python sim_gaussian_mixture.py '
         for j, key in enumerate(ks):
             param_str += '--' + key + ' ' + str(param_combinations[i][j]) + ' '
+        print('running: ' + param_str + '({}/{})'.format(i, len(param_combinations)))
         os.system(param_str)

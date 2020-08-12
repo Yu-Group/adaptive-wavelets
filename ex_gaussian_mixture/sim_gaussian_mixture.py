@@ -206,16 +206,9 @@ def calc_disentangle_metric(model, data_loader):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    p.train_batch_size = args.batch_size
-    p.num_epochs = args.epochs
-    p.seed = args.seed
-    p.hidden_dim = args.hidden_dim
-    p.beta = args.beta
-    p.attr = args.attr
-    p.alpha = args.alpha
-    p.gamma = args.gamma
-    p.tc = args.tc
-    
+    for arg in vars(args):
+        setattr(p, arg, getattr(args, arg))
+
     # seed
     random.seed(p.seed)
     np.random.seed(p.seed)
