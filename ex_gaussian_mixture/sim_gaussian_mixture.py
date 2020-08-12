@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import random
@@ -9,13 +8,15 @@ from tqdm import tqdm
 import acd
 from random import randint
 from copy import deepcopy
+import pickle as pkl
+import argparse
+
+sys.path.append('vae')
 from model import init_specific_model
 from losses import Loss
 from dset import *
 from training import Trainer
 from utils import *
-import pickle as pkl
-import argparse
 
 
 parser = argparse.ArgumentParser(description='Gaussian Mixture Example')

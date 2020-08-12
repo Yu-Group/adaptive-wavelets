@@ -9,15 +9,14 @@ import acd
 from copy import deepcopy
 import itertools
 
-
 if __name__ == '__main__':
     
     params_to_vary = {
         'epochs': [50],
         'seed': range(10, 15),
         'hidden_dim': [4, 5, 6, 7, 8, 9, 10],
-        'beta': [0],
-        'attr': np.round(np.linspace(0, 5, 30), 3)
+        'beta': np.round(np.linspace(0, 5, 30), 3),
+        'attr': [0]
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
