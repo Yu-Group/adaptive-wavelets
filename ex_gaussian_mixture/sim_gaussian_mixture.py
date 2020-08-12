@@ -15,6 +15,29 @@ from dset import *
 from training import Trainer
 from utils import *
 import pickle as pkl
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Gaussian Mixture Example')
+parser.add_argument('--batch_size', type=int, default=64, metavar='N',
+                    help='input batch size for training (default: 64)')
+parser.add_argument('--epochs', type=int, default=50, metavar='N',
+                    help='number of epochs to train (default: 50)')
+parser.add_argument('--seed', type=int, default=1, metavar='S',
+                    help='random seed (default: 1)')
+parser.add_argument('--hidden_dim', type=int, default=8,
+                   help='number of hidden variables in VAE (default: 8)')
+parser.add_argument('--beta', type=float, default=1,
+                   help='weight of the KL term')
+parser.add_argument('--attr', type=float, default=1,
+                   help='weight of the local indepndence term')
+parser.add_argument('--alpha', type=float, default=0,
+                   help='weight of the mutual information term')
+parser.add_argument('--gamma', type=float, default=0,
+                   help='weight of the dim-wise KL term')
+parser.add_argument('--tc', type=float, default=0,
+                   help='weight of the total correlation term')
+
 
 class p:
     '''Parameters for Gaussian mixture simulation
@@ -181,6 +204,17 @@ def calc_disentangle_metric(model, data_loader):
 
 
 if __name__ == '__main__':
+    args = parser.parse_args()
+    p.train_batch_size = args.batch_size
+    p.num_epochs = args.epochs
+    p.seed = args.seed
+    p.hidden_dim = args.hidden_dim
+    p.beta = args.beta
+    p.attr = args.attr
+    p.alpha = args.alpha
+    p.gamma = args.gamma
+    p.tc = args.tc
+    
     # seed
     random.seed(p.seed)
     np.random.seed(p.seed)
@@ -195,16 +229,9 @@ if __name__ == '__main__':
 
     # TRAINS
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    beta = p.beta
-    attr = p.attr
-    alpha = p.alpha
-    gamma = p.gamma
-    tc = p.tc
-    num_epochs = p.num_epochs
-    
-    loss_f = Loss(beta=beta, attr=attr, alpha=alpha, gamma=gamma, tc=tc, is_mss=True)
+    loss_f = Loss(beta=p.beta, attr=p.attr, alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
-    trainer(train_loader, test_loader, epochs=num_epochs)
+    trainer(train_loader, test_loader, epochs=p.num_epochs)
     
     # calculate losses
     print('calculating losses and metric...')    
@@ -222,3 +249,4 @@ if __name__ == '__main__':
     os.makedirs(p.out_dir, exist_ok=True)
     results = {**p._dict(p), **s._dict(s)}
     pkl.dump(results, open(opj(p.out_dir, p._str(p) + '.pkl'), 'wb'))    
+    torch.save(model.state_dict(), opj(p.out_dir, p._str(p) + '.pth')) 
