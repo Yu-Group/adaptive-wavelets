@@ -13,11 +13,13 @@ import itertools
 if __name__ == '__main__':
     
     params_to_vary = {
-        'epochs': [50],
+        'num_epochs': [100],
         'seed': range(10, 15),
-        'hidden_dim': [4, 5, 6, 7, 8, 9, 10],
-        'beta': np.round(np.linspace(0, 5, 30), 3),
-        'attr': [0]
+        'hidden_dim': range(6, 10),
+        'eps': [0.01],
+        'beta': np.round(np.linspace(5e-4, 5, 40), 5),
+        'attr': [0],
+        'dirname': ['vary_beta0']
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]

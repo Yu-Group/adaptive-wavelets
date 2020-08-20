@@ -22,7 +22,7 @@ from utils import *
 parser = argparse.ArgumentParser(description='Gaussian Mixture Example')
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-parser.add_argument('--epochs', type=int, default=50, metavar='N',
+parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
                     help='number of epochs to train (default: 50)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
@@ -38,6 +38,12 @@ parser.add_argument('--gamma', type=float, default=0,
                    help='weight of the dim-wise KL term')
 parser.add_argument('--tc', type=float, default=0,
                    help='weight of the total correlation term')
+parser.add_argument('--eps', type=float, default=0.1,
+                   help='size of perturbation for local independence term')
+parser.add_argument('--p_batch_size', type=float, default=50,
+                   help='perturbation batch size for local independence term')
+parser.add_argument('--dirname', default='vary',
+                   help='name of directory')
 
 
 class p:
@@ -69,8 +75,13 @@ class p:
     
     seed = 13
     
+    # parameters for loss
+    eps = 0.1
+    p_batch_size = 50
+    
     # SAVE MODEL
     out_dir = "/home/ubuntu/transformation-importance/ex_gaussian_mixture/results"
+    dirname = "vary"
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
     def _str(self):
@@ -184,11 +195,13 @@ def measure_anlge_iteration(model, data):
         for i in range(2):
             x = decoded_traversal[100*idxs[i]:100*(idxs[i]+1)]
             v = x[-1] - x[0]
-            angles.append(abs(v/torch.norm(v)))
-        angles = torch.stack(angles)
-        s1 = torch.sqrt((angles[0,0] - 1)**2 + (angles[1,1] - 1)**2)
-        s2 = torch.sqrt((angles[0,1] - 1)**2 + (angles[1,0] - 1)**2)
-        results.append(torch.min(s1, s2))
+            if torch.norm(v) > 0:
+                angles.append(abs(v/torch.norm(v)))
+        if len(angles) == 2:
+            angles = torch.stack(angles)
+            s1 = torch.sqrt((angles[0,0] - 1)**2 + (angles[1,1] - 1)**2)
+            s2 = torch.sqrt((angles[0,1] - 1)**2 + (angles[1,0] - 1)**2)
+            results.append(torch.min(s1, s2))
 
     return torch.stack(results)
 
@@ -223,7 +236,7 @@ if __name__ == '__main__':
 
     # TRAINS
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    loss_f = Loss(beta=p.beta, attr=p.attr, alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True)
+    loss_f = Loss(beta=p.beta, attr=p.attr, alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     
@@ -235,12 +248,13 @@ if __name__ == '__main__':
     s.total_correlation = tc_loss
     s.mutual_information = mi_loss
     s.dimensionwise_kl_loss = dw_kl_loss
-    s.attribution_loss = attr_loss
-    s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean()
+    if p.attr > 0:
+        s.attribution_loss = attr_loss
+    s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean().item()
     s.net = model    
     
     # save
-    os.makedirs(p.out_dir, exist_ok=True)
+    os.makedirs(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed)), exist_ok=True)
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(p.out_dir, p._str(p) + '.pkl'), 'wb'))    
-    torch.save(model.state_dict(), opj(p.out_dir, p._str(p) + '.pth')) 
+    pkl.dump(results, open(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pkl'), 'wb'))    
+    torch.save(model.state_dict(), opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pth')) 

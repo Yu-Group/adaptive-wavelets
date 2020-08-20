@@ -13,14 +13,15 @@ from utils import *
 class Loss(abc.ABC):
     """
     """
-    def __init__(self, beta=4., attr=1., alpha=0., gamma=0., tc=1., is_mss=True):
+    def __init__(self, beta=4., attr=1., alpha=0., gamma=0., tc=1., eps=.1, p_batch_size=50, is_mss=True):
         self.beta = beta
         self.attr = attr
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
+        self.eps = eps
+        self.p_batch_size = p_batch_size
         self.is_mss = is_mss
-        self.L1Loss = torch.nn.L1Loss()
 
     def __call__(self, data, recon_data, latent_dist, latent_sample, n_data):
         batch_size, latent_dim = latent_sample.shape
@@ -45,24 +46,31 @@ class Loss(abc.ABC):
                                 self.tc * self.tc_loss +
                                 self.gamma * self.dw_kl_loss)        
         
-        if self.attr > 0:
-            self.attr_loss = 0
-            log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
-            # local indepedence loss
-            eps = 0.1
-            for i in range(latent_dim):
-                perb = torch.zeros_like(latent_sample)
-                perb[:,i] = eps * torch.ones(batch_size)
-                latent_sample_p = latent_sample + perb
-                
-                _, log_qz_p, log_qzi_p, _, _ = _get_log_pz_qz_prodzi_qzCx(latent_sample_p,
-                                                                          latent_dist,
-                                                                          n_data,
-                                                                          is_mss=self.is_mss)                 
-                log_q_zCzi_p = log_qz_p.view(batch_size, 1) - log_qzi_p    
-                diff = (log_q_zCzi - log_q_zCzi_p)[:,i]
-                self.attr_loss += self.L1Loss(diff, torch.zeros_like(diff))  
+        # local independence loss
+        self.attr_loss = 0
+        log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
+
+        deltas = 2 * self.eps * torch.rand(self.p_batch_size) - self.eps
+        
+        for i in range(latent_dim):
+            perb = torch.zeros(batch_size, latent_dim, self.p_batch_size).to(latent_sample.device)
+            perb[:,i] = deltas.view(1, self.p_batch_size) * torch.ones(batch_size, 1)
+            latent_sample_p = latent_sample.unsqueeze(2) + perb
+            
+            log_qz_p, log_qzi_p = _get_log_qz_qzi_perb(latent_sample_p, 
+                                                       latent_dist, 
+                                                       n_data, 
+                                                       is_mss=self.is_mss)
+            log_q_zCzi_p = log_qz_p.view(batch_size, 1, self.p_batch_size) - log_qzi_p   
+            diff = (log_q_zCzi_p - log_q_zCzi.unsqueeze(2))[:,i,:]
+            self.attr_loss += abs(diff).mean()
             loss += self.attr * self.attr_loss
+            
+#             # partial log p(z_-j|z_j)/partial z_j
+#             for i in range(latent_dim):
+#                 gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
+#                                                 retain_graph=True, create_graph=True, only_inputs=True)[0][:,i]               
+#                 loss += self.attr * self.L1Loss(gradients, torch.zeros_like(gradients))              
 
         return loss
     
@@ -139,11 +147,25 @@ def _get_log_pz_qz_prodzi_qzCx(latent_sample, latent_dist, n_data, is_mss=True):
     return log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx
 
 
-#         if self.attr > 0:
-#             log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
+def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
+    batch_size, hidden_dim, perb_size = latent_sample_perb.shape
+    mu, logvar = latent_dist
+    
+    latent_sample_perb = latent_sample_perb.view(batch_size, 1, hidden_dim, perb_size)    
+    mu = mu.view(1, batch_size, hidden_dim, 1)
+    logvar = logvar.view(1, batch_size, hidden_dim, 1)
+    
+    # calculate log q(z)
+    mat_log_qz = log_density_gaussian(latent_sample_perb, mu, logvar)
+
+    if is_mss:
+        # use stratification
+        log_iw_mat = log_importance_weight_matrix(batch_size, n_data).to(latent_sample_perb.device)
+        mat_log_qzi = mat_log_qz + log_iw_mat.view(batch_size, batch_size, 1, 1)
+        
+    log_qz = logsumexp(mat_log_qz.sum(2) + log_iw_mat.view(batch_size, batch_size, 1), dim=1, keepdim=False)
+    log_qzi = logsumexp(mat_log_qzi, dim=1, keepdim=False)
+
+    return log_qz, log_qzi
+
             
-#             # local indepedence loss
-#             for i in range(latent_dim):
-#                 gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
-#                                                 retain_graph=True, create_graph=True, only_inputs=True)[0][:,i]               
-#                 loss += self.attr * self.L1Loss(gradients, torch.zeros_like(gradients))  

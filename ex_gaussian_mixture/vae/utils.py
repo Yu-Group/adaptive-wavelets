@@ -33,7 +33,7 @@ def traverse_line(idx, model, n_samples=100, n_latents=2, data=None):
             post_std_idx = torch.exp(post_logvar / 2).cpu()[0, idx]
 
         # travers from the gaussian of the posterior in case quantile
-        traversals = torch.linspace(post_mean_idx-0.1*post_std_idx, post_mean_idx+0.1*post_std_idx, steps=n_samples)
+        traversals = torch.linspace(post_mean_idx-1*post_std_idx, post_mean_idx+1*post_std_idx, steps=n_samples)
 
     for i in range(n_samples):
         samples[i, idx] = traversals[i]
