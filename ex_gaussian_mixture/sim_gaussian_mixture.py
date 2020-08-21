@@ -5,7 +5,6 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
 opj = os.path.join
 from tqdm import tqdm
-import acd
 from random import randint
 from copy import deepcopy
 import pickle as pkl
@@ -42,8 +41,8 @@ parser.add_argument('--eps', type=float, default=0.1,
                    help='size of perturbation for local independence term')
 parser.add_argument('--p_batch_size', type=float, default=50,
                    help='perturbation batch size for local independence term')
-parser.add_argument('--dirname', default='vary',
-                   help='name of directory')
+parser.add_argument('--out_dir', default='vary',
+                   help='directory to save results')
 
 
 class p:
@@ -234,7 +233,7 @@ if __name__ == '__main__':
     model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
     model = model.to(device)
 
-    # TRAINS
+    # TRAIN
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, attr=p.attr, alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
@@ -254,7 +253,8 @@ if __name__ == '__main__':
     s.net = model    
     
     # save
-    os.makedirs(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed)), exist_ok=True)
+    os.makedirs(p.out_dir, exist_ok=True)
+#     os.makedirs(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed)), exist_ok=True)
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pkl'), 'wb'))    
-    torch.save(model.state_dict(), opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pth')) 
+    pkl.dump(results, open(opj(p.out_dir, p._str(p) + '.pkl'), 'wb')) 
+    torch.save(model.state_dict(), opj(p.out_dir, p._str(p) + '.pth')) 
