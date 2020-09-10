@@ -98,7 +98,7 @@ class Loss(abc.ABC):
                                 self.mu * self.mu_loss)        
         
         # pointwise independence loss
-        self.pt_loss = None
+        self.pt_loss = 0
         if self.lamPT > 0 and latent_output is not None:
             for i in range(latent_dim):
                 col_idx = np.arange(latent_dim)!=i
