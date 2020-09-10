@@ -22,16 +22,20 @@ from utils import *
 parser = argparse.ArgumentParser(description='Gaussian Mixture Example')
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
-                    help='number of epochs to train (default: 50)')
+parser.add_argument('--num_epochs', type=int, default=100, metavar='N',
+                    help='number of epochs to train (default: 100)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
-parser.add_argument('--hidden_dim', type=int, default=8,
+parser.add_argument('--hidden_dim', type=int, default=12,
                    help='number of hidden variables in VAE (default: 8)')
 parser.add_argument('--beta', type=float, default=1,
                    help='weight of the KL term')
-parser.add_argument('--attr', type=float, default=1,
-                   help='weight of the local indepndence term')
+parser.add_argument('--mu', type=float, default=0,
+                   help='weight of the mu term')
+parser.add_argument('--lamPT', type=float, default=0,
+                   help='weight of the pointwise local indepndence term')
+parser.add_argument('--lamCI', type=float, default=0,
+                   help='weight of the conditional local indepndence term')
 parser.add_argument('--alpha', type=float, default=0,
                    help='weight of the mutual information term')
 parser.add_argument('--gamma', type=float, default=0,
@@ -50,28 +54,30 @@ class p:
     '''Parameters for Gaussian mixture simulation
     '''
     # parameters for generating data
-    train_n_samples_per_cluster = 10000
-    test_n_samples_per_cluster = 2000
-    latent_means = [[0.0, 0.0], [10.0, 10.0], [20.0, 20.0]]
-    latent_vars = [[4, 2], [4, 2], [4, 2]]
+    train_n_samples_per_cluster = 5000
+    test_n_samples_per_cluster = 1000
+    latent_means = [[0.0, 0.0], [15.0, 15.0], [30.0, 30.0], [25.0, 5.0], [10.0, 25.0]]
+    latent_vars = [[4, 1], [4, 1], [4, 1], [4, 1], [4, 1]]
     noise_dim = 8
     noise_var = 0.01
     
     # parameters for model architecture
-    orig_dim = 2 + noise_dim
+    orig_dim = 10
     latent_dim = 4    
-    hidden_dim = orig_dim - 2
+    hidden_dim = 12
     
     # parameters for training
     train_batch_size = 64
     test_batch_size = 100
     lr = 1e-3
     beta = 0.0
-    attr = 0.5
+    mu = 0.0
+    lamPT = 0.0
+    lamCI = 0.0
     alpha = 0.0
     gamma = 0.0
     tc = 0.0
-    num_epochs = 50
+    num_epochs = 100
     
     seed = 13
     
@@ -86,7 +92,7 @@ class p:
 
     def _str(self):
         vals = vars(p)
-        return 'beta=' + str(vals['beta']) + '_attr=' + str(vals['attr']) + '_tc=' + str(vals['tc']) + '_seed=' + str(vals['seed']) \
+        return 'beta=' + str(vals['beta']) + '_mu=' + str(vals['mu']) + '_lamPT=' + str(vals['lamPT']) + '_lamCI=' + str(vals['lamCI']) + '_seed=' + str(vals['seed']) \
                 + '_hdim=' + str(vals['hidden_dim']) + '_pid=' + vals['pid']
     
     def _dict(self):
@@ -99,11 +105,13 @@ class s:
     '''
     reconstruction_loss = None
     kl_normal_loss = None
+    mu_squared_loss = None
     disentanglement_metric = None
     total_correlation = None
     mutual_information = None
     dimensionwise_kl_loss = None
-    attribution_loss = None
+    pt_local_independence_loss = None
+    ci_local_independence_loss = None
     net = None
     
     def _dict(self):
@@ -129,49 +137,60 @@ def define_dataloaders(p):
                                                 extra_dim=p.noise_dim, 
                                                 var=p.noise_var,
                                                 batch_size=p.test_batch_size, 
-                                                shuffle=True,
+                                                shuffle=False,
                                                 return_latents=True)   
     return((train_loader, train_latents), (test_loader, test_latents))
 
 
 # calculate losses
 def calc_losses(model, data_loader, loss_f):
-        """
-        Tests the model for one epoch.
+    """
+    Tests the model for one epoch.
 
-        Parameters
-        ----------
-        data_loader: torch.utils.data.DataLoader
+    Parameters
+    ----------
+    data_loader: torch.utils.data.DataLoader
 
-        loss_f: loss object
+    loss_f: loss object
 
-        Return
-        ------
-        """    
-        model.eval()
-        n_data = data_loader.dataset.data.shape[0]
-        rec_loss = kl_loss = mi_loss = tc_loss = dw_kl_loss = attr_loss = 0
-        
-        for _, data in enumerate(data_loader):
-            data = data.to(device)
-            recon_data, latent_dist, latent_sample = model(data)
-            _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data) 
-            rec_loss += loss_f.rec_loss.item()
-            kl_loss += loss_f.kl_loss.item()
-            mi_loss += loss_f.mi_loss.item()
-            tc_loss += loss_f.tc_loss.item()
-            dw_kl_loss += loss_f.dw_kl_loss.item()
-            attr_loss += loss_f.attr_loss.item()     
-        
-        n_batch = len(data_loader)
-        rec_loss /= n_batch
-        kl_loss /= n_batch
-        mi_loss /= n_batch
-        tc_loss /= n_batch
-        dw_kl_loss /= n_batch
-        attr_loss /= n_batch
-        
-        return (rec_loss, kl_loss, mi_loss, tc_loss, dw_kl_loss, attr_loss)
+    Return
+    ------
+    """    
+    model.eval()
+    n_data = data_loader.dataset.data.shape[0]
+    rec_loss = 0
+    kl_loss = 0
+    mu_loss = 0
+    mi_loss = 0
+    tc_loss = 0
+    dw_kl_loss = 0
+    pt_loss = 0
+    ci_loss = 0
+
+    for _, data in enumerate(data_loader):
+        data = data.to(device)
+        recon_data, latent_dist, latent_sample = model(data)
+        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data) 
+        rec_loss += loss_f.rec_loss.item()
+        kl_loss += loss_f.kl_loss.item()
+        mu_loss += loss_f.mu_loss.item()
+        mi_loss += loss_f.mi_loss.item()
+        tc_loss += loss_f.tc_loss.item()
+        dw_kl_loss += loss_f.dw_kl_loss.item()
+        pt_loss += loss_f.pt_loss.item()     
+        ci_loss += loss_f.ci_loss.item()
+
+    n_batch = len(data_loader)
+    rec_loss /= n_batch
+    kl_loss /= n_batch
+    mu_loss /= n_batch
+    mi_loss /= n_batch
+    tc_loss /= n_batch
+    dw_kl_loss /= n_batch
+    pt_loss /= n_batch
+    ci_loss /= n_batch
+
+    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss)
     
     
 def measure_anlge_iteration(model, data):
@@ -236,20 +255,21 @@ if __name__ == '__main__':
 
     # TRAINS
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    loss_f = Loss(beta=p.beta, attr=p.attr, alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
+    loss_f = Loss(beta=p.beta, mu=p.mu, lamb=p.lamb, alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     
     # calculate losses
     print('calculating losses and metric...')    
-    rec_loss, kl_loss, mi_loss, tc_loss, dw_kl_loss, attr_loss = calc_losses(model, test_loader, loss_f)
+    rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss = calc_losses(model, test_loader, loss_f)
     s.reconstruction_loss = rec_loss
     s.kl_normal_loss = kl_loss
+    s.mu_squared_loss = mu_loss
     s.total_correlation = tc_loss
     s.mutual_information = mi_loss
     s.dimensionwise_kl_loss = dw_kl_loss
-    if p.attr > 0:
-        s.attribution_loss = attr_loss
+    s.pt_local_independence_loss = pt_loss
+    s.ci_local_indenepdence_loss = ci_loss
     s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean().item()
     s.net = model    
     

@@ -24,13 +24,15 @@ class Encoder(nn.Module):
         
         # Fully connected layers
         self.lin1 = nn.Linear(self.orig_dim, hidden_dim)
-        self.lin2 = nn.Linear(hidden_dim, hidden_dim)
+        self.lin2 = nn.Linear(hidden_dim, 2*hidden_dim)
+        self.lin3 = nn.Linear(2*hidden_dim, hidden_dim)
         self.mu_logvar_gen = nn.Linear(hidden_dim, self.latent_dim * 2)
      
     def forward(self, x):
         # Fully connected layers with ReLu activations
         x = torch.relu(self.lin1(x))
         x = torch.relu(self.lin2(x))
+        x = torch.relu(self.lin3(x))
 
         # Fully connected layer for log variance and mean
         # Log std-dev in paper (bear in mind)
@@ -51,14 +53,16 @@ class Decoder(nn.Module):
         
         # Fully connected layers
         self.lin1 = nn.Linear(latent_dim, hidden_dim)
-        self.lin2 = nn.Linear(hidden_dim, hidden_dim)
-        self.lin3 = nn.Linear(hidden_dim, orig_dim)
+        self.lin2 = nn.Linear(hidden_dim, 2*hidden_dim)
+        self.lin3 = nn.Linear(2*hidden_dim, hidden_dim)
+        self.lin4 = nn.Linear(hidden_dim, orig_dim)
 
     def forward(self, z):
         # Fully connected layers with ReLu activations
         x = torch.relu(self.lin1(z))
         x = torch.relu(self.lin2(x))
-        x = self.lin3(x)
+        x = torch.relu(self.lin3(x))
+        x = self.lin4(x)
 
         return x     
     

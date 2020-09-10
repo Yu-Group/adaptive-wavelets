@@ -13,9 +13,35 @@ from utils import *
 class Loss(abc.ABC):
     """
     """
-    def __init__(self, beta=4., attr=1., alpha=0., gamma=0., tc=1., eps=.1, p_batch_size=50, is_mss=True):
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., eps=.1, p_batch_size=50, is_mss=True):
+        """
+        Parameters
+        ----------
+        beta : float
+            Hyperparameter for beta-VAE term.
+
+        mu : float
+            Hyperparameter for latent distribution mean.
+            
+        lamPT : float
+            Hyperparameter for penalizing change in one latent induced by another.
+            
+        lamCI : float
+            Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
+            
+        alpha : float
+            Hyperparameter for mutual information term.
+            
+        gamma: float
+            Hyperparameter for dimension-wise KL term.
+            
+        tc: float
+            Hyperparameter for total correlation term.
+        """           
         self.beta = beta
-        self.attr = attr
+        self.mu = mu
+        self.lamPT = lamPT
+        self.lamCI = lamCI
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
@@ -23,11 +49,38 @@ class Loss(abc.ABC):
         self.p_batch_size = p_batch_size
         self.is_mss = is_mss
 
-    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data):
+    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
+        """
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+            
+        latent_dist: list of torch.Tensor
+            Encoder latent distribution [mean, logvar]. Shape : (batch_size, latent_dim).
+            
+        latent_sample: torch.Tensor
+            Latent samples. Shape : (batch_size, latent_dim).
+            
+        n_data: int
+            Total number of training examples. 
+            
+        latent_output: torch.Tensor, optional
+            Output of the Decoder->Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
+
+        Return
+        ------
+        loss : torch.Tensor
+        """        
         batch_size, latent_dim = latent_sample.shape
         
         self.rec_loss = _reconstruction_loss(data, recon_data)
-        self.kl_loss = _kl_normal_loss(*latent_dist)
+        self.kl_loss = _kl_normal_loss(*latent_dist) 
+        self.mu_loss = _kl_normal_loss(latent_dist[0], torch.zeros_like(latent_dist[1])) 
 
         log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx = _get_log_pz_qz_prodzi_qzCx(latent_sample,
                                                                                       latent_dist,
@@ -38,40 +91,32 @@ class Loss(abc.ABC):
         # TC[z] = KL[q(z)||\prod_i z_i]
         self.tc_loss = (log_qz - log_prod_qzi).mean()
         # dw_kl_loss is KL[q(z)||p(z)] instead of usual KL[q(z|x)||p(z))]
-        self.dw_kl_loss = (log_prod_qzi - log_pz).mean()
+        self.dw_kl_loss = (log_prod_qzi - log_pz).mean()           
 
         # total loss
         loss = self.rec_loss + (self.beta * self.kl_loss +
-                                self.alpha * self.mi_loss +
-                                self.tc * self.tc_loss +
-                                self.gamma * self.dw_kl_loss)        
+                                self.mu * self.mu_loss)        
+        
+        # pointwise independence loss
+        self.pt_loss = None
+        if self.lamPT > 0 and latent_output is not None:
+            for i in range(latent_dim):
+                col_idx = np.arange(latent_dim)!=i
+                gradients = torch.autograd.grad(latent_output[:,i], latent_sample, grad_outputs=torch.ones_like(latent_output[:,i]), 
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,col_idx]   
+                self.pt_loss += abs(gradients).mean()
+            loss += self.lamPT * self.pt_loss
         
         # local independence loss
-        self.attr_loss = 0
-        log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
-
-        deltas = 2 * self.eps * torch.rand(self.p_batch_size) - self.eps
-        
-        for i in range(latent_dim):
-            perb = torch.zeros(batch_size, latent_dim, self.p_batch_size).to(latent_sample.device)
-            perb[:,i] = deltas.view(1, self.p_batch_size) * torch.ones(batch_size, 1)
-            latent_sample_p = latent_sample.unsqueeze(2) + perb
+        self.ci_loss = 0
+        if self.lamCI > 0:
+            log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
+            for i in range(latent_dim):
+                gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
+                self.ci_loss += abs(gradients).mean()     
+            loss += self.lamCI * self.ci_loss        
             
-            log_qz_p, log_qzi_p = _get_log_qz_qzi_perb(latent_sample_p, 
-                                                       latent_dist, 
-                                                       n_data, 
-                                                       is_mss=self.is_mss)
-            log_q_zCzi_p = log_qz_p.view(batch_size, 1, self.p_batch_size) - log_qzi_p   
-            diff = (log_q_zCzi_p - log_q_zCzi.unsqueeze(2))[:,i,:]
-            self.attr_loss += abs(diff).mean()
-            loss += self.attr * self.attr_loss
-            
-#             # partial log p(z_-j|z_j)/partial z_j
-#             for i in range(latent_dim):
-#                 gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
-#                                                 retain_graph=True, create_graph=True, only_inputs=True)[0][:,i]               
-#                 loss += self.attr * self.L1Loss(gradients, torch.zeros_like(gradients))              
-
         return loss
     
     
@@ -169,3 +214,5 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
     return log_qz, log_qzi
 
             
+    
+    

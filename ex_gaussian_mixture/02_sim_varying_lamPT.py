@@ -14,12 +14,14 @@ if __name__ == '__main__':
     
     params_to_vary = {
         'num_epochs': [100],
-        'seed': range(10, 15),
-        'hidden_dim': range(6, 10),
-        'eps': [0.01],
-        'beta': np.round(np.linspace(5e-4, 5, 40), 5),
-        'attr': [0],
-        'dirname': ['vary_beta0']
+        'seed': [13],
+        'hidden_dim': [12],
+        'eps': [0.005],
+        'beta': [0, 0.01, 0.1],
+        'mu': [0],
+        'lamPT': np.round(np.linspace(0.1, 100, 30), 5),
+        'lamCI': [0],
+        'dirname': ['vary_lamPT_beta']
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]

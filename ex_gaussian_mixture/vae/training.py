@@ -99,7 +99,8 @@ class Trainer():
         data = data.to(self.device)
 
         recon_data, latent_dist, latent_sample = self.model(data)
-        loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data)  
+        latent_output = self.latent_map(latent_sample, data)
+        loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)  
         
         self.optimizer.zero_grad()
         loss.backward()
@@ -128,7 +129,8 @@ class Trainer():
         for batch_idx, data in enumerate(data_loader):
             data = data.to(self.device)
             recon_data, latent_dist, latent_sample = self.model(data)
-            loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data)                  
+            latent_output = self.latent_map(latent_sample, data)
+            loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)                  
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
