@@ -5,7 +5,6 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
 opj = os.path.join
 from tqdm import tqdm
-import acd
 from random import randint
 from copy import deepcopy
 import pickle as pkl
@@ -46,8 +45,8 @@ parser.add_argument('--eps', type=float, default=0.1,
                    help='size of perturbation for local independence term')
 parser.add_argument('--p_batch_size', type=float, default=50,
                    help='perturbation batch size for local independence term')
-parser.add_argument('--dirname', default='vary',
-                   help='name of directory')
+parser.add_argument('--out_dir', default='vary',
+                   help='directory to save results')
 
 
 class p:
@@ -193,7 +192,7 @@ def calc_losses(model, data_loader, loss_f):
     return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss)
     
     
-def measure_anlge_iteration(model, data):
+def measure_angle_iteration(model, data):
     batch_size, dim = data.shape
     
     results = []
@@ -201,6 +200,7 @@ def measure_anlge_iteration(model, data):
         data_i = data[batch_idx:batch_idx+1]
         decoded_traversal = traversals(model, data=data_i, n_latents=p.latent_dim)[:,:2]
         
+        # find 2 latents corresponding to the highest variance in the original space
         variab = []
         for i in range(p.latent_dim):
             x = decoded_traversal[100*i:100*(i+1)]
@@ -210,12 +210,13 @@ def measure_anlge_iteration(model, data):
         _, idxs = torch.sort(variab, descending=True)
         idxs = idxs[:2]
 
+        # find the minimum angle of each latent direction with the x and y axis
         angles = []
         for i in range(2):
             x = decoded_traversal[100*idxs[i]:100*(idxs[i]+1)]
             v = x[-1] - x[0]
             if torch.norm(v) > 0:
-                angles.append(abs(v/torch.norm(v)))
+                angles.append(abs(v / torch.norm(v)))
         if len(angles) == 2:
             angles = torch.stack(angles)
             s1 = torch.sqrt((angles[0,0] - 1)**2 + (angles[1,1] - 1)**2)
@@ -226,11 +227,14 @@ def measure_anlge_iteration(model, data):
 
 
 def calc_disentangle_metric(model, data_loader):
+    '''Returns disentanglement metric
+    Smaller is better (closer to capturing groundtruth axes)
+    '''
     model.eval()
     
     dis_metric = []
     for _, data in enumerate(data_loader):
-        results = measure_anlge_iteration(model, data)
+        results = measure_angle_iteration(model, data)
         dis_metric.append(results)
         
     return torch.cat(dis_metric)
@@ -253,7 +257,7 @@ if __name__ == '__main__':
     model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
     model = model.to(device)
 
-    # TRAINS
+    # TRAIN
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, mu=p.mu, lamb=p.lamb, alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
@@ -274,7 +278,8 @@ if __name__ == '__main__':
     s.net = model    
     
     # save
-    os.makedirs(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed)), exist_ok=True)
+    os.makedirs(p.out_dir, exist_ok=True)
+#     os.makedirs(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed)), exist_ok=True)
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pkl'), 'wb'))    
-    torch.save(model.state_dict(), opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pth')) 
+    pkl.dump(results, open(opj(p.out_dir, p._str(p) + '.pkl'), 'wb')) 
+    torch.save(model.state_dict(), opj(p.out_dir, p._str(p) + '.pth')) 
