@@ -1,53 +1,10 @@
-Official code for using / reproducing TRIM from the paper [Transformation Importance with Applications to Cosmology](https://arxiv.org/abs/2003.01926) (ICLR 2020 Workshop). This code shows examples and provides useful wrappers for calculating importance in a transformed feature space.
+Trying to make locally disentangled VAEs.
 
 *This repo is actively maintained. For any questions please file an issue.*
 
-![trim](trim/trim.png)
-
-# examples/documentation
-
-- **dependencies**: depends on the pip-installable [acd package](https://github.com/csinva/hierarchical-dnn-interpretations)
-- **examples**: different folders (e.g. [ex_cosmology](ex_cosmology), [ex_fake_news](ex_fake_news), [ex_mnist](ex_mnist), [ex_urban_sound](ex_urban_sound) contain examples for using TRIM in different settings)
-- **src**: the core code is in the [trim](trim) folder, containing wrappers and code for different transformations
-- **requirements**: tested with python 3.7 and pytorch > 1.0
-
-
-| Attribution to different scales in cosmological images | Fake news attribution to different topics |
-| ------------------------------------------------------ | ----------------------------------------- |
-| ![](ex_cosmology/fig_omegam_curves.png)                | ![](ex_fake_news/fig_fakenews.png)        |
-
-| Attribution to different NMF components in MNIST classification | Attribution to different frequencies in audio classification |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![](ex_mnist/fig_nmf.png)                                    | ![](ex_urban_sound/fig_audio.png)                            |
-
-# sample usage
-
-```python
-import torch
-import torch.nn as nn
-from trim import TrimModel
-from functools import partial
-
-# setup a trim model
-model = nn.Sequential(nn.Linear(10, 10), nn.ReLU(), nn.Linear(10, 1)) # orig model
-transform = partial(torch.rfft, signal_ndim=1, onesided=False) # fft
-inv_transform = partial(torch.irfft, signal_ndim=1, onesided=False) # inverse fft
-model_trim = TrimModel(model=model, inv_transform=inv_transform) # trim model
-
-# get a data point
-x = torch.randn(1, 10)
-s = transform(x)
-
-# can now use any attribution method on the trim model
-# get (input_x_gradient) attribution in the fft space
-s.requires_grad = True
-model_trim(s).backward()
-input_x_gradient = s.grad * s
-```
-- see notebooks for more detailed usage
 
 # related work
-
+- TRIM (ICLR 2020 workshop [pdf](https://arxiv.org/abs/2003.01926), [github](https://github.com/csinva/transformation-importance)) - using simple reparameterizations, allows for calculating disentangled importances to transformations of the input (e.g. assigning importances to different frequencies)
 - ACD (ICLR 2019 [pdf](https://openreview.net/pdf?id=SkEqro0ctQ), [github](https://github.com/csinva/hierarchical-dnn-interpretations)) - extends CD to CNNs / arbitrary DNNs, and aggregates explanations into a hierarchy
 - CDEP (ICML 2020 [pdf](https://arxiv.org/abs/1909.13584), [github](https://github.com/laura-rieger/deep-explanation-penalization)) - penalizes CD / ACD scores during training to make models generalize better
 - DAC (arXiv 2019 [pdf](https://arxiv.org/abs/1905.07631), [github](https://github.com/csinva/disentangled-attribution-curves)) - finds disentangled interpretations for random forests
@@ -59,11 +16,5 @@ input_x_gradient = s.grad * s
 - if you find this code useful for your research, please cite the following:
 
 ```r
-@article{singh2020transformation,
-    title={Transformation Importance with Applications to Cosmology},
-    author={Singh, Chandan and Ha, Wooseok and Lanusse, Francois, and Boehm, Vanessa, and Liu, Jia and Yu, Bin},
-    journal={arXiv preprint arXiv:2003.01926},
-    year={2020},
-    url={https://arxiv.org/abs/2003.01926},
-}
+
 ```
