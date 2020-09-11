@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2" />
+<title>src.vae.losses API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>src.vae.losses</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import abc
+import math
+import os,sys
+sys.path.append(&#39;../disentangling-vae&#39;)
+
+import torch
+import torch.nn as nn
+from torch.nn import functional as F
+from torch import optim
+from .utils import *
+
+
+class Loss(abc.ABC):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., eps=.1, p_batch_size=50, is_mss=True):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        beta : float
+            Hyperparameter for beta-VAE term.
+
+        mu : float
+            Hyperparameter for latent distribution mean.
+            
+        lamPT : float
+            Hyperparameter for penalizing change in one latent induced by another.
+            
+        lamCI : float
+            Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
+            
+        alpha : float
+            Hyperparameter for mutual information term.
+            
+        gamma: float
+            Hyperparameter for dimension-wise KL term.
+            
+        tc: float
+            Hyperparameter for total correlation term.
+        &#34;&#34;&#34;           
+        self.beta = beta
+        self.mu = mu
+        self.lamPT = lamPT
+        self.lamCI = lamCI
+        self.alpha = alpha
+        self.gamma = gamma
+        self.tc = tc
+        self.eps = eps
+        self.p_batch_size = p_batch_size
+        self.is_mss = is_mss
+
+    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+            
+        latent_dist: list of torch.Tensor
+            Encoder latent distribution [mean, logvar]. Shape : (batch_size, latent_dim).
+            
+        latent_sample: torch.Tensor
+            Latent samples. Shape : (batch_size, latent_dim).
+            
+        n_data: int
+            Total number of training examples. 
+            
+        latent_output: torch.Tensor, optional
+            Output of the Decoder-&gt;Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
+
+        Return
+        ------
+        loss : torch.Tensor
+        &#34;&#34;&#34;        
+        batch_size, latent_dim = latent_sample.shape
+        
+        self.rec_loss = _reconstruction_loss(data, recon_data)
+        self.kl_loss = _kl_normal_loss(*latent_dist) 
+        self.mu_loss = _kl_normal_loss(latent_dist[0], torch.zeros_like(latent_dist[1])) 
+
+        log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx = _get_log_pz_qz_prodzi_qzCx(latent_sample,
+                                                                                      latent_dist,
+                                                                                      n_data,
+                                                                                      is_mss=self.is_mss)      
+        # I[z;x] = KL[q(z,x)||q(x)q(z)] = E_x[KL[q(z|x)||q(z)]]
+        self.mi_loss = (log_q_zCx - log_qz).mean()
+        # TC[z] = KL[q(z)||\prod_i z_i]
+        self.tc_loss = (log_qz - log_prod_qzi).mean()
+        # dw_kl_loss is KL[q(z)||p(z)] instead of usual KL[q(z|x)||p(z))]
+        self.dw_kl_loss = (log_prod_qzi - log_pz).mean()           
+
+        # total loss
+        loss = self.rec_loss + (self.beta * self.kl_loss +
+                                self.mu * self.mu_loss)        
+        
+        # pointwise independence loss
+        self.pt_loss = 0
+        if self.lamPT &gt; 0 and latent_output is not None:
+            for i in range(latent_dim):
+                col_idx = np.arange(latent_dim)!=i
+                gradients = torch.autograd.grad(latent_output[:,i], latent_sample, grad_outputs=torch.ones_like(latent_output[:,i]), 
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,col_idx]   
+                self.pt_loss += abs(gradients).mean()
+            loss += self.lamPT * self.pt_loss
+        
+        # local independence loss
+        self.ci_loss = 0
+        if self.lamCI &gt; 0:
+            log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
+            for i in range(latent_dim):
+                gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
+                self.ci_loss += abs(gradients).mean()     
+            loss += self.lamCI * self.ci_loss        
+            
+        return loss
+    
+    
+def _reconstruction_loss(data, recon_data):
+    &#34;&#34;&#34;
+    Parameters
+    ----------
+    data : torch.Tensor
+        Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+        height, width).
+
+    recon_data : torch.Tensor
+        Reconstructed data. Shape : (batch_size, n_chan, height, width).
+
+    Returns
+    -------
+    loss : torch.Tensor
+    &#34;&#34;&#34;
+    batch_size, dim = recon_data.size()
+
+    loss = F.mse_loss(recon_data, data, reduction=&#34;sum&#34;) 
+    loss = loss / batch_size
+
+    return loss
+
+
+def _kl_normal_loss(mean, logvar):
+    &#34;&#34;&#34;
+    Calculates the KL divergence between a normal distribution
+    with diagonal covariance and a unit normal distribution.
+
+    Parameters
+    ----------
+    mean : torch.Tensor
+        Mean of the normal distribution. Shape (batch_size, latent_dim) where
+        D is dimension of distribution.
+
+    logvar : torch.Tensor
+        Diagonal log variance of the normal distribution. Shape (batch_size,
+        latent_dim)
+    &#34;&#34;&#34;
+    latent_dim = mean.size(1)
+    # batch mean of kl for each latent dimension
+    latent_kl = 0.5 * (-1 - logvar + mean.pow(2) + logvar.exp()).mean(dim=0)
+    total_kl = latent_kl.sum()
+
+    return total_kl   
+
+
+def _get_log_pz_qz_prodzi_qzCx(latent_sample, latent_dist, n_data, is_mss=True):
+    batch_size, hidden_dim = latent_sample.shape
+
+    # calculate log q(z|x)
+    log_q_zCx = log_density_gaussian(latent_sample, *latent_dist).sum(dim=1)
+
+    # calculate log p(z)
+    # mean and log var is 0
+    zeros = torch.zeros_like(latent_sample)
+    log_pz = log_density_gaussian(latent_sample, zeros, zeros).sum(1)
+    
+    # calculate log q(z)
+    mat_log_qz = matrix_log_density_gaussian(latent_sample, *latent_dist)
+
+    if is_mss:
+        # use stratification
+        log_iw_mat = log_importance_weight_matrix(batch_size, n_data).to(latent_sample.device)
+        mat_log_qzi = mat_log_qz + log_iw_mat.view(batch_size, batch_size, 1)
+        
+    log_qz = logsumexp(mat_log_qz.sum(2) + log_iw_mat, dim=1, keepdim=False)
+    log_qzi = logsumexp(mat_log_qzi, dim=1, keepdim=False)
+    log_prod_qzi = log_qzi.sum(1)
+
+    return log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx
+
+
+def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
+    batch_size, hidden_dim, perb_size = latent_sample_perb.shape
+    mu, logvar = latent_dist
+    
+    latent_sample_perb = latent_sample_perb.view(batch_size, 1, hidden_dim, perb_size)    
+    mu = mu.view(1, batch_size, hidden_dim, 1)
+    logvar = logvar.view(1, batch_size, hidden_dim, 1)
+    
+    # calculate log q(z)
+    mat_log_qz = log_density_gaussian(latent_sample_perb, mu, logvar)
+
+    if is_mss:
+        # use stratification
+        log_iw_mat = log_importance_weight_matrix(batch_size, n_data).to(latent_sample_perb.device)
+        mat_log_qzi = mat_log_qz + log_iw_mat.view(batch_size, batch_size, 1, 1)
+        
+    log_qz = logsumexp(mat_log_qz.sum(2) + log_iw_mat.view(batch_size, batch_size, 1), dim=1, keepdim=False)
+    log_qzi = logsumexp(mat_log_qzi, dim=1, keepdim=False)
+
+    return log_qz, log_qzi
+
+            
+    
+    </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.vae.losses.Loss"><code class="flex name class">
+<span>class <span class="ident">Loss</span></span>
+<span>(</span><span>beta=0.0, mu=0.0, lamPT=0.0, lamCI=0.0, alpha=0.0, gamma=0.0, tc=0.0, eps=0.1, p_batch_size=50, is_mss=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>beta</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for beta-VAE term.</dd>
+<dt><strong><code>mu</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for latent distribution mean.</dd>
+<dt><strong><code>lamPT</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for penalizing change in one latent induced by another.</dd>
+<dt><strong><code>lamCI</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for mutual information term.</dd>
+<dt><strong><code>gamma</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for dimension-wise KL term.</dd>
+<dt><strong><code>tc</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for total correlation term.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Loss(abc.ABC):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., eps=.1, p_batch_size=50, is_mss=True):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        beta : float
+            Hyperparameter for beta-VAE term.
+
+        mu : float
+            Hyperparameter for latent distribution mean.
+            
+        lamPT : float
+            Hyperparameter for penalizing change in one latent induced by another.
+            
+        lamCI : float
+            Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
+            
+        alpha : float
+            Hyperparameter for mutual information term.
+            
+        gamma: float
+            Hyperparameter for dimension-wise KL term.
+            
+        tc: float
+            Hyperparameter for total correlation term.
+        &#34;&#34;&#34;           
+        self.beta = beta
+        self.mu = mu
+        self.lamPT = lamPT
+        self.lamCI = lamCI
+        self.alpha = alpha
+        self.gamma = gamma
+        self.tc = tc
+        self.eps = eps
+        self.p_batch_size = p_batch_size
+        self.is_mss = is_mss
+
+    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+            
+        latent_dist: list of torch.Tensor
+            Encoder latent distribution [mean, logvar]. Shape : (batch_size, latent_dim).
+            
+        latent_sample: torch.Tensor
+            Latent samples. Shape : (batch_size, latent_dim).
+            
+        n_data: int
+            Total number of training examples. 
+            
+        latent_output: torch.Tensor, optional
+            Output of the Decoder-&gt;Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
+
+        Return
+        ------
+        loss : torch.Tensor
+        &#34;&#34;&#34;        
+        batch_size, latent_dim = latent_sample.shape
+        
+        self.rec_loss = _reconstruction_loss(data, recon_data)
+        self.kl_loss = _kl_normal_loss(*latent_dist) 
+        self.mu_loss = _kl_normal_loss(latent_dist[0], torch.zeros_like(latent_dist[1])) 
+
+        log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx = _get_log_pz_qz_prodzi_qzCx(latent_sample,
+                                                                                      latent_dist,
+                                                                                      n_data,
+                                                                                      is_mss=self.is_mss)      
+        # I[z;x] = KL[q(z,x)||q(x)q(z)] = E_x[KL[q(z|x)||q(z)]]
+        self.mi_loss = (log_q_zCx - log_qz).mean()
+        # TC[z] = KL[q(z)||\prod_i z_i]
+        self.tc_loss = (log_qz - log_prod_qzi).mean()
+        # dw_kl_loss is KL[q(z)||p(z)] instead of usual KL[q(z|x)||p(z))]
+        self.dw_kl_loss = (log_prod_qzi - log_pz).mean()           
+
+        # total loss
+        loss = self.rec_loss + (self.beta * self.kl_loss +
+                                self.mu * self.mu_loss)        
+        
+        # pointwise independence loss
+        self.pt_loss = 0
+        if self.lamPT &gt; 0 and latent_output is not None:
+            for i in range(latent_dim):
+                col_idx = np.arange(latent_dim)!=i
+                gradients = torch.autograd.grad(latent_output[:,i], latent_sample, grad_outputs=torch.ones_like(latent_output[:,i]), 
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,col_idx]   
+                self.pt_loss += abs(gradients).mean()
+            loss += self.lamPT * self.pt_loss
+        
+        # local independence loss
+        self.ci_loss = 0
+        if self.lamCI &gt; 0:
+            log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
+            for i in range(latent_dim):
+                gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
+                self.ci_loss += abs(gradients).mean()     
+            loss += self.lamCI * self.ci_loss        
+            
+        return loss</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src.vae" href="index.html">src.vae</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.vae.losses.Loss" href="#src.vae.losses.Loss">Loss</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

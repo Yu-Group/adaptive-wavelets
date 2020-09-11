@@ -5,13 +5,14 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
 opj = os.path.join
 from tqdm import tqdm
-import acd
+# import acd
 from random import randint
 from copy import deepcopy
 import pickle as pkl
 import argparse
 
-sys.path.append('vae')
+sys.path.append('../../src/vae')
+sys.path.append('../../lib/trim')
 from model import init_specific_model
 from losses import Loss
 from dset import *
@@ -19,7 +20,6 @@ from training import Trainer
 from utils import *
 
 # trim modules
-sys.path.append('../trim')
 from trim import DecoderEncoder
 
 
@@ -268,16 +268,17 @@ if __name__ == '__main__':
     np.random.seed(p.seed)
     torch.manual_seed(p.seed)
 
-    # GET DATALOADERS
+    # get dataloaders
     (train_loader, train_latents), (test_loader, test_latents) = define_dataloaders(p)
 
-    # PREPARES MODEL
+    # prepare model
     model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
     model = model.to(device)
 
-    # TRAINS
+    # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI, alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
+    loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI,
+                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     
@@ -291,7 +292,7 @@ if __name__ == '__main__':
     s.mutual_information = mi_loss
     s.dimensionwise_kl_loss = dw_kl_loss
     s.pt_local_independence_loss = pt_loss
-    s.ci_local_indenepdence_loss = ci_loss
+    s.ci_local_independence_loss = ci_loss
     s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean().item()
     s.net = model    
     

@@ -7,7 +7,6 @@ from scipy.ndimage import gaussian_filter
 import sys
 from tqdm import tqdm
 from functools import partial
-import acd
 from copy import deepcopy
 sys.path.append('..')
 from transforms_torch import bandpass_filter
