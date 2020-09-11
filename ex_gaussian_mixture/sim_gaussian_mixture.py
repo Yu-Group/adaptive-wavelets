@@ -18,6 +18,10 @@ from dset import *
 from training import Trainer
 from utils import *
 
+# trim modules
+sys.path.append('../trim')
+from trim import DecoderEncoder
+
 
 parser = argparse.ArgumentParser(description='Gaussian Mixture Example')
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
@@ -170,15 +174,17 @@ def calc_losses(model, data_loader, loss_f):
     for _, data in enumerate(data_loader):
         data = data.to(device)
         recon_data, latent_dist, latent_sample = model(data)
-        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data) 
+        latent_map = DecoderEncoder(model, use_residuals=True)
+        latent_output = latent_map(latent_sample, data)
+        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output) 
         rec_loss += loss_f.rec_loss.item()
         kl_loss += loss_f.kl_loss.item()
         mu_loss += loss_f.mu_loss.item()
         mi_loss += loss_f.mi_loss.item()
         tc_loss += loss_f.tc_loss.item()
         dw_kl_loss += loss_f.dw_kl_loss.item()
-        pt_loss += loss_f.pt_loss.item()     
-        ci_loss += loss_f.ci_loss.item()
+        pt_loss += loss_f.pt_loss.item() if type(loss_f.pt_loss) == torch.Tensor else 0
+        ci_loss += loss_f.ci_loss.item()if type(loss_f.ci_loss) == torch.Tensor else 0
 
     n_batch = len(data_loader)
     rec_loss /= n_batch

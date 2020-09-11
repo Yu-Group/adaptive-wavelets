@@ -9,7 +9,7 @@ from utils import *
 
 # trim modules
 sys.path.append('../trim')
-from trim import TrimModel, DecoderEncoder
+from trim import DecoderEncoder
 
 class Trainer():
     """
