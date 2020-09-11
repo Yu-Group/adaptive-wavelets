@@ -199,7 +199,7 @@ def calc_losses(model, data_loader, loss_f):
     return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss)
     
     
-def measure_anlge_iteration(model, data):
+def measure_angle_iteration(model, data):
     batch_size, dim = data.shape
     
     results = []
@@ -207,15 +207,20 @@ def measure_anlge_iteration(model, data):
         data_i = data[batch_idx:batch_idx+1]
         decoded_traversal = traversals(model, data=data_i, n_latents=p.latent_dim)[:,:2]
         
+        # find 2 latents corresponding to the highest variance in the original space
         variab = []
         for i in range(p.latent_dim):
+            # get x corresponding to 100 small changes in z
             x = decoded_traversal[100*i:100*(i+1)]
+            
+            # calculate variance in x space
             tot_var = torch.var(x[:,0]) + torch.var(x[:,1])
             variab.append(tot_var.item())
         variab = torch.Tensor(variab)
         _, idxs = torch.sort(variab, descending=True)
         idxs = idxs[:2]
 
+        # find the minimum angle of each latent direction with the x and y axis
         angles = []
         for i in range(2):
             x = decoded_traversal[100*idxs[i]:100*(idxs[i]+1)]
@@ -223,20 +228,31 @@ def measure_anlge_iteration(model, data):
             if torch.norm(v) > 0:
                 angles.append(abs(v/torch.norm(v)))
         if len(angles) == 2:
+            # angles[0, 0] is  1st latent var, x-axis
+            # angles[0, 1] is  1st latent var, y-axis
             angles = torch.stack(angles)
+            
+            # is 1st aligned with x and 2nd aligned with y?
             s1 = torch.sqrt((angles[0,0] - 1)**2 + (angles[1,1] - 1)**2)
+            
+            # is 2nd aligned with x and 1st aligned with y?
             s2 = torch.sqrt((angles[0,1] - 1)**2 + (angles[1,0] - 1)**2)
+            
+            # return minimum of those two
             results.append(torch.min(s1, s2))
 
     return torch.stack(results)
 
 
 def calc_disentangle_metric(model, data_loader):
+    '''Returns disentanglement metric
+    Smaller is better (closer to capturing groundtruth axes)
+    '''
     model.eval()
     
     dis_metric = []
     for _, data in enumerate(data_loader):
-        results = measure_anlge_iteration(model, data)
+        results = measure_angle_iteration(model, data)
         dis_metric.append(results)
         
     return torch.cat(dis_metric)
