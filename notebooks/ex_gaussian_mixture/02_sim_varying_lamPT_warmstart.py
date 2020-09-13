@@ -13,19 +13,20 @@ import itertools
 if __name__ == '__main__':
     
     params_to_vary = {
-        'num_epochs': [100],
+        'num_epochs': [50],
         'seed': [13],
         'hidden_dim': [12],
-        'eps': [0.005],
-        'beta': [0, 0.01, 0.1],
-        'mu': [0],
-        'lamPT': np.round(np.linspace(0.1, 100, 30), 5),
+        'beta': [0],
+        'mu': [0, 0.005, 0.01, 0.05, 0.1, 0.5],
+        'lamPT': np.round(np.linspace(1, 300, 60), 5),
         'lamCI': [0],
-        'dirname': ['vary_lamPT_beta']
+        'dirname': ['vary_lamPT_mu_warmstart'],
+        'warm_start': ['lamPT'],
+        'seq_init': [1]
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
-    param_combinations = list(itertools.product(*vals)) # list of tuples
+    param_combinations = list(itertools.product(*vals)) # list of tuples    
     
     # iterate
     for i in range(len(param_combinations)):

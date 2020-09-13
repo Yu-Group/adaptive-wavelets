@@ -16,7 +16,6 @@ if __name__ == '__main__':
         'num_epochs': [100],
         'seed': [13],
         'hidden_dim': [12],
-        'eps': [0.005],
         'beta': [0],
         'mu': [0, 0.01, 0.1],
         'lamPT': np.round(np.linspace(0.1, 100, 30), 5),

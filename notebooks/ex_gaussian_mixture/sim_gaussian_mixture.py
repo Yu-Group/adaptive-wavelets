@@ -52,6 +52,10 @@ parser.add_argument('--p_batch_size', type=float, default=50,
                    help='perturbation batch size for local independence term')
 parser.add_argument('--dirname', default='vary',
                    help='name of directory')
+parser.add_argument('--warm_start', default=None,
+                   help='if True initialize model from previous run')
+parser.add_argument('--seq_init', type=float, default=0,
+                   help='An initial value of sequence of varying parameters')
 
 
 class p:
@@ -73,7 +77,7 @@ class p:
     # parameters for training
     train_batch_size = 64
     test_batch_size = 100
-    lr = 1e-3
+    lr = 5*1e-4
     beta = 0.0
     mu = 0.0
     lamPT = 0.0
@@ -84,13 +88,15 @@ class p:
     num_epochs = 100
     
     seed = 13
+    warm_start = None
+    seq_init = 1
     
     # parameters for loss
     eps = 0.1
     p_batch_size = 50
     
     # SAVE MODEL
-    out_dir = "/home/ubuntu/transformation-importance/ex_gaussian_mixture/results"
+    out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
     dirname = "vary"
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
@@ -262,6 +268,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     for arg in vars(args):
         setattr(p, arg, getattr(args, arg))
+    
+    # create dir
+    out_dir = opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed))
+    os.makedirs(out_dir, exist_ok=True)        
 
     # seed
     random.seed(p.seed)
@@ -272,8 +282,29 @@ if __name__ == '__main__':
     (train_loader, train_latents), (test_loader, test_latents) = define_dataloaders(p)
 
     # prepare model
-    model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
-    model = model.to(device)
+    # optimize model with warm start
+    if p.warm_start is not None and eval('p.'+p.warm_start) > p.seq_init:
+        # load results and initialize model
+        fnames = sorted(os.listdir(out_dir))
+        params = []
+        models = []
+        for fname in fnames:
+            if 'beta={}'.format(p.beta) in fname and 'mu={}'.format(p.mu) in fname:
+                if fname[-3:] == 'pkl':
+                    result = pkl.load(open(opj(out_dir, fname), 'rb'))
+                    params.append(result[p.warm_start])
+                if fname[-3:] == 'pth':
+                    m = init_specific_model(orig_dim=p.orig_dim, 
+                                            latent_dim=p.latent_dim, 
+                                            hidden_dim=p.hidden_dim).to(device)
+                    m.load_state_dict(torch.load(opj(out_dir, fname)))
+                    models.append(m)
+        max_idx = np.argmax(np.array(params))
+        model = models[max_idx]  
+        print("!!!!!!!!!Warm_start Sucess!!!!!!!!!")
+    else:
+        model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
+        model = model.to(device)
 
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
@@ -297,7 +328,6 @@ if __name__ == '__main__':
     s.net = model    
     
     # save
-    os.makedirs(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed)), exist_ok=True)
     results = {**p._dict(p), **s._dict(s)}
     pkl.dump(results, open(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pkl'), 'wb'))    
     torch.save(model.state_dict(), opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pth')) 
