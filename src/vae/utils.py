@@ -75,9 +75,6 @@ def traverse_line(idx, model, n_samples=100, n_latents=2, data=None, max_travers
             post_std_idx = torch.exp(post_logvar / 2).cpu()[0, idx]         
 
         # travers from the gaussian of the posterior in case quantile
-#         traversals = torch.linspace(post_mean_idx - max_traversal*post_std_idx, 
-#                                     post_mean_idx + max_traversal*post_std_idx, 
-#                                     steps=n_samples)
         traversals = torch.linspace(post_mean_idx - max_traversal, 
                                     post_mean_idx + max_traversal, 
                                     steps=n_samples)
@@ -136,16 +133,16 @@ def matrix_log_density_gaussian(x, mu, logvar):
 
     Parameters
     ----------
-    x: torch.Tensor
+    x : torch.Tensor
         Value at which to compute the density. Shape: (batch_size, dim).
 
-    mu: torch.Tensor
+    mu : torch.Tensor
         Mean. Shape: (batch_size, dim).
 
-    logvar: torch.Tensor
+    logvar : torch.Tensor
         Log variance. Shape: (batch_size, dim).
 
-    batch_size: int
+    batch_size : int
         number of training images in the batch
     """
     batch_size, dim = x.shape
@@ -160,13 +157,13 @@ def log_density_gaussian(x, mu, logvar):
 
     Parameters
     ----------
-    x: torch.Tensor or np.ndarray or float
+    x : torch.Tensor or np.ndarray or float
         Value at which to compute the density.
 
-    mu: torch.Tensor or np.ndarray or float
+    mu : torch.Tensor or np.ndarray or float
         Mean.
 
-    logvar: torch.Tensor or np.ndarray or float
+    logvar : torch.Tensor or np.ndarray or float
         Log variance.
     """
     normalization = - 0.5 * (math.log(2 * math.pi) + logvar)
@@ -181,10 +178,10 @@ def log_importance_weight_matrix(batch_size, dataset_size):
 
     Parameters
     ----------
-    batch_size: int
+    batch_size : int
         number of training images in the batch
 
-    dataset_size: int
+    dataset_size : int
     number of training images in the dataset
     """
     N = dataset_size

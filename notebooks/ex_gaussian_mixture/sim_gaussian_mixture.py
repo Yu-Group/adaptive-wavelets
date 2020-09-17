@@ -262,7 +262,7 @@ if __name__ == '__main__':
         setattr(p, arg, getattr(args, arg))
     
     # create dir
-    out_dir = opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed))
+    out_dir = opj(p.out_dir, p.dirname)
     os.makedirs(out_dir, exist_ok=True)        
 
     # seed

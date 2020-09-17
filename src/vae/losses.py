@@ -1,19 +1,19 @@
 import abc
 import math
 import os,sys
-sys.path.append('../disentangling-vae')
+import numpy as np
 
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from torch import optim
-from utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix
+from utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
 
 
 class Loss(abc.ABC):
     """
     """
-    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., eps=.1, p_batch_size=50, is_mss=True):
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., is_mss=True):
         """
         Parameters
         ----------
@@ -45,8 +45,6 @@ class Loss(abc.ABC):
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
-        self.eps = eps
-        self.p_batch_size = p_batch_size
         self.is_mss = is_mss
 
     def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):

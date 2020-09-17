@@ -13,14 +13,15 @@ import itertools
 if __name__ == '__main__':
     
     params_to_vary = {
-        'num_epochs': [70],
-        'seed': range(10, 20),
+        'num_epochs': [50],
+        'seed': [13],
         'hidden_dim': [12],
-        'beta': [0],
-        'mu': [0.01],
-        'lamPT': np.round(np.linspace(1, 300, 60), 5)[-11:-1],
+        'beta': [0, 0.005, 0.01, 0.05, 0.1, 0.5],
+        'mu': [0],
+        'lamPT': np.round(np.linspace(1, 300, 60), 5),
         'lamCI': [0],
-        'dirname': ['vary_lamPT_seed'],
+        'dirname': ['vary_lamPT_beta_warmstart'],
+        'warm_start': ['lamPT'],
         'seq_init': [1]
     }
     ks = sorted(params_to_vary.keys())

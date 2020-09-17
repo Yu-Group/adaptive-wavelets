@@ -83,7 +83,7 @@ class Trainer():
                     100. * batch_idx / len(data_loader),
                     epoch_loss / (batch_idx+1)))            
 
-        mean_epoch_loss = epoch_loss / len(data_loader)
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss
 
     def _train_iteration(self, data, n_data):
@@ -134,5 +134,5 @@ class Trainer():
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
-        mean_epoch_loss = epoch_loss / len(data_loader)
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss    
