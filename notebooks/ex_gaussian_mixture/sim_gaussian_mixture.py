@@ -12,6 +12,7 @@ import pickle as pkl
 import argparse
 
 sys.path.append('../../src/vae')
+sys.path.append('../../src/dsets/gaussian_mixture')
 sys.path.append('../../lib/trim')
 from model import init_specific_model
 from losses import Loss
@@ -22,7 +23,6 @@ from utils import traversals
 # trim modules
 from trim import DecoderEncoder
 
-
 parser = argparse.ArgumentParser(description='Gaussian Mixture Example')
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
@@ -31,7 +31,7 @@ parser.add_argument('--num_epochs', type=int, default=100, metavar='N',
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--hidden_dim', type=int, default=12,
-                   help='number of hidden variables in VAE (default: 8)')
+                   help='number of hidden variables in VAE (default: 12)')
 parser.add_argument('--beta', type=float, default=1,
                    help='weight of the KL term')
 parser.add_argument('--mu', type=float, default=0,
@@ -46,16 +46,12 @@ parser.add_argument('--gamma', type=float, default=0,
                    help='weight of the dim-wise KL term')
 parser.add_argument('--tc', type=float, default=0,
                    help='weight of the total correlation term')
-parser.add_argument('--eps', type=float, default=0.1,
-                   help='size of perturbation for local independence term')
-parser.add_argument('--p_batch_size', type=float, default=50,
-                   help='perturbation batch size for local independence term')
 parser.add_argument('--dirname', default='vary',
                    help='name of directory')
 parser.add_argument('--warm_start', default=None,
-                   help='if True initialize model from previous run')
+                   help='name of hyperparameter to run warm start model (default: None)')
 parser.add_argument('--seq_init', type=float, default=0,
-                   help='An initial value of sequence of varying parameters')
+                   help='An initial value for a sequence of varying parameters')
 
 
 class p:
@@ -90,10 +86,6 @@ class p:
     seed = 13
     warm_start = None
     seq_init = 1
-    
-    # parameters for loss
-    eps = 0.1
-    p_batch_size = 50
     
     # SAVE MODEL
     out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
@@ -177,7 +169,7 @@ def calc_losses(model, data_loader, loss_f):
     pt_loss = 0
     ci_loss = 0
 
-    for _, data in enumerate(data_loader):
+    for batch_idx, data in enumerate(data_loader):
         data = data.to(device)
         recon_data, latent_dist, latent_sample = model(data)
         latent_map = DecoderEncoder(model, use_residuals=True)
@@ -192,7 +184,7 @@ def calc_losses(model, data_loader, loss_f):
         pt_loss += loss_f.pt_loss.item() if type(loss_f.pt_loss) == torch.Tensor else 0
         ci_loss += loss_f.ci_loss.item()if type(loss_f.ci_loss) == torch.Tensor else 0
 
-    n_batch = len(data_loader)
+    n_batch = batch_idx + 1
     rec_loss /= n_batch
     kl_loss /= n_batch
     mu_loss /= n_batch
@@ -308,7 +300,7 @@ if __name__ == '__main__':
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI,
-                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, eps=p.eps, p_batch_size=p.p_batch_size, is_mss=True)
+                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     
@@ -328,5 +320,5 @@ if __name__ == '__main__':
     
     # save
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pkl'), 'wb'))    
-    torch.save(model.state_dict(), opj(p.out_dir, p.dirname + '_seed={}'.format(p.seed), p._str(p) + '.pth')) 
+    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))    
+    torch.save(model.state_dict(), opj(out_dir, p._str(p) + '.pth')) 
