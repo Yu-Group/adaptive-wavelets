@@ -301,7 +301,6 @@ if __name__ == '__main__':
                     models.append(m)
         max_idx = np.argmax(np.array(params))
         model = models[max_idx]  
-        print("!!!!!!!!!Warm_start Sucess!!!!!!!!!")
     else:
         model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
         model = model.to(device)
