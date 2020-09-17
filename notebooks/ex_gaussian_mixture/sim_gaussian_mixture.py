@@ -15,9 +15,9 @@ sys.path.append('../../src/vae')
 sys.path.append('../../lib/trim')
 from model import init_specific_model
 from losses import Loss
-from dset import *
+from dset import get_dataloaders
 from training import Trainer
-from utils import *
+from utils import traversals
 
 # trim modules
 from trim import DecoderEncoder

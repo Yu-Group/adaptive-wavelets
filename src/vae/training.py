@@ -5,7 +5,6 @@ from tqdm import trange
 import torch
 from torch.nn import functional as F
 from copy import deepcopy
-from utils import *
 
 # trim modules
 sys.path.append('../../lib/trim')
