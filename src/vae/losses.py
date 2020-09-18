@@ -13,7 +13,8 @@ from utils import matrix_log_density_gaussian, log_density_gaussian, log_importa
 class Loss(abc.ABC):
     """
     """
-    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., is_mss=True):
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lam_nearest_neighbor=0.,
+                 alpha=0., gamma=0., tc=0., is_mss=True):
         """
         Parameters
         ----------
@@ -29,6 +30,9 @@ class Loss(abc.ABC):
         lamCI : float
             Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
             
+        lam_nearest_neighbor : float
+            Hyperparameter for penalizing distance to nearest neighbors in each batch
+            
         alpha : float
             Hyperparameter for mutual information term.
             
@@ -42,6 +46,7 @@ class Loss(abc.ABC):
         self.mu = mu
         self.lamPT = lamPT
         self.lamCI = lamCI
+        self.lam_nearest_neighbor = lam_nearest_neighbor        
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
@@ -114,7 +119,15 @@ class Loss(abc.ABC):
                                                 retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
                 self.ci_loss += abs(gradients).mean()     
             loss += self.lamCI * self.ci_loss        
-            
+        
+        # nearest-neighbor batch loss
+        self.nearest_neighbor_loss = 0
+        if self.lam_nearest_neighbor > 0:
+            for i in range(latent_dim):
+                dists = torch.pairwise_distance(latent_sample[i], latent_sample)
+                self.nearest_neighbor_loss += dists.min()
+            loss += self.lam_nearest_neighbor * self.nearest_neighbor_loss
+        
         return loss
     
     

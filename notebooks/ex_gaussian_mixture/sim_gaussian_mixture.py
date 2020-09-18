@@ -73,11 +73,12 @@ class p:
     # parameters for training
     train_batch_size = 64
     test_batch_size = 100
-    lr = 5*1e-4
+    lr = 5e-4
     beta = 0.0
     mu = 0.0
     lamPT = 0.0
     lamCI = 0.0
+    lam_nearest_neighbor = 0.0
     alpha = 0.0
     gamma = 0.0
     tc = 0.0
@@ -88,7 +89,8 @@ class p:
     seq_init = 1
     
     # SAVE MODEL
-    out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
+    # out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
+    out_dir = 'tmp'
     dirname = "vary"
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
@@ -168,6 +170,7 @@ def calc_losses(model, data_loader, loss_f):
     dw_kl_loss = 0
     pt_loss = 0
     ci_loss = 0
+    nearest_neighbor_loss = 0
 
     for batch_idx, data in enumerate(data_loader):
         data = data.to(device)
@@ -183,6 +186,8 @@ def calc_losses(model, data_loader, loss_f):
         dw_kl_loss += loss_f.dw_kl_loss.item()
         pt_loss += loss_f.pt_loss.item() if type(loss_f.pt_loss) == torch.Tensor else 0
         ci_loss += loss_f.ci_loss.item()if type(loss_f.ci_loss) == torch.Tensor else 0
+        nearest_neighbor_loss += loss_f.nearest_neighbor_loss.item()if type(loss_f.nearest_neighbor_loss) == torch.Tensor else 0        
+        
 
     n_batch = batch_idx + 1
     rec_loss /= n_batch
@@ -193,6 +198,7 @@ def calc_losses(model, data_loader, loss_f):
     dw_kl_loss /= n_batch
     pt_loss /= n_batch
     ci_loss /= n_batch
+    nearest_neighbor_loss /= n_batch
 
     return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss)
     
@@ -300,13 +306,14 @@ if __name__ == '__main__':
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI,
+                  lam_nearest_neighbor=p.lam_nearest_neighbor,
                   alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     
     # calculate losses
     print('calculating losses and metric...')    
-    rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss = calc_losses(model, test_loader, loss_f)
+    rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss = calc_losses(model, test_loader, loss_f)
     s.reconstruction_loss = rec_loss
     s.kl_normal_loss = kl_loss
     s.mu_squared_loss = mu_loss
@@ -316,6 +323,7 @@ if __name__ == '__main__':
     s.pt_local_independence_loss = pt_loss
     s.ci_local_independence_loss = ci_loss
     s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean().item()
+    s.nearest_neighbor_loss = nearest_neighbor_loss
     s.net = model    
     
     # save
