@@ -13,6 +13,7 @@ Trying to make locally disentangled VAEs.
 # reference
 
 - feel free to use/share this code openly
+- uses code from [disentangling-vae](https://github.com/YannDubs/disentangling-vae) + [TRIM](https://github.com/csinva/transformation-importance)
 - if you find this code useful for your research, please cite the following:
 
 ```r

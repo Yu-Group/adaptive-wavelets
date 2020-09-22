@@ -27,19 +27,20 @@
 <pre><code class="python">import abc
 import math
 import os,sys
-sys.path.append(&#39;../disentangling-vae&#39;)
+import numpy as np
 
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from torch import optim
-from .utils import *
+from .utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
 
 
 class Loss(abc.ABC):
     &#34;&#34;&#34;
     &#34;&#34;&#34;
-    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., eps=.1, p_batch_size=50, is_mss=True):
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lam_nearest_neighbor=0.,
+                 alpha=0., gamma=0., tc=0., is_mss=True):
         &#34;&#34;&#34;
         Parameters
         ----------
@@ -55,6 +56,9 @@ class Loss(abc.ABC):
         lamCI : float
             Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
             
+        lam_nearest_neighbor : float
+            Hyperparameter for penalizing distance to nearest neighbors in each batch
+            
         alpha : float
             Hyperparameter for mutual information term.
             
@@ -68,11 +72,10 @@ class Loss(abc.ABC):
         self.mu = mu
         self.lamPT = lamPT
         self.lamCI = lamCI
+        self.lam_nearest_neighbor = lam_nearest_neighbor        
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
-        self.eps = eps
-        self.p_batch_size = p_batch_size
         self.is_mss = is_mss
 
     def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
@@ -142,7 +145,15 @@ class Loss(abc.ABC):
                                                 retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
                 self.ci_loss += abs(gradients).mean()     
             loss += self.lamCI * self.ci_loss        
-            
+        
+        # nearest-neighbor batch loss
+        self.nearest_neighbor_loss = 0
+        if self.lam_nearest_neighbor &gt; 0:
+            for i in range(latent_dim):
+                dists = torch.pairwise_distance(latent_sample[i], latent_sample)
+                self.nearest_neighbor_loss += dists.min()
+            loss += self.lam_nearest_neighbor * self.nearest_neighbor_loss
+        
         return loss
     
     
@@ -255,7 +266,7 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
 <dl>
 <dt id="src.vae.losses.Loss"><code class="flex name class">
 <span>class <span class="ident">Loss</span></span>
-<span>(</span><span>beta=0.0, mu=0.0, lamPT=0.0, lamCI=0.0, alpha=0.0, gamma=0.0, tc=0.0, eps=0.1, p_batch_size=50, is_mss=True)</span>
+<span>(</span><span>beta=0.0, mu=0.0, lamPT=0.0, lamCI=0.0, lam_nearest_neighbor=0.0, alpha=0.0, gamma=0.0, tc=0.0, is_mss=True)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="parameters">Parameters</h2>
@@ -268,6 +279,8 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
 <dd>Hyperparameter for penalizing change in one latent induced by another.</dd>
 <dt><strong><code>lamCI</code></strong> :&ensp;<code>float</code></dt>
 <dd>Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).</dd>
+<dt><strong><code>lam_nearest_neighbor</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for penalizing distance to nearest neighbors in each batch</dd>
 <dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
 <dd>Hyperparameter for mutual information term.</dd>
 <dt><strong><code>gamma</code></strong> :&ensp;<code>float</code></dt>
@@ -282,7 +295,8 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
 <pre><code class="python">class Loss(abc.ABC):
     &#34;&#34;&#34;
     &#34;&#34;&#34;
-    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., alpha=0., gamma=0., tc=0., eps=.1, p_batch_size=50, is_mss=True):
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lam_nearest_neighbor=0.,
+                 alpha=0., gamma=0., tc=0., is_mss=True):
         &#34;&#34;&#34;
         Parameters
         ----------
@@ -298,6 +312,9 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
         lamCI : float
             Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
             
+        lam_nearest_neighbor : float
+            Hyperparameter for penalizing distance to nearest neighbors in each batch
+            
         alpha : float
             Hyperparameter for mutual information term.
             
@@ -311,11 +328,10 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
         self.mu = mu
         self.lamPT = lamPT
         self.lamCI = lamCI
+        self.lam_nearest_neighbor = lam_nearest_neighbor        
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
-        self.eps = eps
-        self.p_batch_size = p_batch_size
         self.is_mss = is_mss
 
     def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
@@ -385,7 +401,15 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
                                                 retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
                 self.ci_loss += abs(gradients).mean()     
             loss += self.lamCI * self.ci_loss        
-            
+        
+        # nearest-neighbor batch loss
+        self.nearest_neighbor_loss = 0
+        if self.lam_nearest_neighbor &gt; 0:
+            for i in range(latent_dim):
+                dists = torch.pairwise_distance(latent_sample[i], latent_sample)
+                self.nearest_neighbor_loss += dists.min()
+            loss += self.lam_nearest_neighbor * self.nearest_neighbor_loss
+        
         return loss</code></pre>
 </details>
 <h3>Ancestors</h3>

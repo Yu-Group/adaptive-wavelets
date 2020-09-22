@@ -31,7 +31,6 @@ from tqdm import trange
 import torch
 from torch.nn import functional as F
 from copy import deepcopy
-from .utils import *
 
 # trim modules
 sys.path.append(&#39;../../lib/trim&#39;)
@@ -110,7 +109,7 @@ class Trainer():
                     100. * batch_idx / len(data_loader),
                     epoch_loss / (batch_idx+1)))            
 
-        mean_epoch_loss = epoch_loss / len(data_loader)
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss
 
     def _train_iteration(self, data, n_data):
@@ -161,7 +160,7 @@ class Trainer():
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
-        mean_epoch_loss = epoch_loss / len(data_loader)
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss    </code></pre>
 </details>
 </section>
@@ -256,7 +255,7 @@ class Trainer():
                     100. * batch_idx / len(data_loader),
                     epoch_loss / (batch_idx+1)))            
 
-        mean_epoch_loss = epoch_loss / len(data_loader)
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss
 
     def _train_iteration(self, data, n_data):
@@ -307,7 +306,7 @@ class Trainer():
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
-        mean_epoch_loss = epoch_loss / len(data_loader)
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss    </code></pre>
 </details>
 </dd>
