@@ -26,14 +26,16 @@
 </summary>
 <pre><code class="python">import abc
 import math
-import os,sys
+import os, sys
+sys.path.append(&#39;../../&#39;)
 import numpy as np
 
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from torch import optim
-from .utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
+from src.vae.utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
+from src.vae.loss_hessian import hessian_penalty
 
 
 class Loss(abc.ABC):
