@@ -20,8 +20,7 @@ if __name__ == '__main__':
         'mu': [0.01],
         'lamPT': np.round(np.linspace(1, 300, 60), 5)[-11:-1],
         'lamCI': [0],
-        
-        'dirname': ['vary_lamPT_seed'],
+        'dirname': ['vary_lamPT_mu_seeds'],
         'seq_init': [1]
     }
     ks = sorted(params_to_vary.keys())

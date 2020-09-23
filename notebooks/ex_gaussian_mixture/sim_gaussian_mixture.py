@@ -64,8 +64,8 @@ class p:
     # parameters for generating data
     train_n_samples_per_cluster = 5000
     test_n_samples_per_cluster = 1000
-    latent_means = [[0.0, 0.0], [15.0, 15.0], [30.0, 30.0], [25.0, 5.0], [10.0, 25.0]]
-    latent_vars = [[4, 1], [4, 1], [4, 1], [4, 1], [4, 1]]
+    latent_means = [[0.0, 0.0], [15.0, 15.0], [30.0, 30.0]]
+    latent_vars = [[4, 1], [4, 1], [4, 1]]
     noise_dim = 8
     noise_var = 0.01
     
