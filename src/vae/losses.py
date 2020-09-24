@@ -16,7 +16,7 @@ class Loss(abc.ABC):
     """
     """
     def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lamNN=0., lamH=0.,
-                 alpha=0., gamma=0., tc=0., is_mss=True):
+                 alpha=0., gamma=0., tc=0., is_mss=True, decoder=None):
         """
         Parameters
         ----------
@@ -46,6 +46,9 @@ class Loss(abc.ABC):
             
         tc: float
             Hyperparameter for total correlation term.
+            
+        decoder: func
+            Torch module which maps from latent space to reconstruction            
         """           
         self.beta = beta
         self.mu = mu
@@ -57,9 +60,10 @@ class Loss(abc.ABC):
         self.gamma = gamma
         self.tc = tc
         self.is_mss = is_mss
+        self.decoder = decoder
 
     def __call__(self, data, recon_data, latent_dist, latent_sample, n_data,
-                 latent_output=None, decoder=None):
+                 latent_output=None):
         """
         Parameters
         ----------
@@ -81,9 +85,6 @@ class Loss(abc.ABC):
             
         latent_output: torch.Tensor, optional
             Output of the Decoder->Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
-
-        decoder: func
-            Torch module which maps from latent space to reconstruction
 
         Return
         ------
@@ -142,7 +143,8 @@ class Loss(abc.ABC):
         self.hessian_loss = 0
         if self.lamH > 0:
             # print('calculating hessian loss...')
-            self.hessian_loss = hessian_penalty(decoder, latent_sample)
+            for i in range(latent_dim):
+                self.hessian_loss += hessian_penalty(self.decoder, latent_sample[i])
             loss += self.hessian_loss
         return loss
     

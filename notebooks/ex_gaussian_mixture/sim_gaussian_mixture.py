@@ -172,7 +172,11 @@ def calc_losses(model, data_loader, loss_f):
         recon_data, latent_dist, latent_sample = model(data)
         latent_map = DecoderEncoder(model, use_residuals=True)
         latent_output = latent_map(latent_sample, data)
-        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output, model.decoder) 
+#         print('model', model)
+#         print('encoder', model.encoder)
+#         print('decoder', model.decoder)
+        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data,
+                   latent_output=latent_output) #, decoder=model.decoder) 
         rec_loss += loss_f.rec_loss.item()
         kl_loss += loss_f.kl_loss.item()
         mu_loss += loss_f.mu_loss.item()
@@ -310,8 +314,8 @@ if __name__ == '__main__':
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI,
-                  lamNN=p.lamNN,
-                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True)
+                  lamNN=p.lamNN, lamH=p.lamH,
+                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True, decoder=model.decoder)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     

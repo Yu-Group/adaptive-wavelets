@@ -19,7 +19,7 @@ if __name__ == '__main__':
         'mu': [0],
         'lamPT': [0],
         'lamCI': [0],
-        'lamH': np.round(np.linspace(1, 300, 60), 5),
+        'lamH': np.round(np.linspace(1, 300, 20), 5),
         'dirname': ['vary_lamH'],
         'warm_start': ['lamH'], 
         'seq_init': [1]

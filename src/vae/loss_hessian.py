@@ -50,6 +50,7 @@ def hessian_penalty(G, z, k=2, epsilon=0.1, reduction=torch.max, return_separate
 
     :return: A differentiable scalar (the hessian penalty), or a list of hessian penalties if return_separately is True
     """
+    # print('computing hessian!', G, z.shape)
     if G_z is None:
         G_z = G(z, **G_kwargs)
     rademacher_size = torch.Size((k, *z.size()))  # (k, N, z.size())
