@@ -112,17 +112,6 @@ class p:
 class s:
     '''Parameters to save
     '''
-    reconstruction_loss = None
-    kl_normal_loss = None
-    mu_squared_loss = None
-    disentanglement_metric = None
-    total_correlation = None
-    mutual_information = None
-    dimensionwise_kl_loss = None
-    pt_local_independence_loss = None
-    ci_local_independence_loss = None
-    net = None
-    
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
                  if not attr.startswith('_')}
@@ -183,7 +172,7 @@ def calc_losses(model, data_loader, loss_f):
         recon_data, latent_dist, latent_sample = model(data)
         latent_map = DecoderEncoder(model, use_residuals=True)
         latent_output = latent_map(latent_sample, data)
-        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output) 
+        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output, model.decoder) 
         rec_loss += loss_f.rec_loss.item()
         kl_loss += loss_f.kl_loss.item()
         mu_loss += loss_f.mu_loss.item()
@@ -270,6 +259,28 @@ def calc_disentangle_metric(model, data_loader):
     return torch.cat(dis_metric)
 
 
+def warm_start(p, out_dir):
+    '''load results and initialize model where beta=p.beta, mu=p.mu
+    '''
+    print('\twarm starting...')
+    fnames = sorted(os.listdir(out_dir))
+    params = []
+    models = []
+    for fname in fnames:
+        if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname:
+            if fname[-3:] == 'pkl':
+                result = pkl.load(open(opj(out_dir, fname), 'rb'))
+                params.append(result[p.warm_start])
+            if fname[-3:] == 'pth':
+                m = init_specific_model(orig_dim=p.orig_dim, 
+                                        latent_dim=p.latent_dim, 
+                                        hidden_dim=p.hidden_dim).to(device)
+                m.load_state_dict(torch.load(opj(out_dir, fname)))
+                models.append(m)
+    max_idx = np.argmax(np.array(params))
+    model = models[max_idx]
+    return model
+    
 if __name__ == '__main__':
     args = parser.parse_args()
     for arg in vars(args):
@@ -291,24 +302,7 @@ if __name__ == '__main__':
     # optimize model with warm start
     # should have already trained model in this directory with p.warm_start parameter set to p.seq_init
     if p.warm_start is not None and eval('p.' + p.warm_start) > p.seq_init:
-        
-        # load results and initialize model
-        fnames = sorted(os.listdir(out_dir))
-        params = []
-        models = []
-        for fname in fnames:
-            if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname:
-                if fname[-3:] == 'pkl':
-                    result = pkl.load(open(opj(out_dir, fname), 'rb'))
-                    params.append(result[p.warm_start])
-                if fname[-3:] == 'pth':
-                    m = init_specific_model(orig_dim=p.orig_dim, 
-                                            latent_dim=p.latent_dim, 
-                                            hidden_dim=p.hidden_dim).to(device)
-                    m.load_state_dict(torch.load(opj(out_dir, fname)))
-                    models.append(m)
-        max_idx = np.argmax(np.array(params))
-        model = models[max_idx]  
+        model = warm_start(p, out_dir)        
     else:
         model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
         model = model.to(device)

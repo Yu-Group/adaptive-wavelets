@@ -58,7 +58,8 @@ class Loss(abc.ABC):
         self.tc = tc
         self.is_mss = is_mss
 
-    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
+    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data,
+                 latent_output=None, decoder=None):
         """
         Parameters
         ----------
@@ -80,6 +81,9 @@ class Loss(abc.ABC):
             
         latent_output: torch.Tensor, optional
             Output of the Decoder->Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
+
+        decoder: func
+            Torch module which maps from latent space to reconstruction
 
         Return
         ------
@@ -137,15 +141,9 @@ class Loss(abc.ABC):
         # Hessian loss
         self.hessian_loss = 0
         if self.lamH > 0:
-            # self.hessian_loss = hessian_penalty()
+            # print('calculating hessian loss...')
+            self.hessian_loss = hessian_penalty(decoder, latent_sample)
             loss += self.hessian_loss
-        '''
-        if self.lamNN > 0:
-            for i in range(latent_dim):
-                dists = torch.pairwise_distance(latent_sample[i], latent_sample)
-                self.nearest_neighbor_loss += dists.min()
-            loss += self.lamNN * self.nearest_neighbor_loss
-        '''
         return loss
     
     

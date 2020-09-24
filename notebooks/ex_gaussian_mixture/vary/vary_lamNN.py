@@ -19,10 +19,10 @@ if __name__ == '__main__':
         'mu': [0],
         'lamPT': [0],
         'lamCI': [0],
-        'lamH': np.round(np.linspace(1, 300, 60), 5),
-        'dirname': ['vary_lamH'],
-        'warm_start': ['lamH'], 
-        'seq_init': [0]
+        'lamNN': np.round(np.linspace(1, 300, 20), 5),
+        'dirname': ['vary_lamNN'],
+        'warm_start': ['lamNN'], # which parameter to warm start with respect to
+        'seq_init': [1] # value of warm_start parameter to start with respect to
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
