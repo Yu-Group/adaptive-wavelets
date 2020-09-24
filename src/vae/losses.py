@@ -1,20 +1,22 @@
 import abc
 import math
-import os,sys
+import os, sys
+sys.path.append('../../')
 import numpy as np
 
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from torch import optim
-from utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
+from src.vae.utils import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
+from src.vae.loss_hessian import hessian_penalty
 
 
 class Loss(abc.ABC):
     """
     """
-    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lam_nearest_neighbor=0.,
-                 alpha=0., gamma=0., tc=0., is_mss=True):
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lamNN=0., lamH=0.,
+                 alpha=0., gamma=0., tc=0., is_mss=True, decoder=None):
         """
         Parameters
         ----------
@@ -30,8 +32,11 @@ class Loss(abc.ABC):
         lamCI : float
             Hyperparameter for penalizing change in conditional distribution p(z_-j | z_j).
             
-        lam_nearest_neighbor : float
+        lamNN : float
             Hyperparameter for penalizing distance to nearest neighbors in each batch
+            
+        lamH : float
+            Hyperparameter for penalizing Hessian
             
         alpha : float
             Hyperparameter for mutual information term.
@@ -41,18 +46,24 @@ class Loss(abc.ABC):
             
         tc: float
             Hyperparameter for total correlation term.
+            
+        decoder: func
+            Torch module which maps from latent space to reconstruction            
         """           
         self.beta = beta
         self.mu = mu
         self.lamPT = lamPT
         self.lamCI = lamCI
-        self.lam_nearest_neighbor = lam_nearest_neighbor        
+        self.lamNN = lamNN        
+        self.lamH = lamH
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
         self.is_mss = is_mss
+        self.decoder = decoder
 
-    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data, latent_output=None):
+    def __call__(self, data, recon_data, latent_dist, latent_sample, n_data,
+                 latent_output=None):
         """
         Parameters
         ----------
@@ -122,12 +133,19 @@ class Loss(abc.ABC):
         
         # nearest-neighbor batch loss
         self.nearest_neighbor_loss = 0
-        if self.lam_nearest_neighbor > 0:
+        if self.lamNN > 0:
             for i in range(latent_dim):
                 dists = torch.pairwise_distance(latent_sample[i], latent_sample)
                 self.nearest_neighbor_loss += dists.min()
-            loss += self.lam_nearest_neighbor * self.nearest_neighbor_loss
-        
+            loss += self.lamNN * self.nearest_neighbor_loss
+            
+        # Hessian loss
+        self.hessian_loss = 0
+        if self.lamH > 0:
+            # print('calculating hessian loss...')
+            for i in range(latent_dim):
+                self.hessian_loss += hessian_penalty(self.decoder, latent_sample[i])
+            loss += self.hessian_loss
         return loss
     
     

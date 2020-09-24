@@ -40,6 +40,10 @@ parser.add_argument('--lamPT', type=float, default=0,
                    help='weight of the pointwise local indepndence term')
 parser.add_argument('--lamCI', type=float, default=0,
                    help='weight of the conditional local indepndence term')
+parser.add_argument('--lamNN', type=float, default=0,
+                   help='weight of the nearest-neighbor term')
+parser.add_argument('--lamH', type=float, default=0,
+                   help='weight of the Hessian term')
 parser.add_argument('--alpha', type=float, default=0,
                    help='weight of the mutual information term')
 parser.add_argument('--gamma', type=float, default=0,
@@ -78,19 +82,20 @@ class p:
     mu = 0.0
     lamPT = 0.0
     lamCI = 0.0
-    lam_nearest_neighbor = 0.0
+    lamNN = 0.0
+    lamH = 0.0
     alpha = 0.0
     gamma = 0.0
     tc = 0.0
     num_epochs = 100
     
     seed = 13
-    warm_start = None
-    seq_init = 1
+    warm_start = None # which parameter to warm start with respect to
+    seq_init = 1      # value of warm_start parameter to start with respect to
     
     # SAVE MODEL
-    out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
-#     out_dir = 'tmp'
+    out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results" # wooseok's setup
+#     out_dir = '/scratch/users/vision/chandan/local-vae' # chandan's setup
     dirname = "vary"
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
@@ -107,17 +112,6 @@ class p:
 class s:
     '''Parameters to save
     '''
-    reconstruction_loss = None
-    kl_normal_loss = None
-    mu_squared_loss = None
-    disentanglement_metric = None
-    total_correlation = None
-    mutual_information = None
-    dimensionwise_kl_loss = None
-    pt_local_independence_loss = None
-    ci_local_independence_loss = None
-    net = None
-    
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
                  if not attr.startswith('_')}
@@ -171,13 +165,18 @@ def calc_losses(model, data_loader, loss_f):
     pt_loss = 0
     ci_loss = 0
     nearest_neighbor_loss = 0
+    hessian_loss = 0
 
     for batch_idx, data in enumerate(data_loader):
         data = data.to(device)
         recon_data, latent_dist, latent_sample = model(data)
         latent_map = DecoderEncoder(model, use_residuals=True)
         latent_output = latent_map(latent_sample, data)
-        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output) 
+#         print('model', model)
+#         print('encoder', model.encoder)
+#         print('decoder', model.decoder)
+        _ = loss_f(data, recon_data, latent_dist, latent_sample, n_data,
+                   latent_output=latent_output) #, decoder=model.decoder) 
         rec_loss += loss_f.rec_loss.item()
         kl_loss += loss_f.kl_loss.item()
         mu_loss += loss_f.mu_loss.item()
@@ -185,8 +184,9 @@ def calc_losses(model, data_loader, loss_f):
         tc_loss += loss_f.tc_loss.item()
         dw_kl_loss += loss_f.dw_kl_loss.item()
         pt_loss += loss_f.pt_loss.item() if type(loss_f.pt_loss) == torch.Tensor else 0
-        ci_loss += loss_f.ci_loss.item() if type(loss_f.ci_loss) == torch.Tensor else 0
-        nearest_neighbor_loss += loss_f.nearest_neighbor_loss.item() if type(loss_f.nearest_neighbor_loss) == torch.Tensor else 0        
+        ci_loss += loss_f.ci_loss.item()if type(loss_f.ci_loss) == torch.Tensor else 0
+        nearest_neighbor_loss += loss_f.nearest_neighbor_loss.item()if type(loss_f.nearest_neighbor_loss) == torch.Tensor else 0        
+        hessian_loss += loss_f.hessian_loss.item()if type(loss_f.hessian_loss) == torch.Tensor else 0        
         
 
     n_batch = batch_idx + 1
@@ -199,8 +199,9 @@ def calc_losses(model, data_loader, loss_f):
     pt_loss /= n_batch
     ci_loss /= n_batch
     nearest_neighbor_loss /= n_batch
+    hessian_loss /= n_batch
 
-    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss)
+    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss, hessian_loss)
     
     
 def measure_angle_iteration(model, data):
@@ -262,6 +263,28 @@ def calc_disentangle_metric(model, data_loader):
     return torch.cat(dis_metric)
 
 
+def warm_start(p, out_dir):
+    '''load results and initialize model where beta=p.beta, mu=p.mu
+    '''
+    print('\twarm starting...')
+    fnames = sorted(os.listdir(out_dir))
+    params = []
+    models = []
+    for fname in fnames:
+        if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname:
+            if fname[-3:] == 'pkl':
+                result = pkl.load(open(opj(out_dir, fname), 'rb'))
+                params.append(result[p.warm_start])
+            if fname[-3:] == 'pth':
+                m = init_specific_model(orig_dim=p.orig_dim, 
+                                        latent_dim=p.latent_dim, 
+                                        hidden_dim=p.hidden_dim).to(device)
+                m.load_state_dict(torch.load(opj(out_dir, fname)))
+                models.append(m)
+    max_idx = np.argmax(np.array(params))
+    model = models[max_idx]
+    return model
+    
 if __name__ == '__main__':
     args = parser.parse_args()
     for arg in vars(args):
@@ -281,24 +304,9 @@ if __name__ == '__main__':
 
     # prepare model
     # optimize model with warm start
-    if p.warm_start is not None and eval('p.'+p.warm_start) > p.seq_init:
-        # load results and initialize model
-        fnames = sorted(os.listdir(out_dir))
-        params = []
-        models = []
-        for fname in fnames:
-            if 'beta={}'.format(p.beta) in fname and 'mu={}'.format(p.mu) in fname:
-                if fname[-3:] == 'pkl':
-                    result = pkl.load(open(opj(out_dir, fname), 'rb'))
-                    params.append(result[p.warm_start])
-                if fname[-3:] == 'pth':
-                    m = init_specific_model(orig_dim=p.orig_dim, 
-                                            latent_dim=p.latent_dim, 
-                                            hidden_dim=p.hidden_dim).to(device)
-                    m.load_state_dict(torch.load(opj(out_dir, fname)))
-                    models.append(m)
-        max_idx = np.argmax(np.array(params))
-        model = models[max_idx]  
+    # should have already trained model in this directory with p.warm_start parameter set to p.seq_init
+    if p.warm_start is not None and eval('p.' + p.warm_start) > p.seq_init:
+        model = warm_start(p, out_dir)        
     else:
         model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim)
         model = model.to(device)
@@ -306,14 +314,15 @@ if __name__ == '__main__':
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI,
-                  lam_nearest_neighbor=p.lam_nearest_neighbor,
-                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True)
+                  lamNN=p.lamNN, lamH=p.lamH,
+                  alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True, decoder=model.decoder)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
     
     # calculate losses
     print('calculating losses and metric...')    
-    rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss = calc_losses(model, test_loader, loss_f)
+    rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, \
+    pt_loss, ci_loss, nearest_neighbor_loss, hessian_loss = calc_losses(model, test_loader, loss_f)
     s.reconstruction_loss = rec_loss
     s.kl_normal_loss = kl_loss
     s.mu_squared_loss = mu_loss
@@ -324,6 +333,7 @@ if __name__ == '__main__':
     s.ci_local_independence_loss = ci_loss
     s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean().item()
     s.nearest_neighbor_loss = nearest_neighbor_loss
+    s.hessian_loss = hessian_loss
     s.net = model    
     
     # save

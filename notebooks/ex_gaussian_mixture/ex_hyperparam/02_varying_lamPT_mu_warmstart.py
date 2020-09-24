@@ -8,7 +8,7 @@ from tqdm import tqdm
 import acd
 from copy import deepcopy
 import itertools
-
+from scheduling import run_serial, run_parallel
 
 if __name__ == '__main__':
     
@@ -29,9 +29,4 @@ if __name__ == '__main__':
     param_combinations = list(itertools.product(*vals)) # list of tuples    
     
     # iterate
-    for i in range(len(param_combinations)):
-        param_str = 'python sim_gaussian_mixture.py '
-        for j, key in enumerate(ks):
-            param_str += '--' + key + ' ' + str(param_combinations[i][j]) + ' '
-        print('running: ' + param_str + '({}/{})'.format(i, len(param_combinations)))
-        os.system(param_str)
+    run_serial(ks, param_combinations)
