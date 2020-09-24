@@ -89,8 +89,8 @@ class p:
     seq_init = 1
     
     # SAVE MODEL
-    # out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
-    out_dir = 'tmp'
+    out_dir = "/home/ubuntu/local-vae/notebooks/ex_gaussian_mixture/results"
+#     out_dir = 'tmp'
     dirname = "vary"
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 20)])
 
@@ -185,8 +185,8 @@ def calc_losses(model, data_loader, loss_f):
         tc_loss += loss_f.tc_loss.item()
         dw_kl_loss += loss_f.dw_kl_loss.item()
         pt_loss += loss_f.pt_loss.item() if type(loss_f.pt_loss) == torch.Tensor else 0
-        ci_loss += loss_f.ci_loss.item()if type(loss_f.ci_loss) == torch.Tensor else 0
-        nearest_neighbor_loss += loss_f.nearest_neighbor_loss.item()if type(loss_f.nearest_neighbor_loss) == torch.Tensor else 0        
+        ci_loss += loss_f.ci_loss.item() if type(loss_f.ci_loss) == torch.Tensor else 0
+        nearest_neighbor_loss += loss_f.nearest_neighbor_loss.item() if type(loss_f.nearest_neighbor_loss) == torch.Tensor else 0        
         
 
     n_batch = batch_idx + 1
@@ -200,7 +200,7 @@ def calc_losses(model, data_loader, loss_f):
     ci_loss /= n_batch
     nearest_neighbor_loss /= n_batch
 
-    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss)
+    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss)
     
     
 def measure_angle_iteration(model, data):

@@ -8,7 +8,7 @@ from copy import deepcopy
 
 # trim modules
 sys.path.append('../../lib/trim')
-sys.path.append('lib/trim')
+sys.path.append('../../../lib/trim')
 from trim import DecoderEncoder
 
 class Trainer():
