@@ -12,7 +12,9 @@ import pickle as pkl
 import argparse
 
 sys.path.append('../../src/vae')
+sys.path.append('../../../src/vae')
 sys.path.append('../../src/dsets/gaussian_mixture')
+sys.path.append('../../../src/dsets/gaussian_mixture')
 sys.path.append('../../lib/trim')
 from model import init_specific_model
 from losses import Loss

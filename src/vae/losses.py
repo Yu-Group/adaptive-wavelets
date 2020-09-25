@@ -2,6 +2,7 @@ import abc
 import math
 import os, sys
 sys.path.append('../../')
+sys.path.append('../../../')
 import numpy as np
 
 import torch
@@ -134,17 +135,16 @@ class Loss(abc.ABC):
         # nearest-neighbor batch loss
         self.nearest_neighbor_loss = 0
         if self.lamNN > 0:
-            for i in range(latent_dim):
+            for i in range(batch_size):
                 dists = torch.pairwise_distance(latent_sample[i], latent_sample)
-                self.nearest_neighbor_loss += dists.min()
+                self.nearest_neighbor_loss += dists.sort()[0][1] # exclude distance to itself
             loss += self.lamNN * self.nearest_neighbor_loss
             
         # Hessian loss
         self.hessian_loss = 0
         if self.lamH > 0:
             # print('calculating hessian loss...')
-            for i in range(latent_dim):
-                self.hessian_loss += hessian_penalty(self.decoder, latent_sample[i])
+            self.hessian_loss += hessian_penalty(self.decoder, latent_sample)
             loss += self.hessian_loss
         return loss
     
