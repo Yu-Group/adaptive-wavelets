@@ -79,7 +79,7 @@ class p:
     # parameters for training
     train_batch_size = 64
     test_batch_size = 100
-    lr = 5e-4
+    lr = 1e-4
     beta = 0.0
     mu = 0.0
     lamPT = 0.0

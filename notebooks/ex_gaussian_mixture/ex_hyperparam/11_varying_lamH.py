@@ -13,7 +13,7 @@ from scheduling import run_serial, run_parallel
 if __name__ == '__main__':
     
     params_to_vary = {
-        'num_epochs': [50],
+        'num_epochs': [100],
         'seed': [13],
         'hidden_dim': [12],
         'beta': [0],
