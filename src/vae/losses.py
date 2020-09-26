@@ -118,7 +118,7 @@ class Loss(abc.ABC):
             for i in range(latent_dim):
                 col_idx = np.arange(latent_dim)!=i
                 gradients = torch.autograd.grad(latent_output[:,i], latent_sample, grad_outputs=torch.ones_like(latent_output[:,i]), 
-                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,col_idx]   
+                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,col_idx]                     
                 self.pt_loss += abs(gradients).mean()
             loss += self.lamPT * self.pt_loss
         

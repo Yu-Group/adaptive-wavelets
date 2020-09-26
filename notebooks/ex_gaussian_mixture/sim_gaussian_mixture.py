@@ -103,7 +103,7 @@ class p:
 
     def _str(self):
         vals = vars(p)
-        return 'beta=' + str(vals['beta']) + '_mu=' + str(vals['mu']) + '_lamPT=' + str(vals['lamPT']) + '_lamCI=' + str(vals['lamCI']) + '_seed=' + str(vals['seed']) \
+        return 'beta=' + str(vals['beta']) + '_mu=' + str(vals['mu']) + '_lamPT=' + str(vals['lamPT']) + '_lamH=' + str(vals['lamH']) + '_seed=' + str(vals['seed']) \
                 + '_hdim=' + str(vals['hidden_dim']) + '_pid=' + vals['pid']
     
     def _dict(self):
