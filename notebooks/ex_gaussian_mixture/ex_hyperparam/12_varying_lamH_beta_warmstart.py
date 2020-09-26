@@ -14,14 +14,14 @@ if __name__ == '__main__':
     
     params_to_vary = {
         'num_epochs': [50],
-        'seed': [14],
+        'seed': [13],
         'hidden_dim': [12],
-        'beta': [0, 0.001, 0.01],
+        'beta': [0, 0.001, 0.005, 0.01, 0.05],
         'mu': [0],
         'lamPT': [0],
         'lamCI': [0],
         'lamH': np.round(np.linspace(0, 300, 50), 5),
-        'dirname': ['vary_lamH_seed=14'],
+        'dirname': ['vary_lamH_beta_seed=13'],
         'warm_start': ['lamH'], 
         'seq_init': [0]
     }

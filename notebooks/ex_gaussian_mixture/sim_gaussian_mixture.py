@@ -279,7 +279,7 @@ def warm_start(p, out_dir):
     params = []
     models = []
     for fname in fnames:
-        if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname:
+        if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname and f'lamSP={p.lamSP}' in fname:
             if fname[-3:] == 'pkl':
                 result = pkl.load(open(opj(out_dir, fname), 'rb'))
                 params.append(result[p.warm_start])
