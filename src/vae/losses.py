@@ -16,7 +16,7 @@ from src.vae.loss_hessian import hessian_penalty
 class Loss(abc.ABC):
     """
     """
-    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lamNN=0., lamH=0.,
+    def __init__(self, beta=0., mu=0., lamPT=0., lamCI=0., lamNN=0., lamH=0., lamSP=0.,
                  alpha=0., gamma=0., tc=0., is_mss=True, decoder=None):
         """
         Parameters
@@ -38,6 +38,9 @@ class Loss(abc.ABC):
             
         lamH : float
             Hyperparameter for penalizing Hessian
+        
+        lamSP : float
+            Hyperparameter for sparisty of Jacobian
             
         alpha : float
             Hyperparameter for mutual information term.
@@ -57,6 +60,7 @@ class Loss(abc.ABC):
         self.lamCI = lamCI
         self.lamNN = lamNN        
         self.lamH = lamH
+        self.lamSP = lamSP
         self.alpha = alpha
         self.gamma = gamma
         self.tc = tc
@@ -115,21 +119,19 @@ class Loss(abc.ABC):
         # pointwise independence loss
         self.pt_loss = 0
         if self.lamPT > 0 and latent_output is not None:
+            jac = jacobian(latent_output, latent_sample)
             for i in range(latent_dim):
-                col_idx = np.arange(latent_dim)!=i
-                gradients = torch.autograd.grad(latent_output[:,i], latent_sample, grad_outputs=torch.ones_like(latent_output[:,i]), 
-                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,col_idx]                     
-                self.pt_loss += abs(gradients).mean()
+                jac[:,i,i] = 0 # make partial i / partial i zero
+            self.pt_loss += abs(jac).sum()/batch_size
             loss += self.lamPT * self.pt_loss
         
         # local independence loss
         self.ci_loss = 0
         if self.lamCI > 0:
             log_q_zCzi = log_qz.view(batch_size, 1) - log_qzi
+            jac = jacobian(log_q_zCzi, latent_sample)
             for i in range(latent_dim):
-                gradients = torch.autograd.grad(log_q_zCzi[:,i], latent_sample, grad_outputs=torch.ones_like(log_q_zCzi[:,i]), 
-                                                retain_graph=True, create_graph=True, only_inputs=True)[0][:,i] 
-                self.ci_loss += abs(gradients).mean()     
+                self.ci_loss += abs(jac[:,i,i]).mean()     
             loss += self.lamCI * self.ci_loss        
         
         # nearest-neighbor batch loss
@@ -145,8 +147,17 @@ class Loss(abc.ABC):
         if self.lamH > 0:
             # print('calculating hessian loss...')
             self.hessian_loss += hessian_penalty(self.decoder, latent_sample)
-            loss += self.hessian_loss
+            loss += self.lamH * self.hessian_loss
+    
+        # sparsity loss
+        self.sp_loss = 0
+        if self.lamSP > 0:
+            decoded_data = self.decoder(latent_sample)
+            self.sp_loss += abs(jacobian(decoded_data, latent_sample)).sum()/batch_size
+            loss += self.lamSP * self.sp_loss
+        
         return loss
+            
     
     
 def _reconstruction_loss(data, recon_data):
@@ -242,6 +253,34 @@ def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
 
     return log_qz, log_qzi
 
+
+def gradient(y, x, grad_outputs=None):
+    """Compute dy/dx @ grad_outputs"""
+    if grad_outputs is None:
+        grad_outputs = torch.ones_like(y)
+    grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
+    return grad
+
+
+def jacobian(y, x):
+    """Compute dy/dx = dy/dx @ grad_outputs; 
+    for grad_outputs in [1, 0, ..., 0], [0, 1, 0, ..., 0], ...., [0, ..., 0, 1]
+    
+    y : torch.Tensor Size: (batch_size, y_dim)
+    x : torch.Tensor Size: (batch_size, x_dim)
+    
+    Return
+    ------
+    jac : torch.Tensor Size: (batch_size, y_dim, x_dim) 
+        Jacobian of y w.r.t. x
+    """
+    grads = []
+    for i in range(y.shape[1]):
+        grad_outputs = torch.zeros_like(y)
+        grad_outputs[:,i] = 1
+        grads.append(gradient(y, x, grad_outputs=grad_outputs).unsqueeze(1))
+    jac = torch.cat(grads, dim=1)
+    return jac
             
     
     

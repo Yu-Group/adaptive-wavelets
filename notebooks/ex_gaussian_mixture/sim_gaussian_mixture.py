@@ -46,6 +46,8 @@ parser.add_argument('--lamNN', type=float, default=0,
                    help='weight of the nearest-neighbor term')
 parser.add_argument('--lamH', type=float, default=0,
                    help='weight of the Hessian term')
+parser.add_argument('--lamSP', type=float, default=0,
+                   help='weight of the sparsity term')
 parser.add_argument('--alpha', type=float, default=0,
                    help='weight of the mutual information term')
 parser.add_argument('--gamma', type=float, default=0,
@@ -79,13 +81,14 @@ class p:
     # parameters for training
     train_batch_size = 64
     test_batch_size = 100
-    lr = 1e-4
+    lr = 5*1e-4
     beta = 0.0
     mu = 0.0
     lamPT = 0.0
     lamCI = 0.0
     lamNN = 0.0
     lamH = 0.0
+    lamSP = 0.0
     alpha = 0.0
     gamma = 0.0
     tc = 0.0
@@ -103,8 +106,8 @@ class p:
 
     def _str(self):
         vals = vars(p)
-        return 'beta=' + str(vals['beta']) + '_mu=' + str(vals['mu']) + '_lamPT=' + str(vals['lamPT']) + '_lamH=' + str(vals['lamH']) + '_seed=' + str(vals['seed']) \
-                + '_hdim=' + str(vals['hidden_dim']) + '_pid=' + vals['pid']
+        return 'beta=' + str(vals['beta']) + '_mu=' + str(vals['mu']) + '_lamPT=' + str(vals['lamPT']) + '_lamH=' + str(vals['lamH']) + '_lamSP=' + str(vals['lamSP']) \
+                + '_seed=' + str(vals['seed']) + '_hdim=' + str(vals['hidden_dim']) + '_pid=' + vals['pid']
     
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
@@ -168,6 +171,7 @@ def calc_losses(model, data_loader, loss_f):
     ci_loss = 0
     nearest_neighbor_loss = 0
     hessian_loss = 0
+    sparsity_loss = 0
 
     for batch_idx, data in enumerate(data_loader):
         data = data.to(device)
@@ -189,6 +193,7 @@ def calc_losses(model, data_loader, loss_f):
         ci_loss += loss_f.ci_loss.item()if type(loss_f.ci_loss) == torch.Tensor else 0
         nearest_neighbor_loss += loss_f.nearest_neighbor_loss.item()if type(loss_f.nearest_neighbor_loss) == torch.Tensor else 0        
         hessian_loss += loss_f.hessian_loss.item()if type(loss_f.hessian_loss) == torch.Tensor else 0        
+        sparsity_loss += loss_f.sp_loss.item()if type(loss_f.sp_loss) == torch.Tensor else 0        
         
 
     n_batch = batch_idx + 1
@@ -202,8 +207,9 @@ def calc_losses(model, data_loader, loss_f):
     ci_loss /= n_batch
     nearest_neighbor_loss /= n_batch
     hessian_loss /= n_batch
+    sparsity_loss /= n_batch
 
-    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss, hessian_loss)
+    return (rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, pt_loss, ci_loss, nearest_neighbor_loss, hessian_loss, sparsity_loss)
     
     
 def measure_angle_iteration(model, data):
@@ -316,7 +322,7 @@ if __name__ == '__main__':
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
     loss_f = Loss(beta=p.beta, mu=p.mu, lamPT=p.lamPT, lamCI=p.lamCI,
-                  lamNN=p.lamNN, lamH=p.lamH,
+                  lamNN=p.lamNN, lamH=p.lamH, lamSP=p.lamSP,
                   alpha=p.alpha, gamma=p.gamma, tc=p.tc, is_mss=True, decoder=model.decoder)
     trainer = Trainer(model, optimizer, loss_f, device=device)
     trainer(train_loader, test_loader, epochs=p.num_epochs)
@@ -324,7 +330,7 @@ if __name__ == '__main__':
     # calculate losses
     print('calculating losses and metric...')    
     rec_loss, kl_loss, mu_loss, mi_loss, tc_loss, dw_kl_loss, \
-    pt_loss, ci_loss, nearest_neighbor_loss, hessian_loss = calc_losses(model, test_loader, loss_f)
+    pt_loss, ci_loss, nearest_neighbor_loss, hessian_loss, sparsity_loss = calc_losses(model, test_loader, loss_f)
     s.reconstruction_loss = rec_loss
     s.kl_normal_loss = kl_loss
     s.mu_squared_loss = mu_loss
@@ -336,6 +342,7 @@ if __name__ == '__main__':
     s.disentanglement_metric = calc_disentangle_metric(model, test_loader).mean().item()
     s.nearest_neighbor_loss = nearest_neighbor_loss
     s.hessian_loss = hessian_loss
+    s.sparsity_loss = sparsity_loss
     s.net = model    
     
     # save
