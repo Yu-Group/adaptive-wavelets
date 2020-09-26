@@ -146,7 +146,7 @@ class Loss(abc.ABC):
         self.hessian_loss = 0
         if self.lamH > 0:
             # print('calculating hessian loss...')
-            self.hessian_loss += hessian_penalty(self.decoder, latent_sample)
+            self.hessian_loss += hessian_penalty(self.decoder, latent_sample, k=10)
             loss += self.lamH * self.hessian_loss
     
         # sparsity loss
