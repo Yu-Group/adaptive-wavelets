@@ -16,14 +16,14 @@ if __name__ == '__main__':
         'num_epochs': [50],
         'seed': [13],
         'hidden_dim': [12],
-        'beta': [0, 0.001, 0.005, 0.01, 0.05],
+        'beta': [0],
         'mu': [0],
-        'lamPT': [0],
+        'lamPT': [0, 0.1, 0.5, 1, 5, 10, 20, 30, 50, 100],
         'lamCI': [0],
-        'lamH': np.round(np.linspace(0, 300, 50), 5),
-        'lamSP': [0],
-        'dirname': ['vary_lamH_beta_seed=13'],
-        'warm_start': ['lamH'], 
+        'lamH': [0],
+        'lamSP': np.round(np.linspace(0, 5, 50), 5),
+        'dirname': ['vary_lamSP_lamPT_seed=13'],
+        'warm_start': ['lamSP'], 
         'seq_init': [0]
     }
     ks = sorted(params_to_vary.keys())
