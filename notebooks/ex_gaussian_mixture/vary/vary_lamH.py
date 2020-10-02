@@ -3,6 +3,7 @@ import torch
 import random
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
+sys.path.append('..')
 opj = os.path.join
 from tqdm import tqdm
 from copy import deepcopy
