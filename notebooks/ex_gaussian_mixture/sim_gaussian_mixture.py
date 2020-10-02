@@ -280,7 +280,8 @@ def warm_start(p, out_dir):
     models = []
     for fname in fnames:
 #         if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname and f'lamSP={p.lamSP}' in fname:
-        if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname and f'lamPT={p.lamPT}' in fname:
+#         if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname and f'lamPT={p.lamPT}' in fname:
+        if f'beta={p.beta}' in fname and f'mu={p.mu}' in fname and f'lamH={p.lamH}' in fname:
             if fname[-3:] == 'pkl':
                 result = pkl.load(open(opj(out_dir, fname), 'rb'))
                 params.append(result[p.warm_start])
@@ -316,6 +317,9 @@ if __name__ == '__main__':
     # should have already trained model in this directory with p.warm_start parameter set to p.seq_init
     if p.warm_start is None:
         model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim).to(device)
+    elif p.warm_start == 'init_fixed_model':
+        model = init_specific_model(orig_dim=p.orig_dim, latent_dim=p.latent_dim, hidden_dim=p.hidden_dim).to(device)
+        model.load_state_dict(torch.load(opj(p.out_dir, 'init.pth')))
     else:
         if eval('p.' + p.warm_start) > p.seq_init:
             model = warm_start(p, out_dir)        
