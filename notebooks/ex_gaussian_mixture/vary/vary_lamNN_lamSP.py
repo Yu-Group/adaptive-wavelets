@@ -3,11 +3,11 @@ import torch
 import random
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
-sys.path.append('..')
 opj = os.path.join
 from tqdm import tqdm
 from copy import deepcopy
 import itertools
+sys.path.append('..')
 from scheduling import run_serial, run_parallel
 
 if __name__ == '__main__':
@@ -18,12 +18,14 @@ if __name__ == '__main__':
         'hidden_dim': [12],
         'beta': [0],
         'mu': [0],
-        'lamPT': [0],
+        'lamPT': [1],
         'lamCI': [0],
-        'lamNN': np.round(np.linspace(1, 1000, 20), 5),
-        'dirname': ['vary_lamNN'],
-        'warm_start': ['lamNN'], # which parameter to warm start with respect to
-        'seq_init': [1] # value of warm_start parameter to start with respect to
+        'lamH': [0],
+        'lamNN': np.round(np.linspace(1, 1000, 5), 5),
+        'lamSP': np.round(np.linspace(0, 5, 5), 5),
+        'dirname': ['vary_lamNN_lamSP'],
+        'warm_start': ['lamSP'], 
+        'seq_init': [0]
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
