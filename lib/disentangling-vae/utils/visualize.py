@@ -24,8 +24,6 @@ PLOT_NAMES = dict(generate_samples="samples.png",
                   reconstruct_traverse="reconstruct_traverse.png",
                   gif_traversals="posterior_traversals.gif",)
 
-# "generate-samples`: random decoded samples. `data-samples` samples from the dataset. `reconstruct` first rnows//2 will be the original and rest will be the corresponding reconstructions. `traversals` traverses the most important rnows dimensions with ncols different samples from the prior or posterior. `reconstruct-traverse` first row for original, second are reconstructions, rest are traversals. `gif-traversals` grid of gifs where rows are latent dimensions, columns are examples, each gif shows posterior traversals. `all` runs every plot."
-
 
 class Visualizer():
     def __init__(self, model, dataset, model_dir,
@@ -219,9 +217,6 @@ class Visualizer():
         with torch.no_grad():
             originals = data.to(self.device)[:n_samples, ...]
             recs, _, _ = self.model(originals)
-            #recon_batch, latent_dist, latent_sample = self.model(originals)
-            #mu, logvar = latent_dist
-            #recs = self._decode_latents(mu)
 
         originals = originals.cpu()
         recs = recs.view(-1, *self.model.img_size).cpu()

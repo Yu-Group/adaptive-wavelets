@@ -13,7 +13,7 @@ PLOT_TYPES = ['generate-samples', 'data-samples', 'reconstruct', "traversals",
               'reconstruct-traverse', "gif-traversals", "all"]
 
 
-def parse_arguments():
+def parse_arguments(args_to_parse):
     """Parse the command line arguments.
 
     Parameters
@@ -25,10 +25,10 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description=description,
                                      formatter_class=FormatterNoDuplicate)
 
-#    parser.add_argument('name', type=str,
-#                        help="Name of the model for storing and loading purposes.")
-#    parser.add_argument("plots", type=str, nargs='+', choices=PLOT_TYPES,
-#                        help="List of all plots to generate. `generate-samples`: random decoded samples. `data-samples` samples from the dataset. `reconstruct` first rnows//2 will be the original and rest will be the corresponding reconstructions. `traversals` traverses the most important rnows dimensions with ncols different samples from the prior or posterior. `reconstruct-traverse` first row for original, second are reconstructions, rest are traversals. `gif-traversals` grid of gifs where rows are latent dimensions, columns are examples, each gif shows posterior traversals. `all` runs every plot.")
+    parser.add_argument('name', type=str,
+                        help="Name of the model for storing and loading purposes.")
+    parser.add_argument("plots", type=str, nargs='+', choices=PLOT_TYPES,
+                        help="List of all plots to generate. `generate-samples`: random decoded samples. `data-samples` samples from the dataset. `reconstruct` first rnows//2 will be the original and rest will be the corresponding reconstructions. `traversals` traverses the most important rnows dimensions with ncols different samples from the prior or posterior. `reconstruct-traverse` first row for original, second are reconstructions, rest are traversals. `gif-traversals` grid of gifs where rows are latent dimensions, columns are examples, each gif shows posterior traversals. `all` runs every plot.")
     parser.add_argument('-s', '--seed', type=int, default=None,
                         help='Random seed. Can be `None` for stochastic behavior.')
     parser.add_argument('-r', '--n-rows', type=int, default=6,
@@ -49,7 +49,7 @@ def parse_arguments():
                         help='Displays the loss on the figures (if applicable).')
     parser.add_argument('--is-posterior', action='store_true',
                         help='Traverses the posterior instead of the prior.')
-    args = parser.parse_args("")
+    args = parser.parse_args()
 
     return args
 

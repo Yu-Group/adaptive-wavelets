@@ -1,5 +1,8 @@
 import numpy as np
 import os, sys
+opj = os.path.join
+import logging
+from collections import defaultdict
 
 from tqdm import trange
 import torch
@@ -9,12 +12,27 @@ from copy import deepcopy
 # trim modules
 sys.path.append('../../lib/trim')
 sys.path.append('../../../lib/trim')
-sys.path.append('../lib/trim')
 from trim import DecoderEncoder
+
 
 class Trainer():
     """
     Class to handle training of model.
+
+    Parameters
+    ----------
+    model: torch.model
+    
+    optimizer: torch.optim.Optimizer
+    
+    loss_f: vae.models.BaseLoss
+        Loss function.
+        
+    device: torch.device, optional
+        Device on which to run the code.
+        
+    use_residuals : boolean, optional
+        Use residuals to map latent to latent.
     """
     def __init__(self, model, optimizer, loss_f,
                  device=torch.device("cpu"),
@@ -22,12 +40,13 @@ class Trainer():
 
         self.device = device
         self.model = model.to(self.device)
-        self.loss_f = loss_f
         self.optimizer = optimizer
+        self.loss_f = loss_f
         self.use_residuals = use_residuals
-        self._create_latent_map()        
+        self._create_latent_map()   
+    
 
-    def __call__(self, train_loader, test_loader, epochs=10):
+    def __call__(self, train_loader, test_loader=None, epochs=10):
         """
         Trains the model.
 
@@ -37,15 +56,23 @@ class Trainer():
 
         epochs: int, optional
             Number of epochs to train the model for.
-
-        checkpoint_every: int, optional
-            Save a checkpoint of the trained model every n epoch.
         """
+        self.train_losses = np.empty(epochs)
+        self.test_losses = np.empty(epochs)
         for epoch in range(epochs):
-            mean_epoch_loss = self._train_epoch(train_loader, epoch)
-            mean_epoch_test_loss = self._test_epoch(test_loader)
-            print('====> Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})'.format(epoch, mean_epoch_loss, 
-                                                                                              mean_epoch_test_loss))
+            if test_loader is not None:
+                mean_epoch_loss = self._train_epoch(train_loader)
+                mean_epoch_test_loss = self._test_epoch(test_loader)
+                print('====> Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})'.format(epoch, mean_epoch_loss, 
+                                                                                                  mean_epoch_test_loss))
+                self.train_losses[epoch] = mean_epoch_loss
+                self.test_losses[epoch] = mean_epoch_test_loss
+                
+            else:
+                mean_epoch_loss = self._train_epoch(train_loader)
+                print('====> Epoch: {} Average train loss: {:.4f}'.format(epoch, mean_epoch_loss))
+                self.train_losses[epoch] = mean_epoch_loss    
+
         
     def _create_latent_map(self):
         """
@@ -56,7 +83,7 @@ class Trainer():
         """
         self.latent_map = DecoderEncoder(self.model, use_residuals=self.use_residuals)
 
-    def _train_epoch(self, data_loader, epoch):
+    def _train_epoch(self, data_loader):
         """
         Trains the model for one epoch.
 
@@ -72,19 +99,13 @@ class Trainer():
         mean_epoch_loss: float
         """
         self.model.train()
-        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
-        for batch_idx, data in enumerate(data_loader):
-            iter_loss = self._train_iteration(data, n_data)
-            epoch_loss += iter_loss
-            
-            if batch_idx % 10 == -1:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, batch_idx * len(data), len(data_loader.dataset),
-                    100. * batch_idx / len(data_loader),
-                    epoch_loss / (batch_idx+1)))            
+        for batch_idx, (data, _) in enumerate(data_loader):
+            iter_loss = self._train_iteration(data, n_data=None)
+            epoch_loss += iter_loss         
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
+        self.model.eval()
         return mean_epoch_loss
 
     def _train_iteration(self, data, n_data):
@@ -101,7 +122,8 @@ class Trainer():
 
         recon_data, latent_dist, latent_sample = self.model(data)
         latent_output = self.latent_map(latent_sample, data)
-        loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)  
+        loss = self.loss_f(data, recon_data, latent_dist, self.model.training, storer=None,
+                           latent_sample=latent_sample, latent_output=latent_output, n_data=None)  
         
         self.optimizer.zero_grad()
         loss.backward()
@@ -125,15 +147,18 @@ class Trainer():
         mean_epoch_loss: float
         """
         self.model.eval()
-        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
-        for batch_idx, data in enumerate(data_loader):
+        for batch_idx, (data, _) in enumerate(data_loader):
             data = data.to(self.device)
             recon_data, latent_dist, latent_sample = self.model(data)
             latent_output = self.latent_map(latent_sample, data)
-            loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)                  
+            loss = self.loss_f(data, recon_data, latent_dist, self.model.training, storer=None,
+                               latent_sample=latent_sample, latent_output=latent_output, n_data=None)                              
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
         return mean_epoch_loss    
+    
+    
+    

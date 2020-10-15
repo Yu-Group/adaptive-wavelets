@@ -178,12 +178,35 @@ class DSprites(DisentangledDataset):
                   'shape': np.array([1., 2., 3.]),
                   'color': np.array([1.])}
 
-    def __init__(self, root=os.path.join(DIR, '../data/dsprites/'), **kwargs):
+    def __init__(self, root=os.path.join(DIR, 'data/dsprites/'), **kwargs):
         super().__init__(root, [transforms.ToTensor()], **kwargs)
 
         dataset_zip = np.load(self.train_data)
         self.imgs = dataset_zip['imgs']
         self.lat_values = dataset_zip['latents_values']
+        
+        ########################
+        ### subsample dataset ###
+        x_pos = self.lat_values[:,4]
+        y_pos = self.lat_values[:,5]
+        x_cutvalues = [0, 0.23, 0.49, 0.75, 1.1]
+        y_cutvalues = [0, 0.1, 0.23, 0.36, 0.49]
+        # y_cutvalues = [0, 0.1, 0.23, 0.36, 0.49, 0.62, 0.75, 0.88, 1.1]
+        idx = np.zeros(self.imgs.shape[0], dtype=bool)
+
+        for i in range(len(x_cutvalues)-1):
+            lb = x_cutvalues[i]
+            ub = x_cutvalues[i+1]
+            idx1 = np.logical_and(x_pos>=lb, x_pos<=ub)
+            lb = y_cutvalues[i]
+            ub = y_cutvalues[i+1]    
+            idx2 = np.logical_and(y_pos>=lb, y_pos<=ub)
+            idx = idx + np.logical_and(idx1, idx2)
+
+        self.imgs = self.imgs[idx,:]
+        self.lat_values = self.lat_values[idx,:]             
+        ########################            
+            
 
     def download(self):
         """Download the dataset."""

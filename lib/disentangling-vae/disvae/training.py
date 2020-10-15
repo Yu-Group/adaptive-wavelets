@@ -1,7 +1,6 @@
-import numpy as np
 import imageio
 import logging
-import os, sys
+import os
 from timeit import default_timer
 from collections import defaultdict
 
@@ -10,15 +9,6 @@ import torch
 from torch.nn import functional as F
 
 from disvae.utils.modelIO import save_model
-
-# trim modules
-sys.path.append('../../trim')
-from trim import TrimModel, DecoderEncoder
-from captum.attr import *
-from copy import deepcopy
-
-# TO-DO: currently support two attr methods
-ATTR_METHOS = ['InputXGradient'] 
 
 
 TRAIN_LOSSES_LOGFILE = "train_losses.log"
@@ -58,10 +48,7 @@ class Trainer():
                  logger=logging.getLogger(__name__),
                  save_dir="results",
                  gif_visualizer=None,
-                 is_progress_bar=True,
-                 classifier=None,
-                 trim_lamb=0.0,
-                 attr_lamb=0.0):
+                 is_progress_bar=True):
 
         self.device = device
         self.model = model.to(self.device)
@@ -73,15 +60,6 @@ class Trainer():
         self.losses_logger = LossesLogger(os.path.join(self.save_dir, TRAIN_LOSSES_LOGFILE))
         self.gif_visualizer = gif_visualizer
         self.logger.info("Training Device: {}".format(self.device))
-        self.classifier = classifier
-        self.trim_lamb = trim_lamb
-        self.attr_lamb = attr_lamb
-        self.L1Loss = torch.nn.L1Loss()
-        self.L2Loss = torch.nn.MSELoss()
-        if self.classifier is not None and self.trim_lamb > 0:
-            self._prepend_transformation()
-        if self.attr_lamb > 0:
-            self._create_latent_map()
 
     def __call__(self, data_loader,
                  epochs=10,
@@ -122,26 +100,6 @@ class Trainer():
 
         delta_time = (default_timer() - start) / 60
         self.logger.info('Finished training after {:.1f} min.'.format(delta_time))
-        
-    def _prepend_transformation(self):
-        """
-        Prepends transformation onto network.
-        
-        Parameters
-        ----------
-        """
-        transform_i = lambda s: self.model.decoder(s)
-        m_t = TrimModel(self.classifier, transform_i, use_residuals=True)
-        self.attributer = InputXGradient(m_t)
-        
-    def _create_latent_map(self):
-        """
-        Create saliency object for decoder-encoder map.
-        
-        Parameters
-        ----------
-        """
-        self.latent_map = DecoderEncoder(self.model, use_residuals=True)
 
     def _train_epoch(self, data_loader, storer, epoch):
         """
@@ -166,7 +124,7 @@ class Trainer():
         kwargs = dict(desc="Epoch {}".format(epoch + 1), leave=False,
                       disable=not self.is_progress_bar)
         with trange(len(data_loader), **kwargs) as t:
-            for _, data in enumerate(data_loader):
+            for _, (data, _) in enumerate(data_loader):
                 iter_loss = self._train_iteration(data, storer)
                 epoch_loss += iter_loss
 
@@ -188,39 +146,23 @@ class Trainer():
         storer: dict
             Dictionary in which to store important variables for vizualisation.
         """
-        inputs, labels = data
-        batch_size, channel, height, width = inputs.size()
-        inputs = inputs.to(self.device)
-        labels = labels.to(self.device)
+        batch_size, channel, height, width = data.size()
+        data = data.to(self.device)
 
         try:
-            recon_batch, latent_dist, latent_sample = self.model(inputs)
-            loss = self.loss_f(inputs, recon_batch, latent_dist, self.model.training,
+            recon_batch, latent_dist, latent_sample = self.model(data)
+            loss = self.loss_f(data, recon_batch, latent_dist, self.model.training,
                                storer, latent_sample=latent_sample)
-            
-            if self.attr_lamb > 0:
-#                 s = deepcopy(latent_sample.detach())
-                s = latent_sample
-                s = s.requires_grad_(True)
-                s_output = self.latent_map(s, deepcopy(inputs))
-                loss += 10 * self.L2Loss(s_output, s)
-                for i in range(self.model.latent_dim):
-                    col_idx = np.arange(self.model.latent_dim)!=i
-                    gradients = torch.autograd.grad(s_output[:,i], s, grad_outputs=torch.ones_like(s_output[:,i]), 
-                                                    retain_graph=True, create_graph=True, only_inputs=True)[0]
-                    gradients_pairwise = gradients[:,col_idx]
-                    loss += self.attr_lamb * self.L2Loss(gradients_pairwise, torch.zeros_like(gradients_pairwise))                  
-    
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
         except ValueError:
             # for losses that use multiple optimizers (e.g. Factor)
-            loss = self.loss_f.call_optimize(inputs, self.model, self.optimizer, storer)
+            loss = self.loss_f.call_optimize(data, self.model, self.optimizer, storer)
 
-        return loss.item()  
-    
+        return loss.item()
+
 
 class LossesLogger(object):
     """Class definition for objects to write data to log files in a

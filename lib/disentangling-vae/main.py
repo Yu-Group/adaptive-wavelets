@@ -25,7 +25,7 @@ EXPERIMENTS = ADDITIONAL_EXP + ["{}_{}".format(loss, data)
                                 for data in DATASETS]
 
 
-def parse_arguments(args_to_parse):
+def parse_arguments():
     """Parse the command line arguments.
 
     Parameters
@@ -41,8 +41,8 @@ def parse_arguments(args_to_parse):
 
     # General options
     general = parser.add_argument_group('General options')
-    general.add_argument('name', type=str,
-                         help="Name of the model for storing and loading purposes.")
+#     general.add_argument('name', type=str,
+#                          help="Name of the model for storing and loading purposes.")
     general.add_argument('-L', '--log-level', help="Logging levels.",
                          default=default_config['log_level'], choices=LOG_LEVELS)
     general.add_argument('--no-progress-bar', action='store_true',
@@ -142,7 +142,7 @@ def parse_arguments(args_to_parse):
                             default=default_config['eval_batchsize'],
                             help='Batch size for evaluation.')
 
-    args = parser.parse_args(args_to_parse)
+    args = parser.parse_args("")
     if args.experiment != 'custom':
         if args.experiment not in ADDITIONAL_EXP:
             # update all common sections first

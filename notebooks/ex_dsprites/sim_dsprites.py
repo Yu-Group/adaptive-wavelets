@@ -11,20 +11,16 @@ from copy import deepcopy
 import pickle as pkl
 import argparse
 
-sys.path.append('../../src')
 sys.path.append('../../src/vae')
-sys.path.append('../../src/vae/models')
+sys.path.append('../../../src/vae')
 sys.path.append('../../src/dsets/gaussian_mixture')
-from dset import get_dataloaders
-from model import init_specific_model
-from losses import get_loss_f
-from training import Trainer
-from viz import traversals
-
+sys.path.append('../../../src/dsets/gaussian_mixture')
 sys.path.append('../../lib/trim')
-# trim modules
-from trim import DecoderEncoder
-
+from model import init_specific_model
+from losses import Loss
+from dset import get_dataloaders
+from training import Trainer
+from utils import traversals
 
 # trim modules
 from trim import DecoderEncoder
@@ -130,21 +126,23 @@ class s:
 def define_dataloaders(p):
     """A generic data loader
     """
-    train_loader = get_dataloaders(n_samples_per_cluster=p.train_n_samples_per_cluster, 
-                                   latent_means=p.latent_means,
-                                   latent_vars=p.latent_vars,
-                                   extra_dim=p.noise_dim, 
-                                   var=p.noise_var,
-                                   batch_size=p.train_batch_size,
-                                   shuffle=True) 
-    test_loader = get_dataloaders(n_samples_per_cluster=p.test_n_samples_per_cluster, 
-                                 latent_means=p.latent_means,
-                                 latent_vars=p.latent_vars,
-                                 extra_dim=p.noise_dim, 
-                                 var=p.noise_var,
-                                 batch_size=p.test_batch_size, 
-                                 shuffle=False)   
-    return(train_loader, test_loader)
+    train_loader, train_latents = get_dataloaders(n_samples_per_cluster=p.train_n_samples_per_cluster, 
+                                                  latent_means=p.latent_means,
+                                                  latent_vars=p.latent_vars,
+                                                  extra_dim=p.noise_dim, 
+                                                  var=p.noise_var,
+                                                  batch_size=p.train_batch_size,
+                                                  shuffle=True,
+                                                  return_latents=True) 
+    test_loader, test_latents = get_dataloaders(n_samples_per_cluster=p.test_n_samples_per_cluster, 
+                                                latent_means=p.latent_means,
+                                                latent_vars=p.latent_vars,
+                                                extra_dim=p.noise_dim, 
+                                                var=p.noise_var,
+                                                batch_size=p.test_batch_size, 
+                                                shuffle=False,
+                                                return_latents=True)   
+    return((train_loader, train_latents), (test_loader, test_latents))
 
 
 # calculate losses
