@@ -13,19 +13,10 @@ from scheduling import run_serial, run_parallel
 if __name__ == '__main__':
     
     params_to_vary = {
-        'num_epochs': [50],
+        'num_epochs': [100],
         'seed': [13],
-        'hidden_dim': [12],
-        'beta': [0],
-        'mu': [0],
-        'lamPT': [1],
-        'lamCI': [0],
-        'lamH': [0],
-        'lamNN': [0.001, 0.005, 0.01],
-        'lamSP': np.round(np.geomspace(1e-4, 2, 30), 5),
-        'dirname': ['vary_lamSP_lamNN_seed=13'],
-        'warm_start': ['lamSP'], 
-        'seq_init': [1e-4]
+        'h_channels': np.repeat(np.arange(1,7), 10),
+        'dirname': ['vary_h_channels_seed=13']
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
