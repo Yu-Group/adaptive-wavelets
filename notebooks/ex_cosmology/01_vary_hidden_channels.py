@@ -14,8 +14,8 @@ if __name__ == '__main__':
     
     params_to_vary = {
         'num_epochs': [100],
-        'seed': [13],
-        'h_channels': np.repeat(np.arange(1,7), 10),
+        'seed': np.arange(0, 10),
+        'h_channels':np.arange(1, 7),
         'dirname': ['vary_h_channels_seed=13']
     }
     ks = sorted(params_to_vary.keys())

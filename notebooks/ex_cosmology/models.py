@@ -23,9 +23,9 @@ def load_model(model_name='resnet18', device='cuda', num_params=3, inplace=True,
                 if 'ReLU' in t:
                     mod.inplace = False   
 
-            model_ft = model_ft.to(device)
-            if data_path is not None:
-                model_ft.load_state_dict(torch.load(oj(data_path, 'resnet18_state_dict')))
+        model_ft = model_ft.to(device)
+        if data_path is not None:
+            model_ft.load_state_dict(torch.load(oj(data_path, 'resnet18_state_dict')))
 
     elif model_name == 'vgg16':
         model_ft = models.vgg16(pretrained=False)
@@ -110,7 +110,7 @@ class AutoEncoder(nn.Module):
     
     
 class AutoEncoderSimple(nn.Module):
-    def __init__(self, img_size=(1,64,64), hid_channels=5):
+    def __init__(self, img_size=(1,256,256), hid_channels=2):
         """
         Class which defines model and forward pass. Consists of one layer of Conv and ConvTranspose.
         Parameters
@@ -139,6 +139,7 @@ class AutoEncoderSimple(nn.Module):
 
         # Convolutional layers with ReLu activations
         x = self.conv1(x)
+        x = torch.relu(x)
         
         return x
     
@@ -146,6 +147,7 @@ class AutoEncoderSimple(nn.Module):
         batch_size = x.size(0)
         
         x = self.convT1(x)
+#         x = torch.tanh(x)
 
         return x            
 
@@ -160,7 +162,90 @@ class AutoEncoderSimple(nn.Module):
         latent_sample = self.encoder(x)
         reconstruct = self.decoder(latent_sample)
         
-        return reconstruct, latent_sample    
+        return reconstruct, latent_sample  
+    
+    
+class AutoEncoderMix(nn.Module):
+    def __init__(self, img_size=(1,64,64), hid_channels_s=5, hid_channels_d=5, latent_dim=20):
+        """
+        Class which defines model and forward pass.
+        Parameters
+        ----------
+        encoder : torch.nn.Module
+            class of encoder
+        
+        decoder : torch.nn.Module
+            class of decoder
+        """
+        super(AutoEncoderMix, self).__init__()
+        
+        # Layer parameters
+        kernel_size = 4
+        self.img_size = img_size
+        n_chan = self.img_size[0]
+        self.reshape = (hid_channels_d, 16, 16)
+
+        # Convolutional layers
+        cnn_kwargs = dict(stride=2, padding=1)
+        self.conv1s = nn.Conv2d(n_chan, hid_channels_s, kernel_size, **cnn_kwargs)
+        self.conv1d = nn.Conv2d(n_chan, hid_channels_d, kernel_size, **cnn_kwargs)
+        self.conv2d = nn.Conv2d(hid_channels_d, hid_channels_d, kernel_size, **cnn_kwargs)
+        
+        # Fully connected layers
+        self.lin1 = nn.Linear(np.product(self.reshape), latent_dim)
+        
+        # Fully connected layers
+        self.linT1 = nn.Linear(latent_dim, np.product(self.reshape))         
+        
+        # Transpose Convolutional layers
+        self.convT1s = nn.ConvTranspose2d(hid_channels_s, n_chan, kernel_size, **cnn_kwargs)
+        self.convT1d = nn.ConvTranspose2d(hid_channels_d, hid_channels_d, kernel_size, **cnn_kwargs)
+        self.convT2d = nn.ConvTranspose2d(hid_channels_d, n_chan, kernel_size, **cnn_kwargs)
+        
+        
+    def encoder_s(self, x):
+        x = self.conv1s(x)
+        return x
+    
+
+    def decoder_s(self, x):
+        x = self.convT1s(x)
+        return x
+    
+    
+    def encoder_d(self, x):
+        batch_size = x.size(0)
+        
+        x = torch.relu(self.conv1d(x))
+        x = torch.relu(self.conv2d(x))
+        x = x.view((batch_size, -1))
+        x = torch.relu(self.lin1(x))
+        return x
+    
+    
+    def decoder_d(self, x):
+        batch_size = x.size(0)
+        
+        x = torch.relu(self.linT1(x))
+        x = x.view(batch_size, *self.reshape)
+        x = torch.relu(self.convT1d(x))
+        x = self.convT2d(x)
+        return x   
+    
+
+    def forward(self, x):
+        """
+        Forward pass of model.
+        Parameters
+        ----------
+        x : torch.Tensor
+            Batch of data. Shape (batch_size, n_chan, height, width)
+        """
+        latent_sample1, latent_sample2 = self.encoder_s(x), self.encoder_d(x)
+        reconstruct1 = self.decoder_s(latent_sample1) 
+        reconstruct2 = self.decoder_d(latent_sample2)
+        
+        return reconstruct1 + reconstruct2, [reconstruct1, reconstruct2]
 
 
 class AutoEncoderModelBased(nn.Module):

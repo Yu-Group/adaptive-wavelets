@@ -46,7 +46,7 @@ class p:
     data_path = "../../src/dsets/cosmology/data"
     
     # parameters for model architecture
-    img_size = (1, 64, 64)
+    img_size = (1, 256, 256)
     h_channels = 5
     
     # parameters for training
@@ -135,11 +135,11 @@ if __name__ == '__main__':
                                   batch_size=p.train_batch_size)    
     
     # prepare model
-    model = AutoEncoderSimple(img_size=p.img_size, hid_channels=p.hid_channels).to(device)    
+    model = AutoEncoderSimple(img_size=p.img_size, hid_channels=p.h_channels).to(device)    
 
     # train
     optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    losses = trainer(train_loader, model, optimizer, device=device)
+    losses = train(train_loader, model, optimizer, device=device)
     
     # calculate losses
     print('calculating losses and metric...')    
