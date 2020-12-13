@@ -8,21 +8,10 @@ from random import randint
 from copy import deepcopy
 import pickle as pkl
 import argparse
+from models import load_model
 
-from models import AutoEncoder, AutoEncoderSimple, load_model
-
-sys.path.append('../../src')
-sys.path.append('../../src/vae')
-sys.path.append('../../src/vae/models')
 sys.path.append('../../src/dsets/cosmology')
 from dset import get_dataloader
-from model import init_specific_model
-from losses import get_loss_f, _reconstruction_loss
-from training import Trainer
-
-sys.path.append('../../lib/trim')
-# trim modules
-from trim import DecoderEncoder
 
 
 parser = argparse.ArgumentParser(description='Cosmology Example')
@@ -32,8 +21,6 @@ parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
                     help='number of epochs to train (default: 50)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
-parser.add_argument('--h_channels', type=int, default=5,
-                   help='number of hidden channels in autoencoder (default: 5)')
 parser.add_argument('--dirname', default='vary',
                    help='name of directory')
 
@@ -47,7 +34,6 @@ class p:
     
     # parameters for model architecture
     img_size = (1, 256, 256)
-    h_channels = 5
     
     # parameters for training
     train_batch_size = 64
@@ -58,8 +44,7 @@ class p:
     num_epochs = 50
     
     # SAVE MODEL
-    out_dir = "/home/ubuntu/local-vae/notebooks/ex_cosmology/results" # wooseok's setup
-#     out_dir = '/scratch/users/vision/chandan/local-vae' # chandan's setup
+    out_dir = "/home/ubuntu/local-vae/notebooks/ex_cosmology/results" 
     dirname = "vary"
     pid = ''.join(["%s" % randint(0, 9) for num in range(0, 10)])
 
@@ -80,73 +65,18 @@ class s:
                  if not attr.startswith('_')}
     
     
-def train(train_loader, model, optimizer, device=device): 
-    model.train()
-    # Training Loop
-    # Lists to keep track of progress
-    losses = []
-    
-    print("Starting Training Loop...")
-    
-    # For each epoch
-    for epoch in range(p.num_epochs):
-        epoch_loss = 0
-        # For each batch in the dataloader
-        for batch_idx, (data, _) in enumerate(train_loader):
-            data = data.to(device)
-            recon_data, latent_sample = model(data)
-            # loss
-            loss = _reconstruction_loss(data, recon_data, distribution="gaussian", storer=None)
-            # zero grad
-            optimizer.zero_grad()
-            # backward
-            loss.backward()
-            # Update step
-            optimizer.step()
-
-            epoch_loss += loss.data.item()
-            
-        mean_epoch_loss = epoch_loss / (batch_idx + 1)
-        print('====> Epoch: {} Average train loss: {:.4f}'.format(epoch, mean_epoch_loss))
-        # Save Losses for plotting later
-        losses.append(mean_epoch_loss)        
-    
-    model.eval()
-    return losses    
-
-
-    
-if __name__ == '__main__':
-    args = parser.parse_args()
-    for arg in vars(args):
-        setattr(p, arg, getattr(args, arg))
-    
-    # create dir
-    out_dir = opj(p.out_dir, p.dirname)
-    os.makedirs(out_dir, exist_ok=True)        
-
-    # seed
-    random.seed(p.seed)
-    np.random.seed(p.seed)
-    torch.manual_seed(p.seed)
-    
-    # get dataloaders
+# generate data
+def load_dataloader_and_pretrained_model(p):
+    """A generic data loader
+    """
     train_loader = get_dataloader(p.data_path, 
-                                  batch_size=p.train_batch_size)    
-    
-    # prepare model
-    model = AutoEncoderSimple(img_size=p.img_size, hid_channels=p.h_channels).to(device)    
+                                  img_size=256,
+                                  batch_size=p.train_batch_size) 
+    model = load_model(model_name='resnet18', device=device, data_path=p.data_path)
+    model = model.eval()
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False    
 
-    # train
-    optimizer = torch.optim.Adam(model.parameters(), lr=p.lr)
-    losses = train(train_loader, model, optimizer, device=device)
-    
-    # calculate losses
-    print('calculating losses and metric...')    
-    s.losses = losses
-    s.net = model    
-    
-    # save
-    results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))    
-    torch.save(model.state_dict(), opj(out_dir, p._str(p) + '.pth'))     
+    return train_loader, model
+
