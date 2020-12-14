@@ -81,10 +81,15 @@ class tuple_Attributer(nn.Module):
         super(tuple_Attributer, self).__init__()
         self.mt = mt.to(device)
         self.attr_methods = attr_methods   
+        self.device = device
         
     def forward(self, x: tuple, target=1):
         if self.attr_methods == 'InputXGradient':
             attributions = self.InputXGradient(x, target)
+        elif self.attr_methods == 'IntegratedGradient':
+            attributions = self.IntegratedGradient(x, target)
+        else: 
+            raise ValueError
         return attributions
         
     def InputXGradient(self, x: tuple, target=1):
@@ -98,7 +103,35 @@ class tuple_Attributer(nn.Module):
         scores = []
         for i in range(n):
             scores.append(torch.mul(x[i], x[i].grad))
-        return tuple(scores)            
+        return tuple(scores)  
+    
+    def IntegratedGradient(self, x: tuple, target=1, M=100):
+        n = len(x)
+        mult_grid = np.array(range(M))/(M-1) # fractions to multiply by
+
+        # compute all the input vecs
+        input_vecs = []
+        baselines = []
+        for i in range(n):
+            baselines.append(torch.zeros_like(x[i])) # baseline of zeros
+            shape = list(x[i].shape[1:])
+            shape.insert(0, M)
+            inp = torch.empty(shape, dtype=torch.float32, requires_grad=True).to(self.device)    
+            for j, prop in enumerate(mult_grid):
+                inp[j] = baselines[i] + prop * (x[i] - baselines[i])
+            inp.retain_grad()
+            input_vecs.append(inp)
+
+        # run forward pass
+        output = self.mt(input_vecs)[:,1].sum()
+        output.backward(retain_graph=True)
+
+        # ig
+        scores = []
+        for i in range(n):
+            imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
+            scores.append(imps)   
+        return tuple(scores)          
     
     
 def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=50):
@@ -136,6 +169,14 @@ def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=5
         results.append(rec.cpu())
     return results    
     
+    
+def compute_tuple_dim(x):
+    tot_dim = 0
+    for i in range(len(x)):
+        shape = torch.tensor(x[i].shape)
+        tot_dim += torch.prod(shape).item()
+    return tot_dim
+
     
 class Wavelet_Transform_from_Scratch(nn.Module):
     def __init__(self, init_wavelet='bior2.2', requires_grad=True, device='cuda'): 
