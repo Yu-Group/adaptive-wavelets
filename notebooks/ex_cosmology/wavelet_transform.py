@@ -44,7 +44,7 @@ class Wavelet_Transform(nn.Module):
         for i in range(num):
             norm += torch.sum(x[i])
         return norm/num        
-    
+
 
 ### TO DO!! ###
 # incorporate mask for DWT
@@ -74,8 +74,8 @@ class DTCWT_Mask(nn.Module):
     def projection(self):
         for i in range(self.J+1):
             self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)    
-            
-            
+
+
 class tuple_Attributer(nn.Module):
     def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
         super(tuple_Attributer, self).__init__()
@@ -132,8 +132,8 @@ class tuple_Attributer(nn.Module):
             imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
             scores.append(imps)   
         return tuple(scores)          
-    
-    
+
+
 def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=50):
     sp_levels = np.geomspace(1, num_tot, num_seq).astype(np.int)   
     device = 'cuda' if im_t[0].is_cuda else 'cpu'
@@ -168,8 +168,8 @@ def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=5
         indx += 1
         results.append(rec.cpu())
     return results    
-    
-    
+
+
 def compute_tuple_dim(x):
     tot_dim = 0
     for i in range(len(x)):
@@ -177,7 +177,7 @@ def compute_tuple_dim(x):
         tot_dim += torch.prod(shape).item()
     return tot_dim
 
-    
+
 class Wavelet_Transform_from_Scratch(nn.Module):
     def __init__(self, init_wavelet='bior2.2', requires_grad=True, device='cuda'): 
         super(Wavelet_Transform_from_Scratch, self).__init__()        
