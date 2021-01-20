@@ -40,50 +40,7 @@ class Wavelet_Transform(nn.Module):
         Yh = x
         return self.ifm((Yl, Yh))      
     
-<<<<<<< HEAD
-    
 class Attributer(nn.Module):
-=======
-    def tuple_sum(self, x):
-        norm = 0
-        num = len(x)
-        for i in range(num):
-            norm += torch.sum(x[i])
-        return norm/num        
-
-
-### TO DO!! ###
-# incorporate mask for DWT
-class DTCWT_Mask(nn.Module):
-    def __init__(self, dtcwt, img_size=256, device='cuda'):
-        '''
-        dtcwt: DTCWT_Transform class
-        '''
-        super(DTCWT_Mask, self).__init__()
-        self.img_size = img_size
-        self.J = dtcwt.J
-
-        # initialize masks 
-        x = torch.randn(1,1,img_size,img_size).to(device)
-        Y = dtcwt(x)   
-        
-        self.mask = nn.ParameterList()
-        for i in range(self.J+1):
-            self.mask.append(nn.Parameter(torch.ones_like(Y[i])))            
-        
-    def forward(self, x):
-        output_list = []
-        for i in range(self.J+1):
-            output_list.append(torch.mul(x[i], self.mask[i]))
-        return tuple(output_list)    
-    
-    def projection(self):
-        for i in range(self.J+1):
-            self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)    
-
-
-class tuple_Attributer(nn.Module):
->>>>>>> 75d9b22a837145083da93497e0e649e93c26faca
     def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
         super(Attributer, self).__init__()
         self.mt = mt.to(device)
@@ -134,9 +91,8 @@ class tuple_Attributer(nn.Module):
         for i in range(n):
             imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
             scores.append(imps)   
-<<<<<<< HEAD
-        return tuple(scores)      
-    
+        return tuple(scores)       
+
 
 ### TO DO!! ###
 # incorporate mask for DWT
@@ -165,14 +121,9 @@ class DTCWT_Mask(nn.Module):
     
     def projection(self):
         for i in range(self.J+1):
-            self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)            
+            self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)        
     
     
-=======
-        return tuple(scores)          
-
-
->>>>>>> 75d9b22a837145083da93497e0e649e93c26faca
 def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=50):
 #     sp_levels = np.geomspace(1, num_tot, num_seq).astype(np.int)   
     sp_levels = np.linspace(1, 20, num_seq).astype(np.int)   
@@ -219,13 +170,9 @@ def compute_tuple_dim(x):
     return tot_dim
 
 
-<<<<<<< HEAD
 ################################################    
 ################################################    
 ################################################    
-
-=======
->>>>>>> 75d9b22a837145083da93497e0e649e93c26faca
 class Wavelet_Transform_from_Scratch(nn.Module):
     def __init__(self, init_wavelet='bior2.2', requires_grad=True, device='cuda'): 
         super(Wavelet_Transform_from_Scratch, self).__init__()        
