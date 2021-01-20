@@ -1,12 +1,14 @@
 import numpy as np
 import torch
 from torch import nn
+import torch.nn.functional as F
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
 opj = os.path.join
 from copy import deepcopy
 from captum.attr import *
 from pytorch_wavelets import DTCWTForward, DTCWTInverse, DWTForward, DWTInverse
+import pywt
 
 
 class Wavelet_Transform(nn.Module):
@@ -36,14 +38,61 @@ class Wavelet_Transform(nn.Module):
         x = list(x)
         Yl = x.pop(0)
         Yh = x
-        return self.ifm((Yl, Yh))    
+        return self.ifm((Yl, Yh))      
     
-    def tuple_sum(self, x):
-        norm = 0
-        num = len(x)
-        for i in range(num):
-            norm += torch.sum(x[i])
-        return norm/num        
+    
+class Attributer(nn.Module):
+    def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
+        super(Attributer, self).__init__()
+        self.mt = mt.to(device)
+        self.attr_methods = attr_methods   
+        self.device = device
+        
+    def forward(self, x: tuple, target=1):
+        if self.attr_methods == 'InputXGradient':
+            attributions = self.InputXGradient(x, target)
+        elif self.attr_methods == 'IntegratedGradient':
+            attributions = self.IntegratedGradient(x, target)
+        else: 
+            raise ValueError
+        return attributions
+        
+    def InputXGradient(self, x: tuple, target=1):
+        outputs = self.mt(x)[:,target]
+        grads = torch.autograd.grad(torch.unbind(outputs), x)        
+        # input * gradient
+        attributions = tuple(xi * gi for xi, gi in zip(x, grads))
+        return attributions    
+    
+    ### TO DO!! ###
+    # implement batch version of IG
+    def IntegratedGradient(self, x: tuple, target=1, M=100):
+        n = len(x)
+        mult_grid = np.array(range(M))/(M-1) # fractions to multiply by
+
+        # compute all the input vecs
+        input_vecs = []
+        baselines = []
+        for i in range(n):
+            baselines.append(torch.zeros_like(x[i])) # baseline of zeros
+            shape = list(x[i].shape[1:])
+            shape.insert(0, M)
+            inp = torch.empty(shape, dtype=torch.float32, requires_grad=True).to(self.device)    
+            for j, prop in enumerate(mult_grid):
+                inp[j] = baselines[i] + prop * (x[i] - baselines[i])
+            inp.retain_grad()
+            input_vecs.append(inp)
+
+        # run forward pass
+        output = self.mt(input_vecs)[:,1].sum()
+        output.backward(retain_graph=True)
+
+        # ig
+        scores = []
+        for i in range(n):
+            imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
+            scores.append(imps)   
+        return tuple(scores)      
     
 
 ### TO DO!! ###
@@ -73,69 +122,13 @@ class DTCWT_Mask(nn.Module):
     
     def projection(self):
         for i in range(self.J+1):
-            self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)    
-            
-            
-class tuple_Attributer(nn.Module):
-    def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
-        super(tuple_Attributer, self).__init__()
-        self.mt = mt.to(device)
-        self.attr_methods = attr_methods   
-        self.device = device
-        
-    def forward(self, x: tuple, target=1):
-        if self.attr_methods == 'InputXGradient':
-            attributions = self.InputXGradient(x, target)
-        elif self.attr_methods == 'IntegratedGradient':
-            attributions = self.IntegratedGradient(x, target)
-        else: 
-            raise ValueError
-        return attributions
-        
-    def InputXGradient(self, x: tuple, target=1):
-        n = len(x)
-        for i in range(n):
-            x[i].retain_grad()
-        output = self.mt(x)[0][target]
-        output.backward(retain_graph=True)
-        
-        # input * gradient
-        scores = []
-        for i in range(n):
-            scores.append(torch.mul(x[i], x[i].grad))
-        return tuple(scores)  
-    
-    def IntegratedGradient(self, x: tuple, target=1, M=100):
-        n = len(x)
-        mult_grid = np.array(range(M))/(M-1) # fractions to multiply by
-
-        # compute all the input vecs
-        input_vecs = []
-        baselines = []
-        for i in range(n):
-            baselines.append(torch.zeros_like(x[i])) # baseline of zeros
-            shape = list(x[i].shape[1:])
-            shape.insert(0, M)
-            inp = torch.empty(shape, dtype=torch.float32, requires_grad=True).to(self.device)    
-            for j, prop in enumerate(mult_grid):
-                inp[j] = baselines[i] + prop * (x[i] - baselines[i])
-            inp.retain_grad()
-            input_vecs.append(inp)
-
-        # run forward pass
-        output = self.mt(input_vecs)[:,1].sum()
-        output.backward(retain_graph=True)
-
-        # ig
-        scores = []
-        for i in range(n):
-            imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
-            scores.append(imps)   
-        return tuple(scores)          
+            self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)            
     
     
 def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=50):
-    sp_levels = np.geomspace(1, num_tot, num_seq).astype(np.int)   
+#     sp_levels = np.geomspace(1, num_tot, num_seq).astype(np.int)   
+    sp_levels = np.linspace(1, 20, num_seq).astype(np.int)   
+    sp_levels[-1] = num_tot
     device = 'cuda' if im_t[0].is_cuda else 'cpu'
     n = len(im_t)
     indx = 0
@@ -177,7 +170,11 @@ def compute_tuple_dim(x):
         tot_dim += torch.prod(shape).item()
     return tot_dim
 
-    
+
+################################################    
+################################################    
+################################################    
+
 class Wavelet_Transform_from_Scratch(nn.Module):
     def __init__(self, init_wavelet='bior2.2', requires_grad=True, device='cuda'): 
         super(Wavelet_Transform_from_Scratch, self).__init__()        
