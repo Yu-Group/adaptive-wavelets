@@ -19,9 +19,10 @@ def tuple_Sum(x):
 def tuple_L1Loss(x):
     output = 0
     num = len(x)
+    batch_size = x[0].shape[0]
     for i in range(num):
         output += torch.sum(abs(x[i]))
-    return output/num    
+    return output/(num*batch_size)
 
 
 def tuple_L2Loss(x):

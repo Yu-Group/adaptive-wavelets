@@ -83,17 +83,17 @@ class Attributer(nn.Module):
         self.attr_methods = attr_methods   
         self.device = device
         
-    def forward(self, x: tuple, target=1):
+    def forward(self, x: tuple, target=1, additional_forward_args=None):
         if self.attr_methods == 'InputXGradient':
-            attributions = self.InputXGradient(x, target)
+            attributions = self.InputXGradient(x, target, additional_forward_args)
         elif self.attr_methods == 'IntegratedGradient':
-            attributions = self.IntegratedGradient(x, target)
+            attributions = self.IntegratedGradient(x, target, additional_forward_args)
         else: 
             raise ValueError
         return attributions
         
-    def InputXGradient(self, x: tuple, target=1):
-        outputs = self.mt(x)[:,target]
+    def InputXGradient(self, x: tuple, target=1, additional_forward_args=None):
+        outputs = self.mt(x, additional_forward_args)[:,target]
         grads = torch.autograd.grad(torch.unbind(outputs), x)        
         # input * gradient
         attributions = tuple(xi * gi for xi, gi in zip(x, grads))
@@ -101,7 +101,7 @@ class Attributer(nn.Module):
     
     ### TO DO!! ###
     # implement batch version of IG
-    def IntegratedGradient(self, x: tuple, target=1, M=100):
+    def IntegratedGradient(self, x: tuple, target=1, additional_forward_args=None, M=100):
         n = len(x)
         mult_grid = np.array(range(M))/(M-1) # fractions to multiply by
 
