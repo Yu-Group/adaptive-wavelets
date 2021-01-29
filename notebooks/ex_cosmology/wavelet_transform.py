@@ -7,11 +7,36 @@ import os,sys
 opj = os.path.join
 from copy import deepcopy
 from captum.attr import *
+from utils import pad_within
 from pytorch_wavelets import DTCWTForward, DTCWTInverse, DWTForward, DWTInverse
 import pywt
 
 
 class Wavelet_Transform(nn.Module):
+    '''Class of wavelet transform 
+    Params
+    ------
+    wt_type: str
+        indicate either dual-tree complex wavelet transform (DTCWT) or discrete wavelet transform (DWT)
+    biort: str
+        one of 'antonini', 'legall', 'near_sym_a', 'near_sym_b'. Specifies the first level biorthogonal wavelet filters. Can also
+        give a two tuple for the low and highpass filters directly
+    qshift: str
+        one of 'qshift_06', 'qshift_a', 'qshift_b', 'qshift_c', 'qshift_d'. Specifies the second level quarter shift filters. Can
+            also give a 4-tuple for the low tree a, low tree b, high tree a and high tree b filters directly
+    J: int
+        number of levels of decomposition
+    wave: str
+         which wavelet to use.
+         can be:
+            1) a string to pass to pywt.Wavelet constructor
+            2) a pywt.Wavelet class
+            3) a tuple of numpy arrays, either (h0, h1) or (h0_col, h1_col, h0_row, h1_row)
+    mode: str
+        'zero', 'symmetric', 'reflect' or 'periodization'. The padding scheme
+    device: str
+        use GPU or CPU
+    '''
     def __init__(self, wt_type='DTCWT', biort='near_sym_b', qshift='qshift_b', J=5, 
                  wave='db3', mode='zero', device='cuda', requires_grad=True): 
         super(Wavelet_Transform, self).__init__()     
@@ -40,7 +65,18 @@ class Wavelet_Transform(nn.Module):
         Yh = x
         return self.ifm((Yl, Yh))      
     
+    
 class Attributer(nn.Module):
+    '''Get attribution scores for wavelet coefficients
+    Params
+    ------
+    mt: nn.Module
+        model after all the transformations
+    attr_methods: str
+        currently support InputXGradient only
+    device: str
+        use GPU or CPU
+    '''    
     def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
         super(Attributer, self).__init__()
         self.mt = mt.to(device)
@@ -91,131 +127,115 @@ class Attributer(nn.Module):
         for i in range(n):
             imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
             scores.append(imps)   
-        return tuple(scores)       
-
-
-### TO DO!! ###
-# incorporate mask for DWT
-class DTCWT_Mask(nn.Module):
-    def __init__(self, dtcwt, img_size=256, device='cuda'):
-        '''
-        dtcwt: DTCWT_Transform class
-        '''
-        super(DTCWT_Mask, self).__init__()
-        self.img_size = img_size
-        self.J = dtcwt.J
-
-        # initialize masks 
-        x = torch.randn(1,1,img_size,img_size).to(device)
-        Y = dtcwt(x)   
+        return tuple(scores)     
+    
+    
+def get_2dfilts(w_transform, wt_type='DTCWT'):
+    ### TO DO: implement 2d filters for inverse transform ###
+    '''Get 2d filters from one-dimensional wavelets
+    Params
+    ------
+    w_transform: obj
+        wavelet object
+    wt_type: str
+        indicate either dual-tree complex wavelet transform (DTCWT) or discrete wavelet transform (DWT)
+    '''    
+    if wt_type == 'DTCWT':
+        h0o = w_transform.xfm.h0o.data
+        h1o = w_transform.xfm.h1o.data
+        h0a = w_transform.xfm.h0a.data
+        h1a = w_transform.xfm.h1a.data
+        h0b = w_transform.xfm.h0b.data
+        h1b = w_transform.xfm.h1b.data 
         
-        self.mask = nn.ParameterList()
-        for i in range(self.J+1):
-            self.mask.append(nn.Parameter(torch.ones_like(Y[i])))            
+        # compute first level wavelet filters
+        h0_r = F.pad(h0o.squeeze().detach().cpu(), pad=(0, 1), mode='constant', value=0)
+        h0_i = F.pad(h0o.squeeze().detach().cpu(), pad=(1, 0), mode='constant', value=0)
+        h1_r = F.pad(h1o.squeeze().detach().cpu(), pad=(0, 1), mode='constant', value=0)
+        h1_i = F.pad(h1o.squeeze().detach().cpu(), pad=(1, 0), mode='constant', value=0)    
+
+        lh_filt_r1 = h0_r.unsqueeze(0) * h1_r.unsqueeze(1)/np.sqrt(2)
+        lh_filt_r2 = h0_i.unsqueeze(0) * h1_i.unsqueeze(1)/np.sqrt(2)
+        lh_filt_i1 = h0_i.unsqueeze(0) * h1_r.unsqueeze(1)/np.sqrt(2)
+        lh_filt_i2 = h0_r.unsqueeze(0) * h1_i.unsqueeze(1)/np.sqrt(2)
+        filt_15r = lh_filt_r1 - lh_filt_r2
+        filt_165r = lh_filt_r1 + lh_filt_r2
+        filt_15i = lh_filt_i1 + lh_filt_i2
+        filt_165i = lh_filt_i1 - lh_filt_i2
+
+        hh_filt_r1 = h1_r.unsqueeze(0) * h1_r.unsqueeze(1)/np.sqrt(2)
+        hh_filt_r2 = h1_i.unsqueeze(0) * h1_i.unsqueeze(1)/np.sqrt(2)
+        hh_filt_i1 = h1_i.unsqueeze(0) * h1_r.unsqueeze(1)/np.sqrt(2)
+        hh_filt_i2 = h1_r.unsqueeze(0) * h1_i.unsqueeze(1)/np.sqrt(2)
+        filt_45r = hh_filt_r1 - hh_filt_r2
+        filt_135r = hh_filt_r1 + hh_filt_r2
+        filt_45i = hh_filt_i1 + hh_filt_i2
+        filt_135i = hh_filt_i1 - hh_filt_i2 
+
+        hl_filt_r1 = h1_r.unsqueeze(0) * h0_r.unsqueeze(1)/np.sqrt(2)
+        hl_filt_r2 = h1_i.unsqueeze(0) * h0_i.unsqueeze(1)/np.sqrt(2)
+        hl_filt_i1 = h1_i.unsqueeze(0) * h0_r.unsqueeze(1)/np.sqrt(2)
+        hl_filt_i2 = h1_r.unsqueeze(0) * h0_i.unsqueeze(1)/np.sqrt(2)
+        filt_75r = hl_filt_r1 - hl_filt_r2
+        filt_105r = hl_filt_r1 + hl_filt_r2
+        filt_75i = hl_filt_i1 + hl_filt_i2
+        filt_105i = hl_filt_i1 - hl_filt_i2
+
+        fl_filt_reals = [filt_15r, filt_45r, filt_75r, filt_105r, filt_135r, filt_165r]
+        fl_filt_imags = [filt_15i, filt_45i, filt_75i, filt_105i, filt_135i, filt_165i]        
         
-    def forward(self, x):
-        output_list = []
-        for i in range(self.J+1):
-            output_list.append(torch.mul(x[i], self.mask[i]))
-        return tuple(output_list)    
-    
-    def projection(self):
-        for i in range(self.J+1):
-            self.mask[i].data = torch.clamp(self.mask[i].data, 0, 1)        
-    
-    
-def create_images_high_attrs(attributions, im_t, i_transform, num_tot, num_seq=50):
-#     sp_levels = np.geomspace(1, num_tot, num_seq).astype(np.int)   
-    sp_levels = np.linspace(1, 20, num_seq).astype(np.int)   
-    sp_levels[-1] = num_tot
-    device = 'cuda' if im_t[0].is_cuda else 'cpu'
-    n = len(im_t)
-    indx = 0
-    results = []
-    for i in range(num_seq):
-        # sort attribution
-        b = torch.tensor([])
-        list_of_size = [0]
-
-        for k in range(n):
-            a = attributions[k].cpu().reshape(-1)
-            b = torch.cat((b,a))
-            list_of_size.append(list_of_size[-1] + a.shape[0])
-        sort_order = torch.argsort(b, descending=True) 
-        m = torch.zeros_like(b)
-        m[sort_order[:sp_levels[indx]]] = 1
-
-        list_of_masks = []
-        for k in range(n):
-            n0 = list_of_size[k]
-            n1 = list_of_size[k+1]
-            list_of_masks.append(m[n0:n1].reshape(im_t[k].shape))
-
-        wm_list = []
-        for k in range(n):
-            wm_list.append(torch.mul(list_of_masks[k].to(device), im_t[k]))
-        wm_list = tuple(wm_list)
-
-        rec = i_transform(wm_list)       
-        indx += 1
-        results.append(rec.cpu())
-    return results    
-
-
-def compute_tuple_dim(x):
-    tot_dim = 0
-    for i in range(len(x)):
-        shape = torch.tensor(x[i].shape)
-        tot_dim += torch.prod(shape).item()
-    return tot_dim
-
-
-################################################    
-################################################    
-################################################    
-class Wavelet_Transform_from_Scratch(nn.Module):
-    def __init__(self, init_wavelet='bior2.2', requires_grad=True, device='cuda'): 
-        super(Wavelet_Transform_from_Scratch, self).__init__()        
-        # initialize        
-        w = pywt.Wavelet(init_wavelet)
-        dec_hi = torch.tensor(w.dec_hi[::-1])
-        dec_lo = torch.tensor(w.dec_lo[::-1])
-        rec_hi = torch.tensor(w.rec_hi)
-        rec_lo = torch.tensor(w.rec_lo)        
-        self.dec_hi = nn.Parameter(dec_hi.to(device), requires_grad=requires_grad)
-        self.dec_lo = nn.Parameter(dec_lo.to(device), requires_grad=requires_grad)
-        self.rec_hi = nn.Parameter(rec_hi.to(device), requires_grad=requires_grad)
-        self.rec_lo = nn.Parameter(rec_lo.to(device), requires_grad=requires_grad)
+        # compute second level wavelet filters
+        h0_a = h0a.squeeze().detach().cpu()
+        h0_b = h0b.squeeze().detach().cpu()
+        h1_a = h1a.squeeze().detach().cpu()
+        h1_b = h1b.squeeze().detach().cpu()   
         
-        self.filters = torch.stack([self.dec_lo.unsqueeze(0)*self.dec_lo.unsqueeze(1),
-                                    self.dec_lo.unsqueeze(0)*self.dec_hi.unsqueeze(1),
-                                    self.dec_hi.unsqueeze(0)*self.dec_lo.unsqueeze(1),
-                                    self.dec_hi.unsqueeze(0)*self.dec_hi.unsqueeze(1)], dim=0)  
+        lh_filt_r1 = pad_within(h0_b.unsqueeze(0) * h1_a.unsqueeze(1), start_row=1, start_col=0)/np.sqrt(2)
+        lh_filt_r2 = pad_within(h0_a.unsqueeze(0) * h1_b.unsqueeze(1), start_row=0, start_col=1)/np.sqrt(2)
+        lh_filt_i1 = pad_within(h0_a.unsqueeze(0) * h1_a.unsqueeze(1), start_row=1, start_col=1)/np.sqrt(2)
+        lh_filt_i2 = pad_within(h0_b.unsqueeze(0) * h1_b.unsqueeze(1), start_row=0, start_col=0)/np.sqrt(2)
+        filt_15r = lh_filt_r1 - lh_filt_r2
+        filt_165r = lh_filt_r1 + lh_filt_r2
+        filt_15i = lh_filt_i1 + lh_filt_i2
+        filt_165i = lh_filt_i1 - lh_filt_i2
+
+        hh_filt_r1 = pad_within(h1_a.unsqueeze(0) * h1_a.unsqueeze(1), start_row=1, start_col=1)/np.sqrt(2)
+        hh_filt_r2 = pad_within(h1_b.unsqueeze(0) * h1_b.unsqueeze(1), start_row=0, start_col=0)/np.sqrt(2)
+        hh_filt_i1 = pad_within(h1_b.unsqueeze(0) * h1_a.unsqueeze(1), start_row=1, start_col=0)/np.sqrt(2)
+        hh_filt_i2 = pad_within(h1_a.unsqueeze(0) * h1_b.unsqueeze(1), start_row=0, start_col=1)/np.sqrt(2)
+        filt_45r = hh_filt_r1 - hh_filt_r2
+        filt_135r = hh_filt_r1 + hh_filt_r2
+        filt_45i = hh_filt_i1 + hh_filt_i2
+        filt_135i = hh_filt_i1 - hh_filt_i2 
+
+        hl_filt_r1 = pad_within(h1_a.unsqueeze(0) * h0_b.unsqueeze(1), start_row=0, start_col=1)/np.sqrt(2)
+        hl_filt_r2 = pad_within(h1_b.unsqueeze(0) * h0_a.unsqueeze(1), start_row=1, start_col=0)/np.sqrt(2)
+        hl_filt_i1 = pad_within(h1_b.unsqueeze(0) * h0_b.unsqueeze(1), start_row=0, start_col=0)/np.sqrt(2)
+        hl_filt_i2 = pad_within(h1_a.unsqueeze(0) * h0_a.unsqueeze(1), start_row=1, start_col=1)/np.sqrt(2)
+        filt_75r = hl_filt_r1 - hl_filt_r2
+        filt_105r = hl_filt_r1 + hl_filt_r2
+        filt_75i = hl_filt_i1 + hl_filt_i2
+        filt_105i = hl_filt_i1 - hl_filt_i2
         
-        self.inv_filters = torch.stack([self.rec_lo.unsqueeze(0)*self.rec_lo.unsqueeze(1),
-                                        self.rec_lo.unsqueeze(0)*self.rec_hi.unsqueeze(1),
-                                        self.rec_hi.unsqueeze(0)*self.rec_lo.unsqueeze(1),
-                                        self.rec_hi.unsqueeze(0)*self.rec_hi.unsqueeze(1)], dim=0)        
+        sl_filt_reals = [filt_15r, filt_45r, filt_75r, filt_105r, filt_135r, filt_165r]
+        sl_filt_imags = [filt_15i, filt_45i, filt_75i, filt_105i, filt_135i, filt_165i]           
+        
+        return (fl_filt_reals, fl_filt_imags), (sl_filt_reals, sl_filt_imags)
     
-    def xfm(self, x, levels=5):
-        # wavelet transform
-        h = x.size(2)
-        w = x.size(3)
-        x_t = F.conv2d(x, self.filters[:,None], stride=2, padding=2) # only works for filter of size 6
-        res = x_t.clone()
-        if levels > 1:
-            res = self.xfm(res[:,:1], levels=levels-1)
-            x_t[:,:1] = res
-        x_t = x_t.reshape(-1,2,h//2,w//2).transpose(1,2).contiguous().reshape(-1,1,h,w)
-        return x_t
+    elif wt_type == 'DWT':
+        h0_row = F.pad(w_transform.xfm.h0_row.squeeze(), pad=(2,2), mode='constant', value=0)
+        h1_row = F.pad(w_transform.xfm.h1_row.squeeze(), pad=(2,2), mode='constant', value=0)        
+        h0_col = F.pad(w_transform.xfm.h0_col.squeeze(), pad=(2,2), mode='constant', value=0)
+        h1_col = F.pad(w_transform.xfm.h1_col.squeeze(), pad=(2,2), mode='constant', value=0)         
+        
+        filt_lh = h0_row.unsqueeze(0)*h1_col.unsqueeze(1)
+        filt_hl = h1_row.unsqueeze(0)*h0_col.unsqueeze(1)
+        filt_hh = h1_row.unsqueeze(0)*h1_col.unsqueeze(1)
+        
+        return [filt_lh.detach().cpu(), filt_hl.detach().cpu(), filt_hh.detach().cpu()]
     
-    def ifm(self, x, levels=5):
-        # inverse wavelet transform
-        h = x.size(2)
-        w = x.size(3)
-        res = x.reshape(-1,h//2,2,w//2).transpose(1,2).contiguous().reshape(-1,4,h//2,w//2).clone()
-        if levels > 1:
-            res[:,:1] = self.ifm(res[:,:1], levels=levels-1)
-        res = F.conv_transpose2d(res, self.inv_filters[:,None], stride=2)
-        res = res[:,:,2:-2,2:-2]
-        return res    
+    else:
+        raise ValueError('no such type of wavelet transform is supported')        
+    
+
+

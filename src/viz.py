@@ -143,7 +143,7 @@ def plot_traversals(model,
         
         
 def viz_filters(tensors, n_row=4, n_col=8, resize_fac=2, normalize=True, vmax=None, vmin=None, title=None):
-    plt.figure(figsize=(15,15))
+    plt.figure(figsize=(10,10))
     # plot filters
     p = tensors.shape[2] + 2
     mosaic = np.zeros((p*n_row,p*n_col))
@@ -158,7 +158,7 @@ def viz_filters(tensors, n_row=4, n_col=8, resize_fac=2, normalize=True, vmax=No
             indx += 1
     if title is not None:
         plt.title(title)
-    plt.imshow(rescale(mosaic,resize_fac,mode='constant'), cmap='magma', vmax=vmax, vmin=vmin)
+    plt.imshow(rescale(mosaic,resize_fac,mode='constant'), cmap='gray')
     plt.axis('off')    
     plt.show() 
     
