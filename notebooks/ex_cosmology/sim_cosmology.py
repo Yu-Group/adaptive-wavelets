@@ -66,17 +66,18 @@ class s:
     
     
 # generate data
-def load_dataloader_and_pretrained_model(p):
+def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True):
     """A generic data loader
     """
-    train_loader = get_dataloader(p.data_path, 
-                                  img_size=256,
-                                  batch_size=p.train_batch_size) 
+    data_loader = get_dataloader(p.data_path, 
+                                 img_size=img_size,
+                                 split_train_test=split_train_test,
+                                 batch_size=p.train_batch_size) 
     model = load_model(model_name='resnet18', device=device, data_path=p.data_path)
     model = model.eval()
     # freeze layers
     for param in model.parameters():
         param.requires_grad = False    
 
-    return train_loader, model
+    return data_loader, model
 
