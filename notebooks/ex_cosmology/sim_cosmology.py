@@ -15,7 +15,7 @@ from dset import get_dataloader
 
 
 parser = argparse.ArgumentParser(description='Cosmology Example')
-parser.add_argument('--train_batch_size', type=int, default=64, metavar='N',
+parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
                     help='number of epochs to train (default: 50)')
@@ -36,11 +36,8 @@ class p:
     img_size = (1, 256, 256)
     
     # parameters for training
-    train_batch_size = 64
-    test_batch_size = 100
+    batch_size = 64
     lr = 1*1e-4
-    rec_dist = "gaussian"
-    reg_anneal = 0
     num_epochs = 50
     
     # SAVE MODEL
@@ -50,7 +47,7 @@ class p:
 
     def _str(self):
         vals = vars(p)
-        return 'h_channels=' + str(vals['h_channels']) + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
+        return '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
     
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
@@ -72,7 +69,7 @@ def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True)
     data_loader = get_dataloader(p.data_path, 
                                  img_size=img_size,
                                  split_train_test=split_train_test,
-                                 batch_size=p.train_batch_size) 
+                                 batch_size=p.batch_size) 
     model = load_model(model_name='resnet18', device=device, data_path=p.data_path)
     model = model.eval()
     # freeze layers
@@ -80,4 +77,3 @@ def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True)
         param.requires_grad = False    
 
     return data_loader, model
-

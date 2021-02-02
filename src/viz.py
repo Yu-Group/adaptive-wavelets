@@ -6,7 +6,7 @@ import seaborn as sns
 import sys
 import matplotlib.pyplot as plt
 from skimage.transform import rescale
-sys.path.append('..')
+sys.path.append('../..')
 from config import DIR_FIGS
 from os.path import join as opj
 cb = '#66ccff'

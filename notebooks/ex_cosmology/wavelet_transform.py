@@ -127,7 +127,32 @@ class Attributer(nn.Module):
         for i in range(n):
             imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
             scores.append(imps)   
-        return tuple(scores)     
+        return tuple(scores)    
+    
+    
+def initialize_filters(w_transform, noise_level=0.1, device=device):
+    '''Initialize wavelet filters by adding random noise
+    Params
+    ------
+    w_transform: obj
+        wavelet object
+    noise_level: float
+        amount of noise added to original filter
+    '''        
+    w_t = deepcopy(w_transform)
+    w_t.xfm.h0o.data = w_transform.xfm.h0o.data + noise_level*torch.randn(w_transform.xfm.h0o.data.shape).to(device)
+    w_t.xfm.h1o.data = w_transform.xfm.h1o.data + noise_level*torch.randn(w_transform.xfm.h1o.data.shape).to(device)
+    w_t.xfm.h0a.data = w_transform.xfm.h0a.data + noise_level*torch.randn(w_transform.xfm.h0a.data.shape).to(device)
+    w_t.xfm.h1a.data = w_transform.xfm.h1a.data + noise_level*torch.randn(w_transform.xfm.h1a.data.shape).to(device)
+    w_t.xfm.h0b.data = w_transform.xfm.h0b.data + noise_level*torch.randn(w_transform.xfm.h0b.data.shape).to(device)
+    w_t.xfm.h1b.data = w_transform.xfm.h1b.data + noise_level*torch.randn(w_transform.xfm.h1b.data.shape).to(device)
+    w_t.ifm.g0o.data = w_transform.ifm.g0o.data + noise_level*torch.randn(w_transform.ifm.g0o.data.shape).to(device)
+    w_t.ifm.g1o.data = w_transform.ifm.g1o.data + noise_level*torch.randn(w_transform.ifm.g1o.data.shape).to(device)
+    w_t.ifm.g0a.data = w_transform.ifm.g0a.data + noise_level*torch.randn(w_transform.ifm.g0a.data.shape).to(device)
+    w_t.ifm.g1a.data = w_transform.ifm.g1a.data + noise_level*torch.randn(w_transform.ifm.g1a.data.shape).to(device)
+    w_t.ifm.g0b.data = w_transform.ifm.g0b.data + noise_level*torch.randn(w_transform.ifm.g0b.data.shape).to(device)
+    w_t.ifm.g1b.data = w_transform.ifm.g1b.data + noise_level*torch.randn(w_transform.ifm.g1b.data.shape).to(device)
+    return w_t    
     
     
 def get_2dfilts(w_transform, wt_type='DTCWT'):
