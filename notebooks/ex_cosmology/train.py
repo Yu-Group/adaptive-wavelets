@@ -72,8 +72,8 @@ class Trainer():
                 mean_epoch_loss = self._train_epoch(train_loader, epoch)
                 print('\n====> Epoch: {} Average train loss: {:.4f}'.format(epoch, mean_epoch_loss))
                 self.train_losses[epoch] = mean_epoch_loss    
-            torch.save(w_transform.state_dict(), opj(self.out_dir, 'epoch=' + str(epoch) + '_lamL1attr=' \
-                                                     + str(loss_f.lamL1attr) + '_lamL1Maxattr=' + str(loss_f.lamL1Maxattr) + '.pth')) 
+            torch.save(self.w_transform.state_dict(), opj(self.out_dir, 'epoch=' + str(epoch) + '_lamL1attr=' \
+                                                     + str(self.loss_f.lamL1attr) + '_lamL1Maxattr=' + str(self.loss_f.lamL1Maxattr) + '.pth')) 
 
     def _train_epoch(self, data_loader, epoch):
         """
