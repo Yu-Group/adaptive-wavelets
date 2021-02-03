@@ -34,10 +34,10 @@ class DWTForward(nn.Module):
 
         # Prepare the filters
         filts = lowlevel.prep_filt_afb2d(h0_col, h1_col, h0_row, h1_row)
-        self.register_buffer('h0_col', filts[0])
-        self.register_buffer('h1_col', filts[1])
-        self.register_buffer('h0_row', filts[2])
-        self.register_buffer('h1_row', filts[3])
+        self.h0_col = nn.Parameter(filts[0], requires_grad=True)
+        self.h1_col = nn.Parameter(filts[1], requires_grad=True)
+        self.h0_row = nn.Parameter(filts[2], requires_grad=True)
+        self.h1_row = nn.Parameter(filts[3], requires_grad=True)
         self.J = J
         self.mode = mode
 
@@ -67,7 +67,7 @@ class DWTForward(nn.Module):
         # Do a multilevel transform
         for j in range(self.J):
             # Do 1 level of the transform
-            ll, high = lowlevel.AFB2D.apply(
+            ll, high = lowlevel.AFB2D.forward(
                 ll, self.h0_col, self.h1_col, self.h0_row, self.h1_row, mode)
             yh.append(high)
 
@@ -102,10 +102,10 @@ class DWTInverse(nn.Module):
                 g0_row, g1_row = wave[2], wave[3]
         # Prepare the filters
         filts = lowlevel.prep_filt_sfb2d(g0_col, g1_col, g0_row, g1_row)
-        self.register_buffer('g0_col', filts[0])
-        self.register_buffer('g1_col', filts[1])
-        self.register_buffer('g0_row', filts[2])
-        self.register_buffer('g1_row', filts[3])
+        self.g0_col = nn.Parameter(filts[0], requires_grad=True)
+        self.g1_col = nn.Parameter(filts[1], requires_grad=True)
+        self.g0_row = nn.Parameter(filts[2], requires_grad=True)
+        self.g1_row = nn.Parameter(filts[3], requires_grad=True)        
         self.mode = mode
 
     def forward(self, coeffs):
@@ -143,7 +143,7 @@ class DWTInverse(nn.Module):
                 ll = ll[...,:-1,:]
             if ll.shape[-1] > h.shape[-1]:
                 ll = ll[...,:-1]
-            ll = lowlevel.SFB2D.apply(
+            ll = lowlevel.SFB2D.forward(
                 ll, h, self.g0_col, self.g1_col, self.g0_row, self.g1_row, mode)
         return ll
 

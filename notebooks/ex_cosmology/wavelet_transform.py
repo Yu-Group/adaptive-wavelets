@@ -49,6 +49,7 @@ class Wavelet_Transform(nn.Module):
         else: 
             raise ValueError('no such type of wavelet transform is supported')            
         self.J = J
+        self.wt_type = wt_type
 
     def forward(self, x):
         # forward wavelet transform
@@ -130,7 +131,7 @@ class Attributer(nn.Module):
         return tuple(scores)    
     
     
-def initialize_filters(w_transform, noise_level=0.1, device=device):
+def initialize_filters(w_transform, init_level=1, noise_level=0.1, device=device):
     '''Initialize wavelet filters by adding random noise
     Params
     ------
@@ -140,22 +141,34 @@ def initialize_filters(w_transform, noise_level=0.1, device=device):
         amount of noise added to original filter
     '''        
     w_t = deepcopy(w_transform)
-    w_t.xfm.h0o.data = w_transform.xfm.h0o.data + noise_level*torch.randn(w_transform.xfm.h0o.data.shape).to(device)
-    w_t.xfm.h1o.data = w_transform.xfm.h1o.data + noise_level*torch.randn(w_transform.xfm.h1o.data.shape).to(device)
-    w_t.xfm.h0a.data = w_transform.xfm.h0a.data + noise_level*torch.randn(w_transform.xfm.h0a.data.shape).to(device)
-    w_t.xfm.h1a.data = w_transform.xfm.h1a.data + noise_level*torch.randn(w_transform.xfm.h1a.data.shape).to(device)
-    w_t.xfm.h0b.data = w_transform.xfm.h0b.data + noise_level*torch.randn(w_transform.xfm.h0b.data.shape).to(device)
-    w_t.xfm.h1b.data = w_transform.xfm.h1b.data + noise_level*torch.randn(w_transform.xfm.h1b.data.shape).to(device)
-    w_t.ifm.g0o.data = w_transform.ifm.g0o.data + noise_level*torch.randn(w_transform.ifm.g0o.data.shape).to(device)
-    w_t.ifm.g1o.data = w_transform.ifm.g1o.data + noise_level*torch.randn(w_transform.ifm.g1o.data.shape).to(device)
-    w_t.ifm.g0a.data = w_transform.ifm.g0a.data + noise_level*torch.randn(w_transform.ifm.g0a.data.shape).to(device)
-    w_t.ifm.g1a.data = w_transform.ifm.g1a.data + noise_level*torch.randn(w_transform.ifm.g1a.data.shape).to(device)
-    w_t.ifm.g0b.data = w_transform.ifm.g0b.data + noise_level*torch.randn(w_transform.ifm.g0b.data.shape).to(device)
-    w_t.ifm.g1b.data = w_transform.ifm.g1b.data + noise_level*torch.randn(w_transform.ifm.g1b.data.shape).to(device)
+    if w_transform.wt_type == 'DTCWT':
+        w_t.xfm.h0o.data = init_level*w_transform.xfm.h0o.data + noise_level*torch.randn(w_transform.xfm.h0o.data.shape).to(device)
+        w_t.xfm.h1o.data = init_level*w_transform.xfm.h1o.data + noise_level*torch.randn(w_transform.xfm.h1o.data.shape).to(device)
+        w_t.xfm.h0a.data = init_level*w_transform.xfm.h0a.data + noise_level*torch.randn(w_transform.xfm.h0a.data.shape).to(device)
+        w_t.xfm.h1a.data = init_level*w_transform.xfm.h1a.data + noise_level*torch.randn(w_transform.xfm.h1a.data.shape).to(device)
+        w_t.xfm.h0b.data = init_level*w_transform.xfm.h0b.data + noise_level*torch.randn(w_transform.xfm.h0b.data.shape).to(device)
+        w_t.xfm.h1b.data = init_level*w_transform.xfm.h1b.data + noise_level*torch.randn(w_transform.xfm.h1b.data.shape).to(device)
+        w_t.ifm.g0o.data = init_level*w_transform.ifm.g0o.data + noise_level*torch.randn(w_transform.ifm.g0o.data.shape).to(device)
+        w_t.ifm.g1o.data = init_level*w_transform.ifm.g1o.data + noise_level*torch.randn(w_transform.ifm.g1o.data.shape).to(device)
+        w_t.ifm.g0a.data = init_level*w_transform.ifm.g0a.data + noise_level*torch.randn(w_transform.ifm.g0a.data.shape).to(device)
+        w_t.ifm.g1a.data = init_level*w_transform.ifm.g1a.data + noise_level*torch.randn(w_transform.ifm.g1a.data.shape).to(device)
+        w_t.ifm.g0b.data = init_level*w_transform.ifm.g0b.data + noise_level*torch.randn(w_transform.ifm.g0b.data.shape).to(device)
+        w_t.ifm.g1b.data = init_level*w_transform.ifm.g1b.data + noise_level*torch.randn(w_transform.ifm.g1b.data.shape).to(device)
+    elif w_transform.wt_type == 'DWT':
+        w_t.xfm.h0_row.data = init_level*w_transform.xfm.h0_row.data + noise_level*torch.randn(w_transform.xfm.h0_row.data.shape).to(device)
+        w_t.xfm.h1_row.data = init_level*w_transform.xfm.h1_row.data + noise_level*torch.randn(w_transform.xfm.h1_row.data.shape).to(device)
+        w_t.xfm.h0_col.data = init_level*w_transform.xfm.h0_col.data + noise_level*torch.randn(w_transform.xfm.h0_col.data.shape).to(device)
+        w_t.xfm.h1_col.data = init_level*w_transform.xfm.h1_col.data + noise_level*torch.randn(w_transform.xfm.h1_col.data.shape).to(device)
+        w_t.ifm.g0_row.data = init_level*w_transform.ifm.g0_row.data + noise_level*torch.randn(w_transform.ifm.g0_row.data.shape).to(device)
+        w_t.ifm.g1_row.data = init_level*w_transform.ifm.g1_row.data + noise_level*torch.randn(w_transform.ifm.g1_row.data.shape).to(device)
+        w_t.ifm.g0_col.data = init_level*w_transform.ifm.g0_col.data + noise_level*torch.randn(w_transform.ifm.g0_col.data.shape).to(device)
+        w_t.ifm.g1_col.data = init_level*w_transform.ifm.g1_col.data + noise_level*torch.randn(w_transform.ifm.g1_col.data.shape).to(device)        
+    else: 
+        raise ValueError('no such type of wavelet transform is supported')            
     return w_t    
     
     
-def get_2dfilts(w_transform, wt_type='DTCWT'):
+def get_2dfilts(w_transform):
     ### TO DO: implement 2d filters for inverse transform ###
     '''Get 2d filters from one-dimensional wavelets
     Params
@@ -165,7 +178,7 @@ def get_2dfilts(w_transform, wt_type='DTCWT'):
     wt_type: str
         indicate either dual-tree complex wavelet transform (DTCWT) or discrete wavelet transform (DWT)
     '''    
-    if wt_type == 'DTCWT':
+    if w_transform.wt_type == 'DTCWT':
         h0o = w_transform.xfm.h0o.data
         h1o = w_transform.xfm.h1o.data
         h0a = w_transform.xfm.h0a.data
@@ -247,7 +260,7 @@ def get_2dfilts(w_transform, wt_type='DTCWT'):
         
         return (fl_filt_reals, fl_filt_imags), (sl_filt_reals, sl_filt_imags)
     
-    elif wt_type == 'DWT':
+    elif w_transform.wt_type == 'DWT':
         h0_row = F.pad(w_transform.xfm.h0_row.squeeze(), pad=(2,2), mode='constant', value=0)
         h1_row = F.pad(w_transform.xfm.h1_row.squeeze(), pad=(2,2), mode='constant', value=0)        
         h0_col = F.pad(w_transform.xfm.h0_col.squeeze(), pad=(2,2), mode='constant', value=0)
@@ -257,7 +270,7 @@ def get_2dfilts(w_transform, wt_type='DTCWT'):
         filt_hl = h1_row.unsqueeze(0)*h0_col.unsqueeze(1)
         filt_hh = h1_row.unsqueeze(0)*h1_col.unsqueeze(1)
         
-        return [filt_lh.detach().cpu(), filt_hl.detach().cpu(), filt_hh.detach().cpu()]
+        return (filt_lh.detach().cpu(), filt_hl.detach().cpu(), filt_hh.detach().cpu())
     
     else:
         raise ValueError('no such type of wavelet transform is supported')        

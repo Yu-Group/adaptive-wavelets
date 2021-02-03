@@ -333,11 +333,8 @@ class AFB2D(Function):
         y: Tensor of shape (N, C*4, H, W)
     """
     @staticmethod
-    def forward(ctx, x, h0_row, h1_row, h0_col, h1_col, mode):
-        ctx.save_for_backward(h0_row, h1_row, h0_col, h1_col)
-        ctx.shape = x.shape[-2:]
+    def forward(x, h0_row, h1_row, h0_col, h1_col, mode):
         mode = int_to_mode(mode)
-        ctx.mode = mode
         lohi = afb1d(x, h0_row, h1_row, mode=mode, dim=3)
         y = afb1d(lohi, h0_col, h1_col, mode=mode, dim=2)
         s = y.shape
@@ -345,24 +342,6 @@ class AFB2D(Function):
         low = y[:,:,0].contiguous()
         highs = y[:,:,1:].contiguous()
         return low, highs
-
-    @staticmethod
-    def backward(ctx, low, highs):
-        dx = None
-        if ctx.needs_input_grad[0]:
-            mode = ctx.mode
-            h0_row, h1_row, h0_col, h1_col = ctx.saved_tensors
-            lh, hl, hh = torch.unbind(highs, dim=2)
-            lo = sfb1d(low, lh, h0_col, h1_col, mode=mode, dim=2)
-            hi = sfb1d(hl, hh, h0_col, h1_col, mode=mode, dim=2)
-            dx = sfb1d(lo, hi, h0_row, h1_row, mode=mode, dim=3)
-            if dx.shape[-2] > ctx.shape[-2] and dx.shape[-1] > ctx.shape[-1]:
-                dx = dx[:,:,:ctx.shape[-2], :ctx.shape[-1]]
-            elif dx.shape[-2] > ctx.shape[-2]:
-                dx = dx[:,:,:ctx.shape[-2]]
-            elif dx.shape[-1] > ctx.shape[-1]:
-                dx = dx[:,:,:,:ctx.shape[-1]]
-        return dx, None, None, None, None, None
 
 
 class AFB1D(Function):
@@ -668,30 +647,14 @@ class SFB2D(Function):
         y: Tensor of shape (N, C*4, H, W)
     """
     @staticmethod
-    def forward(ctx, low, highs, g0_row, g1_row, g0_col, g1_col, mode):
+    def forward(low, highs, g0_row, g1_row, g0_col, g1_col, mode):
         mode = int_to_mode(mode)
-        ctx.mode = mode
-        ctx.save_for_backward(g0_row, g1_row, g0_col, g1_col)
 
         lh, hl, hh = torch.unbind(highs, dim=2)
         lo = sfb1d(low, lh, g0_col, g1_col, mode=mode, dim=2)
         hi = sfb1d(hl, hh, g0_col, g1_col, mode=mode, dim=2)
         y = sfb1d(lo, hi, g0_row, g1_row, mode=mode, dim=3)
         return y
-
-    @staticmethod
-    def backward(ctx, dy):
-        dlow, dhigh = None, None
-        if ctx.needs_input_grad[0]:
-            mode = ctx.mode
-            g0_row, g1_row, g0_col, g1_col = ctx.saved_tensors
-            dx = afb1d(dy, g0_row, g1_row, mode=mode, dim=3)
-            dx = afb1d(dx, g0_col, g1_col, mode=mode, dim=2)
-            s = dx.shape
-            dx = dx.reshape(s[0], -1, 4, s[-2], s[-1])
-            dlow = dx[:,:,0].contiguous()
-            dhigh = dx[:,:,1:].contiguous()
-        return dlow, dhigh, None, None, None, None, None
 
 
 class SFB1D(Function):
