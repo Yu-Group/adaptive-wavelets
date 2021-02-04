@@ -19,10 +19,9 @@ def tuple_Sum(x):
 def tuple_L1Loss(x):
     output = 0
     num = len(x)
-    batch_size = x[0].shape[0]
     for i in range(num):
         output += torch.sum(abs(x[i]))
-    return output/(num*batch_size)
+    return output/num
 
 
 def tuple_L2Loss(x):
@@ -99,10 +98,16 @@ def viz_list(x: list, figsize=(10, 10), scale=2):
         figure size    
     '''
     ls = len(x)
+    x_min = 1e4
+    x_max = -1e4
+    for i in range(ls):
+        x_min = min(x[i].min(), x_min)
+        x_max = max(x[i].max(), x_max)
+        
     plt.figure(figsize=figsize, dpi=200)
     for i in range(ls):
         plt.subplot(1, ls, i + 1)
-        plt.imshow(rescale(x[i], scale, mode='constant'), cmap='gray', extent=[0,2,0,2])
+        plt.imshow(rescale(x[i], scale, mode='constant'), cmap='gray', extent=[0,2,0,2], vmin=x_min, vmax=x_max)
         plt.axis('off')  
     plt.tight_layout()
     plt.show()    

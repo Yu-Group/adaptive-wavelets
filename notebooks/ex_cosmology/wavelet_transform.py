@@ -39,7 +39,7 @@ class Wavelet_Transform(nn.Module):
     '''
     def __init__(self, wt_type='DTCWT', biort='near_sym_b', qshift='qshift_b', J=5, 
                  wave='db3', mode='zero', device='cuda', requires_grad=True): 
-        super(Wavelet_Transform, self).__init__()     
+        super().__init__()     
         if wt_type == 'DTCWT':
             self.xfm = DTCWTForward(biort=biort, qshift=qshift, J=J).to(device)
             self.ifm = DTCWTInverse(biort=biort, qshift=qshift).to(device)
@@ -79,7 +79,7 @@ class Attributer(nn.Module):
         use GPU or CPU
     '''    
     def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
-        super(Attributer, self).__init__()
+        super().__init__()
         self.mt = mt.to(device)
         self.attr_methods = attr_methods   
         self.device = device
@@ -89,6 +89,8 @@ class Attributer(nn.Module):
             attributions = self.InputXGradient(x, target, additional_forward_args)
         elif self.attr_methods == 'IntegratedGradient':
             attributions = self.IntegratedGradient(x, target, additional_forward_args)
+        elif self.attr_methods == 'Saliency':
+            attributions = self.Saliency(x, target, additional_forward_args)
         else: 
             raise ValueError
         return attributions
@@ -99,6 +101,11 @@ class Attributer(nn.Module):
         # input * gradient
         attributions = tuple(xi * gi for xi, gi in zip(x, grads))
         return attributions    
+    
+    def Saliency(self, x: tuple, target=1, additional_forward_args=None):
+        outputs = self.mt(x, additional_forward_args)[:,target]
+        grads = torch.autograd.grad(torch.unbind(outputs), x)        
+        return grads
     
     ### TO DO!! ###
     # implement batch version of IG
@@ -120,7 +127,7 @@ class Attributer(nn.Module):
             input_vecs.append(inp)
 
         # run forward pass
-        output = self.mt(input_vecs)[:,1].sum()
+        output = self.mt(input_vecs, additional_forward_args)[:,1].sum()
         output.backward(retain_graph=True)
 
         # ig

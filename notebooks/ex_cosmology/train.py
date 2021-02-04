@@ -34,15 +34,16 @@ class Trainer():
     def __init__(self, model, w_transform, attributer, optimizer, loss_f,
                  device=torch.device("cpu"),
                  use_residuals=True,
+                 attr_methods='InputXGradient',
                  out_dir="/home/ubuntu/local-vae/notebooks/ex_cosmology/results"):
 
         self.device = device
         self.model = model.to(self.device)
-        self.w_transform = w_transform
+        self.w_transform = w_transform.to(self.device)
         self.optimizer = optimizer
         self.loss_f = loss_f
         self.mt = TrimModel(model, w_transform.inverse, use_residuals=use_residuals)    
-        self.attributer = attributer(self.mt, attr_methods='InputXGradient')
+        self.attributer = attributer(self.mt, attr_methods=attr_methods, device=self.device)
         self.out_dir = out_dir
 
     def __call__(self, train_loader, test_loader=None, epochs=10):
@@ -72,8 +73,6 @@ class Trainer():
                 mean_epoch_loss = self._train_epoch(train_loader, epoch)
                 print('\n====> Epoch: {} Average train loss: {:.4f}'.format(epoch, mean_epoch_loss))
                 self.train_losses[epoch] = mean_epoch_loss    
-            torch.save(self.w_transform.state_dict(), opj(self.out_dir, 'epoch=' + str(epoch) + '_lamL1attr=' \
-                                                     + str(self.loss_f.lamL1attr) + '_lamL1Maxattr=' + str(self.loss_f.lamL1Maxattr) + '.pth')) 
 
     def _train_epoch(self, data_loader, epoch):
         """
@@ -156,10 +155,81 @@ class Trainer():
             attributions = self.attributer(data_t, target=1, additional_forward_args=deepcopy(data))
             loss = self.loss_f(data, recon_data, data_t, attributions)                  
             iter_loss = loss.item()
-            epoch_loss += iter_loss       
+            epoch_loss += iter_loss   
+            print('\rTest: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(batch_idx * len(data), len(data_loader.dataset),
+                       100. * batch_idx / len(data_loader), iter_loss), end='')               
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
-        return mean_epoch_loss    
+        return mean_epoch_loss 
     
     
+class Validator():
+    """
+    Class to handle training of model.
+
+    Parameters
+    ----------
+    model: torch.model
     
+    optimizer: torch.optim.Optimizer
+    
+    w_transform: torch.nn.module
+        Wavelet transformer
+        
+    attributer: torch.nn.module
+        Attributer for model appended with wavelet transform
+        
+    device: torch.device, optional
+        Device on which to run the code.
+        
+    use_residuals : boolean, optional
+        Use residuals to compute TRIM score.
+    """
+    def __init__(self, model, w_transform, attributer, loss_f,
+                 device=torch.device("cpu"),
+                 attr_methods='InputXGradient',
+                 use_residuals=True):
+
+        self.device = device
+        self.model = model.to(self.device)
+        self.w_transform = w_transform.to(self.device)
+        self.loss_f = loss_f
+        self.mt = TrimModel(model, w_transform.inverse, use_residuals=use_residuals)    
+        self.attributer = attributer(self.mt, attr_methods=attr_methods, device=self.device)
+ 
+    def __call__(self, data_loader):
+        """
+        Tests the model for one epoch.
+
+        Parameters
+        ----------
+        data_loader: torch.utils.data.DataLoader
+
+        Return
+        ------
+        mean_epoch_loss: float
+        """
+        self.w_transform.eval()
+        epoch_loss = 0.
+        rec_loss = 0.
+        L1attr_loss = 0.
+        for batch_idx, (data, _) in enumerate(data_loader):
+            data = data.to(self.device)
+            data_t = self.w_transform(data)
+            recon_data = self.w_transform.inverse(data_t)
+            attributions = self.attributer(data_t, target=1, additional_forward_args=deepcopy(data))
+            loss = self.loss_f(data, recon_data, data_t, attributions)                  
+            iter_loss = loss.item()
+            epoch_loss += iter_loss   
+            print('\rTest: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(batch_idx * len(data), len(data_loader.dataset),
+                       100. * batch_idx / len(data_loader), iter_loss), end='')   
+            rec_loss += self.loss_f.rec_loss.item()
+            L1attr_loss += self.loss_f.L1attr_loss.item()
+
+        mean_epoch_loss = epoch_loss / (batch_idx + 1)
+        mean_rec_loss = rec_loss / (batch_idx + 1)
+        mean_L1attr_loss = L1attr_loss / (batch_idx + 1)
+        return (mean_epoch_loss, mean_rec_loss, mean_L1attr_loss)
+    
+    
+        

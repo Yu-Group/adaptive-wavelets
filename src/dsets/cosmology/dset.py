@@ -36,7 +36,7 @@ def get_dataloader(root_dir, img_size=64, shuffle=True, split_train_test=True, p
                                   shuffle=shuffle,
                                   pin_memory=pin_memory,
                                   **kwargs)
-        test_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(25000, 30000)),
+        test_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(25000, 27000)),
                                  batch_size=batch_size,
                                  shuffle=shuffle,
                                  pin_memory=pin_memory,
