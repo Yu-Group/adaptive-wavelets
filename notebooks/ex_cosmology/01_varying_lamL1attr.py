@@ -20,7 +20,7 @@ if __name__ == '__main__':
         'attr_methods': ['Saliency'],
         'lamL1attr': np.round(np.geomspace(1, 100, 20), 5),
         'lr': [0.01],
-        'dirname': ['vary_lamL1attr_seeds']
+        'dirname': ['vary_lamL1attr_seeds_initialized']
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
