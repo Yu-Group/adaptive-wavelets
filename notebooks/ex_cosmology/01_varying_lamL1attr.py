@@ -14,7 +14,7 @@ if __name__ == '__main__':
     
     params_to_vary = {
         'num_epochs': [100],
-        'seed': range(0, 5),
+        'seed': [100],
         'init_level': [1],
         'noise_level': [0.1],
         'attr_methods': ['Saliency'],
