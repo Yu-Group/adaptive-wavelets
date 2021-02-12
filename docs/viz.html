@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2" />
+<title>adaptive_wavelets.viz API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>adaptive_wavelets.viz</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+import torch
+device = &#39;cuda&#39; if torch.cuda.is_available() else &#39;cpu&#39;
+
+import seaborn as sns
+import sys
+import matplotlib.pyplot as plt
+from skimage.transform import rescale
+sys.path.append(&#39;../..&#39;)
+from config import DIR_FIGS
+from os.path import join as opj
+cb = &#39;#66ccff&#39;
+cr = &#39;#cc0000&#39;
+cm = sns.diverging_palette(10, 240, n=1000, as_cmap=True)
+
+def save_fig(fname):
+    plt.savefig(opj(DIR_FIGS, fname) + &#39;.png&#39;)
+    
+    
+def cshow(im):
+    plt.imshow(im, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.axis(&#39;off&#39;)
+    
+    
+def plot_2d_samples(sample, color=&#39;C0&#39;):
+    &#34;&#34;&#34;Plot 2d sample 
+    
+        Arugments
+        ---------
+        sample : 2D ndarray or tensor
+            matrix of spatial coordinates for each sample       
+    &#34;&#34;&#34;
+    if &#34;torch&#34; in str(type(sample)):
+        sample_np = sample.detach().cpu().numpy()
+    x = sample_np[:, 0]
+    y = sample_np[:, 1]
+    plt.scatter(x, y, color=color)
+    plt.gca().set_aspect(&#39;equal&#39;, adjustable=&#39;box&#39;)
+    
+    
+def plot_2d_latent_samples(latent_sample, color=&#39;C0&#39;):
+    &#34;&#34;&#34;Plot latent samples select two most highly variable coordinates
+    
+        Arugments
+        ---------
+        latent_sample : tensor
+            matrix of spatial coordinates for each latent sample       
+    &#34;&#34;&#34;    
+    latent_dim = latent_sample.size()[1]
+    stds = []
+    for i in range(latent_dim):
+        stds.append(torch.std(latent_sample[:,i]).item())
+    stds = np.array(stds)
+    ind = np.argsort(stds)[::-1][:2]
+    plot_2d_samples(latent_sample[:,list(ind)])    
+    
+    
+def traverse_line(idx, model, n_samples=100, n_latents=2, data=None, max_traversal=10):
+    &#34;&#34;&#34;Return a (size, latent_size) latent sample, corresponding to a traversal
+    of a latent variable indicated by idx.
+
+    Parameters
+    ----------
+    idx : int
+        Index of continuous dimension to traverse. If the continuous latent
+        vector is 10 dimensional and idx = 7, then the 7th dimension
+        will be traversed while all others are fixed.
+
+    n_samples : int
+        Number of samples to generate.
+
+    data : torch.Tensor or None, optional
+        Data to use for computing the posterior. If `None` 
+        then use the mean of the prior (all zeros) for all other dimensions.
+    &#34;&#34;&#34;
+    model.eval()
+    if data is None:
+        # mean of prior for other dimensions
+        samples = torch.zeros(n_samples, n_latents)
+        traversals = torch.linspace(-2, 2, steps=n_samples)
+
+    else:
+        if data.size(0) &gt; 1:
+            raise ValueError(&#34;Every value should be sampled from the same posterior, but {} datapoints given.&#34;.format(data.size(0)))
+
+        with torch.no_grad():
+            post_mean, post_logvar = model.encoder(data.to(device))
+            samples = model.reparameterize(post_mean, post_logvar)
+            samples = samples.cpu().repeat(n_samples, 1)
+            post_mean_idx = post_mean.cpu()[0, idx]
+            post_std_idx = torch.exp(post_logvar / 2).cpu()[0, idx]         
+
+        # travers from the gaussian of the posterior in case quantile
+        traversals = torch.linspace(post_mean_idx - max_traversal, 
+                                    post_mean_idx + max_traversal, 
+                                    steps=n_samples)
+
+    for i in range(n_samples):
+        samples[i, idx] = traversals[i]
+
+    return samples
+    
+    
+def traversals(model,
+               data=None,
+               n_samples=100,
+               n_latents=2,
+               max_traversal=1.):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    latent_samples = [traverse_line(dim, model, n_samples, n_latents, data=data, max_traversal=max_traversal) for dim in range(n_latents)]
+    decoded_traversal = model.decoder(torch.cat(latent_samples, dim=0).to(device))
+    decoded_traversal = decoded_traversal.detach().cpu()
+
+    return decoded_traversal
+
+
+def plot_traversals(model, 
+                    data, 
+                    lb=0,
+                    ub=2000,
+                    num=100,
+                    draw_data=False,
+                    draw_recon=False,
+                    traversal_samples=100, 
+                    n_latents=4,
+                    max_traversal=1.):
+    if draw_data is True:
+        plot_2d_samples(data[:,:2], color=&#39;C0&#39;)
+    if draw_recon is True:
+        recon_data, _, _ = model(data)
+        plot_2d_samples(recon_data[:,:2], color=&#39;C8&#39;)    
+    ranges = np.arange(lb, ub)
+    samples_index = np.random.choice(ranges, num, replace=False)
+    for i in samples_index:
+        decoded_traversal = traversals(model, data=data[i:i+1], n_samples=traversal_samples, n_latents=n_latents,
+                                       max_traversal=max_traversal)
+        decoded_traversal0 = decoded_traversal[:,:2]
+        plot_2d_samples(decoded_traversal0[:100], color=&#39;C2&#39;)
+        plot_2d_samples(decoded_traversal0[100:200], color=&#39;C3&#39;)
+        plot_2d_samples(decoded_traversal0[200:300], color=&#39;C4&#39;)
+        plot_2d_samples(decoded_traversal0[300:400], color=&#39;C5&#39;)
+        
+        
+def viz_filters(tensors, n_row=4, n_col=8, resize_fac=2, normalize=True, vmax=None, vmin=None, title=None):
+    plt.figure(figsize=(10,10))
+    # plot filters
+    p = tensors.shape[2] + 2
+    mosaic = np.zeros((p*n_row,p*n_col))
+    indx = 0
+    for i in range(n_row):
+        for j in range(n_col):
+            im = tensors.data.cpu().numpy()[indx].squeeze()
+            if normalize:
+                im = (im-np.min(im))
+                im = im/np.max(im)
+            mosaic[i*p:(i+1)*p,j*p:(j+1)*p] = np.pad(im,(1,1),mode=&#39;constant&#39;)
+            indx += 1
+    if title is not None:
+        plt.title(title)
+    plt.imshow(rescale(mosaic,resize_fac,mode=&#39;constant&#39;), cmap=&#39;gray&#39;)
+    plt.axis(&#39;off&#39;)    
+    plt.show() 
+    
+    
+def viz_im_r(im, im_r):
+    if &#39;Tensor&#39; in str(type(im)):
+        im = im.data.squeeze().cpu()
+        im_r = im_r.data.squeeze().cpu()
+
+    plt.figure(figsize=(10,10))
+    plt.subplot(1, 3, 1)
+    plt.imshow(im, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.title(&#39;Original&#39;)
+    plt.axis(&#39;off&#39;)
+    plt.subplot(1, 3, 2)
+    plt.imshow(im_r, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.title(&#39;Reconstructed&#39;)
+    plt.axis(&#39;off&#39;)
+    plt.subplot(1, 3, 3)
+    plt.imshow(im-im_r, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.title(&#39;Difference&#39;)
+    plt.axis(&#39;off&#39;)
+    plt.show()        
+    
+    
+def plot_all(bs, scores_list, preds_list, params_list, class_num=1, param_num=None, tit=None, ylab=True):
+    s = scores_list[..., class_num].T / preds_list[:, class_num] # (num_bands, num_curves)
+    
+    if param_num is not None:
+        if tit is None:
+            s = s[:, param_num::len(params_list)] # skip every 10 images
+            params = params_list[param_num]
+            plt.title(f&#34;$m_\\nu=${params[0]:0.2f}   $\Omega_m$={params[1]:0.2f}    $10^9A_s$={params[2]:0.2f}&#34;)
+#         plt.title(str())
+        else:
+            plt.title(tit)
+    else:
+        if tit is None:
+            plt.title(&#39;all params&#39;)
+        else:
+            plt.title(tit)
+    
+#     print(bs)
+    plt.plot(bs, np.array(s), &#39;-&#39;, alpha=0.1, color=cb)
+    plt.plot(bs, np.array(s).mean(axis=1), &#39;-&#39;, color=cr)
+    
+    plt.xlabel(&#39;Central scale (angular multipole $\ell$)&#39;) # $\pm 1350$&#39;)
+    plt.ylabel(&#39;CD Score (normalized)&#39;)     
+
+    </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="adaptive_wavelets.viz.cshow"><code class="name flex">
+<span>def <span class="ident">cshow</span></span>(<span>im)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cshow(im):
+    plt.imshow(im, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.axis(&#39;off&#39;)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.plot_2d_latent_samples"><code class="name flex">
+<span>def <span class="ident">plot_2d_latent_samples</span></span>(<span>latent_sample, color='C0')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Plot latent samples select two most highly variable coordinates</p>
+<h2 id="arugments">Arugments</h2>
+<dl>
+<dt><strong><code>latent_sample</code></strong> :&ensp;<code>tensor</code></dt>
+<dd>matrix of spatial coordinates for each latent sample</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_2d_latent_samples(latent_sample, color=&#39;C0&#39;):
+    &#34;&#34;&#34;Plot latent samples select two most highly variable coordinates
+    
+        Arugments
+        ---------
+        latent_sample : tensor
+            matrix of spatial coordinates for each latent sample       
+    &#34;&#34;&#34;    
+    latent_dim = latent_sample.size()[1]
+    stds = []
+    for i in range(latent_dim):
+        stds.append(torch.std(latent_sample[:,i]).item())
+    stds = np.array(stds)
+    ind = np.argsort(stds)[::-1][:2]
+    plot_2d_samples(latent_sample[:,list(ind)])    </code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.plot_2d_samples"><code class="name flex">
+<span>def <span class="ident">plot_2d_samples</span></span>(<span>sample, color='C0')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Plot 2d sample </p>
+<h2 id="arugments">Arugments</h2>
+<dl>
+<dt><strong><code>sample</code></strong> :&ensp;<code>2D</code> <code>ndarray</code> or <code>tensor</code></dt>
+<dd>matrix of spatial coordinates for each sample</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_2d_samples(sample, color=&#39;C0&#39;):
+    &#34;&#34;&#34;Plot 2d sample 
+    
+        Arugments
+        ---------
+        sample : 2D ndarray or tensor
+            matrix of spatial coordinates for each sample       
+    &#34;&#34;&#34;
+    if &#34;torch&#34; in str(type(sample)):
+        sample_np = sample.detach().cpu().numpy()
+    x = sample_np[:, 0]
+    y = sample_np[:, 1]
+    plt.scatter(x, y, color=color)
+    plt.gca().set_aspect(&#39;equal&#39;, adjustable=&#39;box&#39;)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.plot_all"><code class="name flex">
+<span>def <span class="ident">plot_all</span></span>(<span>bs, scores_list, preds_list, params_list, class_num=1, param_num=None, tit=None, ylab=True)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_all(bs, scores_list, preds_list, params_list, class_num=1, param_num=None, tit=None, ylab=True):
+    s = scores_list[..., class_num].T / preds_list[:, class_num] # (num_bands, num_curves)
+    
+    if param_num is not None:
+        if tit is None:
+            s = s[:, param_num::len(params_list)] # skip every 10 images
+            params = params_list[param_num]
+            plt.title(f&#34;$m_\\nu=${params[0]:0.2f}   $\Omega_m$={params[1]:0.2f}    $10^9A_s$={params[2]:0.2f}&#34;)
+#         plt.title(str())
+        else:
+            plt.title(tit)
+    else:
+        if tit is None:
+            plt.title(&#39;all params&#39;)
+        else:
+            plt.title(tit)
+    
+#     print(bs)
+    plt.plot(bs, np.array(s), &#39;-&#39;, alpha=0.1, color=cb)
+    plt.plot(bs, np.array(s).mean(axis=1), &#39;-&#39;, color=cr)
+    
+    plt.xlabel(&#39;Central scale (angular multipole $\ell$)&#39;) # $\pm 1350$&#39;)
+    plt.ylabel(&#39;CD Score (normalized)&#39;)     </code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.plot_traversals"><code class="name flex">
+<span>def <span class="ident">plot_traversals</span></span>(<span>model, data, lb=0, ub=2000, num=100, draw_data=False, draw_recon=False, traversal_samples=100, n_latents=4, max_traversal=1.0)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_traversals(model, 
+                    data, 
+                    lb=0,
+                    ub=2000,
+                    num=100,
+                    draw_data=False,
+                    draw_recon=False,
+                    traversal_samples=100, 
+                    n_latents=4,
+                    max_traversal=1.):
+    if draw_data is True:
+        plot_2d_samples(data[:,:2], color=&#39;C0&#39;)
+    if draw_recon is True:
+        recon_data, _, _ = model(data)
+        plot_2d_samples(recon_data[:,:2], color=&#39;C8&#39;)    
+    ranges = np.arange(lb, ub)
+    samples_index = np.random.choice(ranges, num, replace=False)
+    for i in samples_index:
+        decoded_traversal = traversals(model, data=data[i:i+1], n_samples=traversal_samples, n_latents=n_latents,
+                                       max_traversal=max_traversal)
+        decoded_traversal0 = decoded_traversal[:,:2]
+        plot_2d_samples(decoded_traversal0[:100], color=&#39;C2&#39;)
+        plot_2d_samples(decoded_traversal0[100:200], color=&#39;C3&#39;)
+        plot_2d_samples(decoded_traversal0[200:300], color=&#39;C4&#39;)
+        plot_2d_samples(decoded_traversal0[300:400], color=&#39;C5&#39;)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.save_fig"><code class="name flex">
+<span>def <span class="ident">save_fig</span></span>(<span>fname)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_fig(fname):
+    plt.savefig(opj(DIR_FIGS, fname) + &#39;.png&#39;)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.traversals"><code class="name flex">
+<span>def <span class="ident">traversals</span></span>(<span>model, data=None, n_samples=100, n_latents=2, max_traversal=1.0)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def traversals(model,
+               data=None,
+               n_samples=100,
+               n_latents=2,
+               max_traversal=1.):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    latent_samples = [traverse_line(dim, model, n_samples, n_latents, data=data, max_traversal=max_traversal) for dim in range(n_latents)]
+    decoded_traversal = model.decoder(torch.cat(latent_samples, dim=0).to(device))
+    decoded_traversal = decoded_traversal.detach().cpu()
+
+    return decoded_traversal</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.traverse_line"><code class="name flex">
+<span>def <span class="ident">traverse_line</span></span>(<span>idx, model, n_samples=100, n_latents=2, data=None, max_traversal=10)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return a (size, latent_size) latent sample, corresponding to a traversal
+of a latent variable indicated by idx.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>idx</code></strong> :&ensp;<code>int</code></dt>
+<dd>Index of continuous dimension to traverse. If the continuous latent
+vector is 10 dimensional and idx = 7, then the 7th dimension
+will be traversed while all others are fixed.</dd>
+<dt><strong><code>n_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of samples to generate.</dd>
+<dt><strong><code>data</code></strong> :&ensp;<code>torch.Tensor</code> or <code>None</code>, optional</dt>
+<dd>Data to use for computing the posterior. If <code>None</code>
+then use the mean of the prior (all zeros) for all other dimensions.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def traverse_line(idx, model, n_samples=100, n_latents=2, data=None, max_traversal=10):
+    &#34;&#34;&#34;Return a (size, latent_size) latent sample, corresponding to a traversal
+    of a latent variable indicated by idx.
+
+    Parameters
+    ----------
+    idx : int
+        Index of continuous dimension to traverse. If the continuous latent
+        vector is 10 dimensional and idx = 7, then the 7th dimension
+        will be traversed while all others are fixed.
+
+    n_samples : int
+        Number of samples to generate.
+
+    data : torch.Tensor or None, optional
+        Data to use for computing the posterior. If `None` 
+        then use the mean of the prior (all zeros) for all other dimensions.
+    &#34;&#34;&#34;
+    model.eval()
+    if data is None:
+        # mean of prior for other dimensions
+        samples = torch.zeros(n_samples, n_latents)
+        traversals = torch.linspace(-2, 2, steps=n_samples)
+
+    else:
+        if data.size(0) &gt; 1:
+            raise ValueError(&#34;Every value should be sampled from the same posterior, but {} datapoints given.&#34;.format(data.size(0)))
+
+        with torch.no_grad():
+            post_mean, post_logvar = model.encoder(data.to(device))
+            samples = model.reparameterize(post_mean, post_logvar)
+            samples = samples.cpu().repeat(n_samples, 1)
+            post_mean_idx = post_mean.cpu()[0, idx]
+            post_std_idx = torch.exp(post_logvar / 2).cpu()[0, idx]         
+
+        # travers from the gaussian of the posterior in case quantile
+        traversals = torch.linspace(post_mean_idx - max_traversal, 
+                                    post_mean_idx + max_traversal, 
+                                    steps=n_samples)
+
+    for i in range(n_samples):
+        samples[i, idx] = traversals[i]
+
+    return samples</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.viz_filters"><code class="name flex">
+<span>def <span class="ident">viz_filters</span></span>(<span>tensors, n_row=4, n_col=8, resize_fac=2, normalize=True, vmax=None, vmin=None, title=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def viz_filters(tensors, n_row=4, n_col=8, resize_fac=2, normalize=True, vmax=None, vmin=None, title=None):
+    plt.figure(figsize=(10,10))
+    # plot filters
+    p = tensors.shape[2] + 2
+    mosaic = np.zeros((p*n_row,p*n_col))
+    indx = 0
+    for i in range(n_row):
+        for j in range(n_col):
+            im = tensors.data.cpu().numpy()[indx].squeeze()
+            if normalize:
+                im = (im-np.min(im))
+                im = im/np.max(im)
+            mosaic[i*p:(i+1)*p,j*p:(j+1)*p] = np.pad(im,(1,1),mode=&#39;constant&#39;)
+            indx += 1
+    if title is not None:
+        plt.title(title)
+    plt.imshow(rescale(mosaic,resize_fac,mode=&#39;constant&#39;), cmap=&#39;gray&#39;)
+    plt.axis(&#39;off&#39;)    
+    plt.show() </code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.viz.viz_im_r"><code class="name flex">
+<span>def <span class="ident">viz_im_r</span></span>(<span>im, im_r)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def viz_im_r(im, im_r):
+    if &#39;Tensor&#39; in str(type(im)):
+        im = im.data.squeeze().cpu()
+        im_r = im_r.data.squeeze().cpu()
+
+    plt.figure(figsize=(10,10))
+    plt.subplot(1, 3, 1)
+    plt.imshow(im, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.title(&#39;Original&#39;)
+    plt.axis(&#39;off&#39;)
+    plt.subplot(1, 3, 2)
+    plt.imshow(im_r, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.title(&#39;Reconstructed&#39;)
+    plt.axis(&#39;off&#39;)
+    plt.subplot(1, 3, 3)
+    plt.imshow(im-im_r, cmap=&#39;magma&#39;, vmax=0.15, vmin=-0.05)
+    plt.title(&#39;Difference&#39;)
+    plt.axis(&#39;off&#39;)
+    plt.show()        </code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="adaptive_wavelets" href="index.html">adaptive_wavelets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="adaptive_wavelets.viz.cshow" href="#adaptive_wavelets.viz.cshow">cshow</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.plot_2d_latent_samples" href="#adaptive_wavelets.viz.plot_2d_latent_samples">plot_2d_latent_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.plot_2d_samples" href="#adaptive_wavelets.viz.plot_2d_samples">plot_2d_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.plot_all" href="#adaptive_wavelets.viz.plot_all">plot_all</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.plot_traversals" href="#adaptive_wavelets.viz.plot_traversals">plot_traversals</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.save_fig" href="#adaptive_wavelets.viz.save_fig">save_fig</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.traversals" href="#adaptive_wavelets.viz.traversals">traversals</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.traverse_line" href="#adaptive_wavelets.viz.traverse_line">traverse_line</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.viz_filters" href="#adaptive_wavelets.viz.viz_filters">viz_filters</a></code></li>
+<li><code><a title="adaptive_wavelets.viz.viz_im_r" href="#adaptive_wavelets.viz.viz_im_r">viz_im_r</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

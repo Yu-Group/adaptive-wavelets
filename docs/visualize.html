@@ -1,0 +1,1350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2" />
+<title>adaptive_wavelets.visualize API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>adaptive_wavelets.visualize</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import os
+from math import ceil, floor
+
+import imageio
+import random
+from PIL import Image, ImageDraw
+import numpy as np
+from scipy import stats
+import torch
+import torch.nn.functional as F
+from torch.autograd import Variable
+from torchvision.utils import make_grid, save_image
+
+
+TRAIN_FILE = &#34;train_losses.log&#34;
+DECIMAL_POINTS = 3
+GIF_FILE = &#34;training.gif&#34;
+PLOT_NAMES = dict(generate_samples=&#34;samples.png&#34;,
+                  data_samples=&#34;data_samples.png&#34;,
+                  reconstruct=&#34;reconstruct.png&#34;,
+                  traversals=&#34;traversals.png&#34;,
+                  reconstruct_traverse=&#34;reconstruct_traverse.png&#34;,
+                  gif_traversals=&#34;posterior_traversals.gif&#34;,)
+
+
+class Visualizer():
+    def __init__(self, model, model_dir,
+                 save_images=True,
+                 max_traversal=0.1,  
+                 upsample_factor=1):
+        &#34;&#34;&#34;
+        Visualizer is used to generate images of samples, reconstructions,
+        latent traversals and so on of the trained model.
+        Parameters
+        ----------
+        model : disvae.vae.VAE
+        model_dir : str
+            The directory that the model is saved to and where the images will
+            be stored.
+        save_images : bool, optional
+            Whether to save images or return a tensor.
+        max_traversal: float, optional
+            The maximum displacement induced by a latent traversal. Symmetrical
+            traversals are assumed. If `m&gt;=0.5` then uses absolute value traversal,
+            if `m&lt;0.5` uses a percentage of the distribution (quantile).
+            E.g. for the prior the distribution is a standard normal so `m=0.45` c
+            orresponds to an absolute value of `1.645` because `2m=90%%` of a
+            standard normal is between `-1.645` and `1.645`. Note in the case
+            of the posterior, the distribution is not standard normal anymore.
+        upsample_factor : floar, optional
+            Scale factor to upsample the size of the tensor
+        &#34;&#34;&#34;
+        self.model = model
+        self.device = next(self.model.parameters()).device
+        self.latent_dim = self.model.encoder.latent_dim
+        self.max_traversal = max_traversal
+        self.save_images = save_images
+        self.model_dir = model_dir
+        self.upsample_factor = upsample_factor
+
+    def _get_traversal_range(self, mean=0, std=1):
+        &#34;&#34;&#34;Return the corresponding traversal range in absolute terms.&#34;&#34;&#34;
+        max_traversal = self.max_traversal
+
+        if max_traversal &lt; 0.5:
+            max_traversal = (1 - 2 * max_traversal) / 2  # from 0.45 to 0.05
+            max_traversal = stats.norm.ppf(max_traversal, loc=mean, scale=std)  # from 0.05 to -1.645
+
+        # symmetrical traversals
+        return (-1 * abs(max_traversal), abs(max_traversal))
+
+    def _traverse_line(self, idx, n_samples, data=None):
+        &#34;&#34;&#34;Return a (size, latent_size) latent sample, corresponding to a traversal
+        of a latent variable indicated by idx.
+        Parameters
+        ----------
+        idx : int
+            Index of continuous dimension to traverse. If the continuous latent
+            vector is 10 dimensional and idx = 7, then the 7th dimension
+            will be traversed while all others are fixed.
+        n_samples : int
+            Number of samples to generate.
+        data : torch.Tensor or None, optional
+            Data to use for computing the posterior. Shape (N, C, H, W). If
+            `None` then use the mean of the prior (all zeros) for all other dimensions.
+        &#34;&#34;&#34;
+        if data is None:
+            # mean of prior for other dimensions
+            samples = torch.zeros(n_samples, self.latent_dim)
+            traversals = torch.linspace(*self._get_traversal_range(), steps=n_samples)
+
+        else:
+            if data.size(0) &gt; 1:
+                raise ValueError(&#34;Every value should be sampled from the same posterior, but {} datapoints given.&#34;.format(data.size(0)))
+
+            with torch.no_grad():
+                post_mean, post_logvar = self.model.encoder(data.to(self.device))
+                samples = self.model.reparameterize(post_mean, post_logvar)
+                samples = samples.cpu().repeat(n_samples, 1)
+                post_mean_idx = post_mean.cpu()[0, idx]
+                post_std_idx = torch.exp(post_logvar / 2).cpu()[0, idx]
+
+            # travers from the gaussian of the posterior in case quantile
+            traversals = torch.linspace(*self._get_traversal_range(mean=post_mean_idx,
+                                                                   std=post_std_idx),
+                                        steps=n_samples)
+
+        for i in range(n_samples):
+            samples[i, idx] = traversals[i]
+
+        return samples
+
+    def _save_or_return(self, to_plot, size, filename, is_force_return=False):
+        &#34;&#34;&#34;Create plot and save or return it.&#34;&#34;&#34;
+        to_plot = F.interpolate(to_plot, scale_factor=self.upsample_factor)
+
+        if size[0] * size[1] != to_plot.shape[0]:
+            raise ValueError(&#34;Wrong size {} for datashape {}&#34;.format(size, to_plot.shape))
+
+        # `nrow` is number of images PER row =&gt; number of col
+        kwargs = dict(nrow=size[1], pad_value=(1))
+        if self.save_images and not is_force_return:
+            filename = os.path.join(self.model_dir, filename)
+            save_image(to_plot, filename, **kwargs)
+        else:
+            return make_grid_img(to_plot, **kwargs)
+
+    def _decode_latents(self, latent_samples):
+        &#34;&#34;&#34;Decodes latent samples into images.
+        Parameters
+        ----------
+        latent_samples : torch.autograd.Variable
+            Samples from latent distribution. Shape (N, L) where L is dimension
+            of latent distribution.
+        &#34;&#34;&#34;
+        latent_samples = latent_samples.to(self.device)
+        return self.model.decoder(latent_samples).cpu()
+
+    def generate_samples(self, size=(8, 8)):
+        &#34;&#34;&#34;Plot generated samples from the prior and decoding.
+        Parameters
+        ----------
+        size : tuple of ints, optional
+            Size of the final grid.
+        &#34;&#34;&#34;
+        prior_samples = torch.randn(size[0] * size[1], self.latent_dim)
+        generated = self._decode_latents(prior_samples)
+        return self._save_or_return(generated.data, size, PLOT_NAMES[&#34;generate_samples&#34;])
+
+    def data_samples(self, data, size=(8, 8)):
+        &#34;&#34;&#34;Plot samples from the dataset
+        Parameters
+        ----------
+        data : torch.Tensor
+            Data to be reconstructed. Shape (N, C, H, W)
+        size : tuple of ints, optional
+            Size of the final grid.
+        &#34;&#34;&#34;
+        data = data[:size[0] * size[1], ...]
+        return self._save_or_return(data, size, PLOT_NAMES[&#34;data_samples&#34;])
+
+    def reconstruct(self, data, size=(8, 8), is_original=True, is_force_return=False):
+        &#34;&#34;&#34;Generate reconstructions of data through the model.
+        Parameters
+        ----------
+        data : torch.Tensor
+            Data to be reconstructed. Shape (N, C, H, W)
+        size : tuple of ints, optional
+            Size of grid on which reconstructions will be plotted. The number
+            of rows should be even when `is_original`, so that upper
+            half contains true data and bottom half contains reconstructions.contains
+        is_original : bool, optional
+            Whether to exclude the original plots.
+        is_force_return : bool, optional
+            Force returning instead of saving the image.
+        &#34;&#34;&#34;
+        if is_original:
+            if size[0] % 2 != 0:
+                raise ValueError(&#34;Should be even number of rows when showing originals not {}&#34;.format(size[0]))
+            n_samples = size[0] // 2 * size[1]
+        else:
+            n_samples = size[0] * size[1]
+
+        with torch.no_grad():
+            originals = data.to(self.device)[:n_samples, ...]
+            recs, _, _ = self.model(originals)
+
+        originals = originals.cpu()
+        recs = recs.view(-1, *self.model.img_size).cpu()
+
+        to_plot = torch.cat([originals, recs]) if is_original else recs
+        return self._save_or_return(to_plot, size, PLOT_NAMES[&#34;reconstruct&#34;],
+                                    is_force_return=is_force_return)
+
+    def traversals(self,
+                   data=None,
+                   n_per_latent=8,
+                   n_latents=None,
+                   is_force_return=False):
+        &#34;&#34;&#34;Plot traverse through all latent dimensions (prior or posterior) one
+        by one and plots a grid of images where each row corresponds to a latent
+        traversal of one latent dimension.
+        Parameters
+        ----------
+        data : bool, optional
+            Data to use for computing the latent posterior. If `None` traverses
+            the prior.
+        n_per_latent : int, optional
+            The number of points to include in the traversal of a latent dimension.
+            I.e. number of columns.
+        n_latents : int, optional
+            The number of latent dimensions to display. I.e. number of rows. If `None`
+            uses all latents.
+        is_force_return : bool, optional
+            Force returning instead of saving the image.
+        &#34;&#34;&#34;
+        n_latents = n_latents if n_latents is not None else self.latent_dim
+        latent_samples = [self._traverse_line(dim, n_per_latent, data=data)
+                          for dim in range(self.latent_dim)]
+        decoded_traversal = self._decode_latents(torch.cat(latent_samples, dim=0))
+        decoded_traversal = decoded_traversal[range(n_per_latent * n_latents), ...]
+
+        size = (n_latents, n_per_latent)
+        sampling_type = &#34;prior&#34; if data is None else &#34;posterior&#34;
+        filename = &#34;{}_{}&#34;.format(sampling_type, PLOT_NAMES[&#34;traversals&#34;])
+
+        return self._save_or_return(decoded_traversal.data, size, filename,
+                                    is_force_return=is_force_return)
+
+    def reconstruct_traverse(self, data,
+                             is_posterior=True,
+                             n_per_latent=8,
+                             n_latents=None):
+        &#34;&#34;&#34;
+        Creates a figure whith first row for original images, second are
+        reconstructions, rest are traversals (prior or posterior) of the latent
+        dimensions.
+        Parameters
+        ----------
+        data : torch.Tensor
+            Data to be reconstructed. Shape (N, C, H, W)
+        n_per_latent : int, optional
+            The number of points to include in the traversal of a latent dimension.
+            I.e. number of columns.
+        n_latents : int, optional
+            The number of latent dimensions to display. I.e. number of rows. If `None`
+            uses all latents.
+        is_posterior : bool, optional
+            Whether to sample from the posterior.
+        &#34;&#34;&#34;
+        n_latents = n_latents if n_latents is not None else self.latent_dim
+
+        reconstructions = self.reconstruct(data[:2 * n_per_latent, ...],
+                                           size=(2, n_per_latent),
+                                           is_force_return=True)
+        traversals = self.traversals(data=data[0:1, ...] if is_posterior else None,
+                                     is_reorder_latents=True,
+                                     n_per_latent=n_per_latent,
+                                     n_latents=n_latents,
+                                     is_force_return=True)
+
+        concatenated = np.concatenate((reconstructions, traversals), axis=0)
+        concatenated = Image.fromarray(concatenated)
+
+        filename = os.path.join(self.model_dir, PLOT_NAMES[&#34;reconstruct_traverse&#34;])
+        concatenated.save(filename)
+
+    def gif_traversals(self, data, n_latents=None, n_per_gif=15):
+        &#34;&#34;&#34;Generates a grid of gifs of latent posterior traversals where the rows
+        are the latent dimensions and the columns are random images.
+        Parameters
+        ----------
+        data : bool
+            Data to use for computing the latent posteriors. The number of datapoint
+            (batchsize) will determine the number of columns of the grid.
+        n_latents : int, optional
+            The number of latent dimensions to display. I.e. number of rows. If `None`
+            uses all latents.
+        n_per_gif : int, optional
+            Number of images per gif (number of traversals)
+        &#34;&#34;&#34;
+        n_images, _, _, width_col = data.shape
+        width_col = int(width_col * self.upsample_factor)
+        all_cols = [[] for c in range(n_per_gif)]
+        for i in range(n_images):
+            grid = self.traversals(data=data[i:i + 1, ...], is_reorder_latents=True,
+                                   n_per_latent=n_per_gif, n_latents=n_latents,
+                                   is_force_return=True)
+
+            height, width, c = grid.shape
+            padding_width = (width - width_col * n_per_gif) // (n_per_gif + 1)
+
+            # split the grids into a list of column images (and removes padding)
+            for j in range(n_per_gif):
+                all_cols[j].append(grid[:, [(j + 1) * padding_width + j * width_col + i
+                                            for i in range(width_col)], :])
+
+        pad_values = (1) * 255
+        all_cols = [concatenate_pad(cols, pad_size=2, pad_values=pad_values, axis=1)
+                    for cols in all_cols]
+
+        filename = os.path.join(self.model_dir, PLOT_NAMES[&#34;gif_traversals&#34;])
+        imageio.mimsave(filename, all_cols, fps=FPS_GIF)
+
+
+class GifTraversalsTraining:
+    &#34;&#34;&#34;Creates a Gif of traversals by generating an image at every training epoch.
+    Parameters
+    ----------
+    model : disvae.vae.VAE
+    dataset : str
+        Name of the dataset.
+    model_dir : str
+        The directory that the model is saved to and where the images will
+        be stored.
+    is_reorder_latents : bool, optional
+        If the latent dimensions should be reordered or not
+    n_per_latent : int, optional
+        The number of points to include in the traversal of a latent dimension.
+        I.e. number of columns.
+    n_latents : int, optional
+        The number of latent dimensions to display. I.e. number of rows. If `None`
+        uses all latents.
+    kwargs:
+        Additional arguments to `Visualizer`
+    &#34;&#34;&#34;
+
+    def __init__(self, model, dataset, model_dir,
+                 is_reorder_latents=False,
+                 n_per_latent=10,
+                 n_latents=None,
+                 **kwargs):
+        self.save_filename = os.path.join(model_dir, GIF_FILE)
+        self.visualizer = Visualizer(model, dataset, model_dir,
+                                     save_images=False, **kwargs)
+
+        self.images = []
+        self.is_reorder_latents = is_reorder_latents
+        self.n_per_latent = n_per_latent
+        self.n_latents = n_latents if n_latents is not None else model.latent_dim
+
+    def __call__(self):
+        &#34;&#34;&#34;Generate the next gif image. Should be called after each epoch.&#34;&#34;&#34;
+        cached_training = self.visualizer.model.training
+        self.visualizer.model.eval()
+        img_grid = self.visualizer.traversals(data=None,  # GIF from prior
+                                              is_reorder_latents=self.is_reorder_latents,
+                                              n_per_latent=self.n_per_latent,
+                                              n_latents=self.n_latents)
+        self.images.append(img_grid)
+        if cached_training:
+            self.visualizer.model.train()
+
+    def save_reset(self):
+        &#34;&#34;&#34;Saves the GIF and resets the list of images. Call at the end of training.&#34;&#34;&#34;
+        imageio.mimsave(self.save_filename, self.images, fps=FPS_GIF)
+        self.images = []
+        
+        
+### HELPERS ###        
+def add_labels(input_image, labels):
+    &#34;&#34;&#34;Adds labels next to rows of an image.
+    Parameters
+    ----------
+    input_image : image
+        The image to which to add the labels
+    labels : list
+        The list of labels to plot
+    &#34;&#34;&#34;
+    new_width = input_image.width + 100
+    new_size = (new_width, input_image.height)
+    new_img = Image.new(&#34;RGB&#34;, new_size, color=&#39;white&#39;)
+    new_img.paste(input_image, (0, 0))
+    draw = ImageDraw.Draw(new_img)
+
+    for i, s in enumerate(labels):
+        draw.text(xy=(new_width - 100 + 0.005,
+                      int((i / len(labels) + 1 / (2 * len(labels))) * input_image.height)),
+                  text=s,
+                  fill=(0, 0, 0))
+
+    return new_img        
+
+
+def make_grid_img(tensor, **kwargs):
+    &#34;&#34;&#34;Converts a tensor to a grid of images that can be read by imageio.
+    Notes
+    -----
+    * from in https://github.com/pytorch/vision/blob/master/torchvision/utils.py
+    Parameters
+    ----------
+    tensor (torch.Tensor or list): 4D mini-batch Tensor of shape (B x C x H x W)
+        or a list of images all of the same size.
+    kwargs:
+        Additional arguments to `make_grid_img`.
+    &#34;&#34;&#34;
+    grid = make_grid(tensor, **kwargs)
+#     img_grid = grid.mul_(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0)
+#     img_grid = img_grid.to(&#39;cpu&#39;, torch.uint8).numpy()
+    img_grid = grid.permute(1, 2, 0)
+    im_grid = img_grid.to(&#39;cpu&#39;).numpy()
+    return img_grid
+
+
+def get_samples(dataset, num_samples, idcs=[], verbose=False):
+    &#34;&#34;&#34; Generate a number of samples from the dataset.
+    Parameters
+    ----------
+    dataset : str
+        The name of the dataset.
+    num_samples : int, optional
+        The number of samples to load from the dataset
+    idcs : list of ints, optional
+        List of indices to of images to put at the begning of the samples.
+    &#34;&#34;&#34;
+    idcs += random.sample(range(len(dataset)), num_samples - len(idcs))
+    samples = torch.stack([dataset[i][0] for i in idcs], dim=0)
+    if verbose:
+        print(&#34;Selected idcs: {}&#34;.format(idcs))
+
+    return samples</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="adaptive_wavelets.visualize.add_labels"><code class="name flex">
+<span>def <span class="ident">add_labels</span></span>(<span>input_image, labels)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Adds labels next to rows of an image.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>input_image</code></strong> :&ensp;<code>image</code></dt>
+<dd>The image to which to add the labels</dd>
+<dt><strong><code>labels</code></strong> :&ensp;<code>list</code></dt>
+<dd>The list of labels to plot</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_labels(input_image, labels):
+    &#34;&#34;&#34;Adds labels next to rows of an image.
+    Parameters
+    ----------
+    input_image : image
+        The image to which to add the labels
+    labels : list
+        The list of labels to plot
+    &#34;&#34;&#34;
+    new_width = input_image.width + 100
+    new_size = (new_width, input_image.height)
+    new_img = Image.new(&#34;RGB&#34;, new_size, color=&#39;white&#39;)
+    new_img.paste(input_image, (0, 0))
+    draw = ImageDraw.Draw(new_img)
+
+    for i, s in enumerate(labels):
+        draw.text(xy=(new_width - 100 + 0.005,
+                      int((i / len(labels) + 1 / (2 * len(labels))) * input_image.height)),
+                  text=s,
+                  fill=(0, 0, 0))
+
+    return new_img        </code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.get_samples"><code class="name flex">
+<span>def <span class="ident">get_samples</span></span>(<span>dataset, num_samples, idcs=[], verbose=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Generate a number of samples from the dataset.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>dataset</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the dataset.</dd>
+<dt><strong><code>num_samples</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of samples to load from the dataset</dd>
+<dt><strong><code>idcs</code></strong> :&ensp;<code>list</code> of <code>ints</code>, optional</dt>
+<dd>List of indices to of images to put at the begning of the samples.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_samples(dataset, num_samples, idcs=[], verbose=False):
+    &#34;&#34;&#34; Generate a number of samples from the dataset.
+    Parameters
+    ----------
+    dataset : str
+        The name of the dataset.
+    num_samples : int, optional
+        The number of samples to load from the dataset
+    idcs : list of ints, optional
+        List of indices to of images to put at the begning of the samples.
+    &#34;&#34;&#34;
+    idcs += random.sample(range(len(dataset)), num_samples - len(idcs))
+    samples = torch.stack([dataset[i][0] for i in idcs], dim=0)
+    if verbose:
+        print(&#34;Selected idcs: {}&#34;.format(idcs))
+
+    return samples</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.make_grid_img"><code class="name flex">
+<span>def <span class="ident">make_grid_img</span></span>(<span>tensor, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Converts a tensor to a grid of images that can be read by imageio.
+Notes</p>
+<hr>
+<ul>
+<li>from in <a href="https://github.com/pytorch/vision/blob/master/torchvision/utils.py">https://github.com/pytorch/vision/blob/master/torchvision/utils.py</a>
+Parameters</li>
+</ul>
+<hr>
+<p>tensor (torch.Tensor or list): 4D mini-batch Tensor of shape (B x C x H x W)
+or a list of images all of the same size.
+kwargs:
+Additional arguments to <a title="adaptive_wavelets.visualize.make_grid_img" href="#adaptive_wavelets.visualize.make_grid_img"><code>make_grid_img()</code></a>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_grid_img(tensor, **kwargs):
+    &#34;&#34;&#34;Converts a tensor to a grid of images that can be read by imageio.
+    Notes
+    -----
+    * from in https://github.com/pytorch/vision/blob/master/torchvision/utils.py
+    Parameters
+    ----------
+    tensor (torch.Tensor or list): 4D mini-batch Tensor of shape (B x C x H x W)
+        or a list of images all of the same size.
+    kwargs:
+        Additional arguments to `make_grid_img`.
+    &#34;&#34;&#34;
+    grid = make_grid(tensor, **kwargs)
+#     img_grid = grid.mul_(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0)
+#     img_grid = img_grid.to(&#39;cpu&#39;, torch.uint8).numpy()
+    img_grid = grid.permute(1, 2, 0)
+    im_grid = img_grid.to(&#39;cpu&#39;).numpy()
+    return img_grid</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="adaptive_wavelets.visualize.GifTraversalsTraining"><code class="flex name class">
+<span>class <span class="ident">GifTraversalsTraining</span></span>
+<span>(</span><span>model, dataset, model_dir, is_reorder_latents=False, n_per_latent=10, n_latents=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Creates a Gif of traversals by generating an image at every training epoch.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>disvae.vae.VAE</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>dataset</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the dataset.</dd>
+<dt><strong><code>model_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>The directory that the model is saved to and where the images will
+be stored.</dd>
+<dt><strong><code>is_reorder_latents</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>If the latent dimensions should be reordered or not</dd>
+<dt><strong><code>n_per_latent</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of points to include in the traversal of a latent dimension.
+I.e. number of columns.</dd>
+<dt><strong><code>n_latents</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of latent dimensions to display. I.e. number of rows. If <code>None</code>
+uses all latents.</dd>
+</dl>
+<p>kwargs:
+Additional arguments to <a title="adaptive_wavelets.visualize.Visualizer" href="#adaptive_wavelets.visualize.Visualizer"><code>Visualizer</code></a></p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GifTraversalsTraining:
+    &#34;&#34;&#34;Creates a Gif of traversals by generating an image at every training epoch.
+    Parameters
+    ----------
+    model : disvae.vae.VAE
+    dataset : str
+        Name of the dataset.
+    model_dir : str
+        The directory that the model is saved to and where the images will
+        be stored.
+    is_reorder_latents : bool, optional
+        If the latent dimensions should be reordered or not
+    n_per_latent : int, optional
+        The number of points to include in the traversal of a latent dimension.
+        I.e. number of columns.
+    n_latents : int, optional
+        The number of latent dimensions to display. I.e. number of rows. If `None`
+        uses all latents.
+    kwargs:
+        Additional arguments to `Visualizer`
+    &#34;&#34;&#34;
+
+    def __init__(self, model, dataset, model_dir,
+                 is_reorder_latents=False,
+                 n_per_latent=10,
+                 n_latents=None,
+                 **kwargs):
+        self.save_filename = os.path.join(model_dir, GIF_FILE)
+        self.visualizer = Visualizer(model, dataset, model_dir,
+                                     save_images=False, **kwargs)
+
+        self.images = []
+        self.is_reorder_latents = is_reorder_latents
+        self.n_per_latent = n_per_latent
+        self.n_latents = n_latents if n_latents is not None else model.latent_dim
+
+    def __call__(self):
+        &#34;&#34;&#34;Generate the next gif image. Should be called after each epoch.&#34;&#34;&#34;
+        cached_training = self.visualizer.model.training
+        self.visualizer.model.eval()
+        img_grid = self.visualizer.traversals(data=None,  # GIF from prior
+                                              is_reorder_latents=self.is_reorder_latents,
+                                              n_per_latent=self.n_per_latent,
+                                              n_latents=self.n_latents)
+        self.images.append(img_grid)
+        if cached_training:
+            self.visualizer.model.train()
+
+    def save_reset(self):
+        &#34;&#34;&#34;Saves the GIF and resets the list of images. Call at the end of training.&#34;&#34;&#34;
+        imageio.mimsave(self.save_filename, self.images, fps=FPS_GIF)
+        self.images = []</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="adaptive_wavelets.visualize.GifTraversalsTraining.save_reset"><code class="name flex">
+<span>def <span class="ident">save_reset</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Saves the GIF and resets the list of images. Call at the end of training.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_reset(self):
+    &#34;&#34;&#34;Saves the GIF and resets the list of images. Call at the end of training.&#34;&#34;&#34;
+    imageio.mimsave(self.save_filename, self.images, fps=FPS_GIF)
+    self.images = []</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="adaptive_wavelets.visualize.Visualizer"><code class="flex name class">
+<span>class <span class="ident">Visualizer</span></span>
+<span>(</span><span>model, model_dir, save_images=True, max_traversal=0.1, upsample_factor=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Visualizer is used to generate images of samples, reconstructions,
+latent traversals and so on of the trained model.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>disvae.vae.VAE</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>model_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>The directory that the model is saved to and where the images will
+be stored.</dd>
+<dt><strong><code>save_images</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to save images or return a tensor.</dd>
+<dt><strong><code>max_traversal</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The maximum displacement induced by a latent traversal. Symmetrical
+traversals are assumed. If <code>m&gt;=0.5</code> then uses absolute value traversal,
+if <code>m&lt;0.5</code> uses a percentage of the distribution (quantile).
+E.g. for the prior the distribution is a standard normal so <code>m=0.45</code> c
+orresponds to an absolute value of <code>1.645</code> because <code>2m=90%%</code> of a
+standard normal is between <code>-1.645</code> and <code>1.645</code>. Note in the case
+of the posterior, the distribution is not standard normal anymore.</dd>
+<dt><strong><code>upsample_factor</code></strong> :&ensp;<code>floar</code>, optional</dt>
+<dd>Scale factor to upsample the size of the tensor</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Visualizer():
+    def __init__(self, model, model_dir,
+                 save_images=True,
+                 max_traversal=0.1,  
+                 upsample_factor=1):
+        &#34;&#34;&#34;
+        Visualizer is used to generate images of samples, reconstructions,
+        latent traversals and so on of the trained model.
+        Parameters
+        ----------
+        model : disvae.vae.VAE
+        model_dir : str
+            The directory that the model is saved to and where the images will
+            be stored.
+        save_images : bool, optional
+            Whether to save images or return a tensor.
+        max_traversal: float, optional
+            The maximum displacement induced by a latent traversal. Symmetrical
+            traversals are assumed. If `m&gt;=0.5` then uses absolute value traversal,
+            if `m&lt;0.5` uses a percentage of the distribution (quantile).
+            E.g. for the prior the distribution is a standard normal so `m=0.45` c
+            orresponds to an absolute value of `1.645` because `2m=90%%` of a
+            standard normal is between `-1.645` and `1.645`. Note in the case
+            of the posterior, the distribution is not standard normal anymore.
+        upsample_factor : floar, optional
+            Scale factor to upsample the size of the tensor
+        &#34;&#34;&#34;
+        self.model = model
+        self.device = next(self.model.parameters()).device
+        self.latent_dim = self.model.encoder.latent_dim
+        self.max_traversal = max_traversal
+        self.save_images = save_images
+        self.model_dir = model_dir
+        self.upsample_factor = upsample_factor
+
+    def _get_traversal_range(self, mean=0, std=1):
+        &#34;&#34;&#34;Return the corresponding traversal range in absolute terms.&#34;&#34;&#34;
+        max_traversal = self.max_traversal
+
+        if max_traversal &lt; 0.5:
+            max_traversal = (1 - 2 * max_traversal) / 2  # from 0.45 to 0.05
+            max_traversal = stats.norm.ppf(max_traversal, loc=mean, scale=std)  # from 0.05 to -1.645
+
+        # symmetrical traversals
+        return (-1 * abs(max_traversal), abs(max_traversal))
+
+    def _traverse_line(self, idx, n_samples, data=None):
+        &#34;&#34;&#34;Return a (size, latent_size) latent sample, corresponding to a traversal
+        of a latent variable indicated by idx.
+        Parameters
+        ----------
+        idx : int
+            Index of continuous dimension to traverse. If the continuous latent
+            vector is 10 dimensional and idx = 7, then the 7th dimension
+            will be traversed while all others are fixed.
+        n_samples : int
+            Number of samples to generate.
+        data : torch.Tensor or None, optional
+            Data to use for computing the posterior. Shape (N, C, H, W). If
+            `None` then use the mean of the prior (all zeros) for all other dimensions.
+        &#34;&#34;&#34;
+        if data is None:
+            # mean of prior for other dimensions
+            samples = torch.zeros(n_samples, self.latent_dim)
+            traversals = torch.linspace(*self._get_traversal_range(), steps=n_samples)
+
+        else:
+            if data.size(0) &gt; 1:
+                raise ValueError(&#34;Every value should be sampled from the same posterior, but {} datapoints given.&#34;.format(data.size(0)))
+
+            with torch.no_grad():
+                post_mean, post_logvar = self.model.encoder(data.to(self.device))
+                samples = self.model.reparameterize(post_mean, post_logvar)
+                samples = samples.cpu().repeat(n_samples, 1)
+                post_mean_idx = post_mean.cpu()[0, idx]
+                post_std_idx = torch.exp(post_logvar / 2).cpu()[0, idx]
+
+            # travers from the gaussian of the posterior in case quantile
+            traversals = torch.linspace(*self._get_traversal_range(mean=post_mean_idx,
+                                                                   std=post_std_idx),
+                                        steps=n_samples)
+
+        for i in range(n_samples):
+            samples[i, idx] = traversals[i]
+
+        return samples
+
+    def _save_or_return(self, to_plot, size, filename, is_force_return=False):
+        &#34;&#34;&#34;Create plot and save or return it.&#34;&#34;&#34;
+        to_plot = F.interpolate(to_plot, scale_factor=self.upsample_factor)
+
+        if size[0] * size[1] != to_plot.shape[0]:
+            raise ValueError(&#34;Wrong size {} for datashape {}&#34;.format(size, to_plot.shape))
+
+        # `nrow` is number of images PER row =&gt; number of col
+        kwargs = dict(nrow=size[1], pad_value=(1))
+        if self.save_images and not is_force_return:
+            filename = os.path.join(self.model_dir, filename)
+            save_image(to_plot, filename, **kwargs)
+        else:
+            return make_grid_img(to_plot, **kwargs)
+
+    def _decode_latents(self, latent_samples):
+        &#34;&#34;&#34;Decodes latent samples into images.
+        Parameters
+        ----------
+        latent_samples : torch.autograd.Variable
+            Samples from latent distribution. Shape (N, L) where L is dimension
+            of latent distribution.
+        &#34;&#34;&#34;
+        latent_samples = latent_samples.to(self.device)
+        return self.model.decoder(latent_samples).cpu()
+
+    def generate_samples(self, size=(8, 8)):
+        &#34;&#34;&#34;Plot generated samples from the prior and decoding.
+        Parameters
+        ----------
+        size : tuple of ints, optional
+            Size of the final grid.
+        &#34;&#34;&#34;
+        prior_samples = torch.randn(size[0] * size[1], self.latent_dim)
+        generated = self._decode_latents(prior_samples)
+        return self._save_or_return(generated.data, size, PLOT_NAMES[&#34;generate_samples&#34;])
+
+    def data_samples(self, data, size=(8, 8)):
+        &#34;&#34;&#34;Plot samples from the dataset
+        Parameters
+        ----------
+        data : torch.Tensor
+            Data to be reconstructed. Shape (N, C, H, W)
+        size : tuple of ints, optional
+            Size of the final grid.
+        &#34;&#34;&#34;
+        data = data[:size[0] * size[1], ...]
+        return self._save_or_return(data, size, PLOT_NAMES[&#34;data_samples&#34;])
+
+    def reconstruct(self, data, size=(8, 8), is_original=True, is_force_return=False):
+        &#34;&#34;&#34;Generate reconstructions of data through the model.
+        Parameters
+        ----------
+        data : torch.Tensor
+            Data to be reconstructed. Shape (N, C, H, W)
+        size : tuple of ints, optional
+            Size of grid on which reconstructions will be plotted. The number
+            of rows should be even when `is_original`, so that upper
+            half contains true data and bottom half contains reconstructions.contains
+        is_original : bool, optional
+            Whether to exclude the original plots.
+        is_force_return : bool, optional
+            Force returning instead of saving the image.
+        &#34;&#34;&#34;
+        if is_original:
+            if size[0] % 2 != 0:
+                raise ValueError(&#34;Should be even number of rows when showing originals not {}&#34;.format(size[0]))
+            n_samples = size[0] // 2 * size[1]
+        else:
+            n_samples = size[0] * size[1]
+
+        with torch.no_grad():
+            originals = data.to(self.device)[:n_samples, ...]
+            recs, _, _ = self.model(originals)
+
+        originals = originals.cpu()
+        recs = recs.view(-1, *self.model.img_size).cpu()
+
+        to_plot = torch.cat([originals, recs]) if is_original else recs
+        return self._save_or_return(to_plot, size, PLOT_NAMES[&#34;reconstruct&#34;],
+                                    is_force_return=is_force_return)
+
+    def traversals(self,
+                   data=None,
+                   n_per_latent=8,
+                   n_latents=None,
+                   is_force_return=False):
+        &#34;&#34;&#34;Plot traverse through all latent dimensions (prior or posterior) one
+        by one and plots a grid of images where each row corresponds to a latent
+        traversal of one latent dimension.
+        Parameters
+        ----------
+        data : bool, optional
+            Data to use for computing the latent posterior. If `None` traverses
+            the prior.
+        n_per_latent : int, optional
+            The number of points to include in the traversal of a latent dimension.
+            I.e. number of columns.
+        n_latents : int, optional
+            The number of latent dimensions to display. I.e. number of rows. If `None`
+            uses all latents.
+        is_force_return : bool, optional
+            Force returning instead of saving the image.
+        &#34;&#34;&#34;
+        n_latents = n_latents if n_latents is not None else self.latent_dim
+        latent_samples = [self._traverse_line(dim, n_per_latent, data=data)
+                          for dim in range(self.latent_dim)]
+        decoded_traversal = self._decode_latents(torch.cat(latent_samples, dim=0))
+        decoded_traversal = decoded_traversal[range(n_per_latent * n_latents), ...]
+
+        size = (n_latents, n_per_latent)
+        sampling_type = &#34;prior&#34; if data is None else &#34;posterior&#34;
+        filename = &#34;{}_{}&#34;.format(sampling_type, PLOT_NAMES[&#34;traversals&#34;])
+
+        return self._save_or_return(decoded_traversal.data, size, filename,
+                                    is_force_return=is_force_return)
+
+    def reconstruct_traverse(self, data,
+                             is_posterior=True,
+                             n_per_latent=8,
+                             n_latents=None):
+        &#34;&#34;&#34;
+        Creates a figure whith first row for original images, second are
+        reconstructions, rest are traversals (prior or posterior) of the latent
+        dimensions.
+        Parameters
+        ----------
+        data : torch.Tensor
+            Data to be reconstructed. Shape (N, C, H, W)
+        n_per_latent : int, optional
+            The number of points to include in the traversal of a latent dimension.
+            I.e. number of columns.
+        n_latents : int, optional
+            The number of latent dimensions to display. I.e. number of rows. If `None`
+            uses all latents.
+        is_posterior : bool, optional
+            Whether to sample from the posterior.
+        &#34;&#34;&#34;
+        n_latents = n_latents if n_latents is not None else self.latent_dim
+
+        reconstructions = self.reconstruct(data[:2 * n_per_latent, ...],
+                                           size=(2, n_per_latent),
+                                           is_force_return=True)
+        traversals = self.traversals(data=data[0:1, ...] if is_posterior else None,
+                                     is_reorder_latents=True,
+                                     n_per_latent=n_per_latent,
+                                     n_latents=n_latents,
+                                     is_force_return=True)
+
+        concatenated = np.concatenate((reconstructions, traversals), axis=0)
+        concatenated = Image.fromarray(concatenated)
+
+        filename = os.path.join(self.model_dir, PLOT_NAMES[&#34;reconstruct_traverse&#34;])
+        concatenated.save(filename)
+
+    def gif_traversals(self, data, n_latents=None, n_per_gif=15):
+        &#34;&#34;&#34;Generates a grid of gifs of latent posterior traversals where the rows
+        are the latent dimensions and the columns are random images.
+        Parameters
+        ----------
+        data : bool
+            Data to use for computing the latent posteriors. The number of datapoint
+            (batchsize) will determine the number of columns of the grid.
+        n_latents : int, optional
+            The number of latent dimensions to display. I.e. number of rows. If `None`
+            uses all latents.
+        n_per_gif : int, optional
+            Number of images per gif (number of traversals)
+        &#34;&#34;&#34;
+        n_images, _, _, width_col = data.shape
+        width_col = int(width_col * self.upsample_factor)
+        all_cols = [[] for c in range(n_per_gif)]
+        for i in range(n_images):
+            grid = self.traversals(data=data[i:i + 1, ...], is_reorder_latents=True,
+                                   n_per_latent=n_per_gif, n_latents=n_latents,
+                                   is_force_return=True)
+
+            height, width, c = grid.shape
+            padding_width = (width - width_col * n_per_gif) // (n_per_gif + 1)
+
+            # split the grids into a list of column images (and removes padding)
+            for j in range(n_per_gif):
+                all_cols[j].append(grid[:, [(j + 1) * padding_width + j * width_col + i
+                                            for i in range(width_col)], :])
+
+        pad_values = (1) * 255
+        all_cols = [concatenate_pad(cols, pad_size=2, pad_values=pad_values, axis=1)
+                    for cols in all_cols]
+
+        filename = os.path.join(self.model_dir, PLOT_NAMES[&#34;gif_traversals&#34;])
+        imageio.mimsave(filename, all_cols, fps=FPS_GIF)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="adaptive_wavelets.visualize.Visualizer.data_samples"><code class="name flex">
+<span>def <span class="ident">data_samples</span></span>(<span>self, data, size=(8, 8))</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Plot samples from the dataset
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Data to be reconstructed. Shape (N, C, H, W)</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>tuple</code> of <code>ints</code>, optional</dt>
+<dd>Size of the final grid.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def data_samples(self, data, size=(8, 8)):
+    &#34;&#34;&#34;Plot samples from the dataset
+    Parameters
+    ----------
+    data : torch.Tensor
+        Data to be reconstructed. Shape (N, C, H, W)
+    size : tuple of ints, optional
+        Size of the final grid.
+    &#34;&#34;&#34;
+    data = data[:size[0] * size[1], ...]
+    return self._save_or_return(data, size, PLOT_NAMES[&#34;data_samples&#34;])</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.Visualizer.generate_samples"><code class="name flex">
+<span>def <span class="ident">generate_samples</span></span>(<span>self, size=(8, 8))</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Plot generated samples from the prior and decoding.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>size</code></strong> :&ensp;<code>tuple</code> of <code>ints</code>, optional</dt>
+<dd>Size of the final grid.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_samples(self, size=(8, 8)):
+    &#34;&#34;&#34;Plot generated samples from the prior and decoding.
+    Parameters
+    ----------
+    size : tuple of ints, optional
+        Size of the final grid.
+    &#34;&#34;&#34;
+    prior_samples = torch.randn(size[0] * size[1], self.latent_dim)
+    generated = self._decode_latents(prior_samples)
+    return self._save_or_return(generated.data, size, PLOT_NAMES[&#34;generate_samples&#34;])</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.Visualizer.gif_traversals"><code class="name flex">
+<span>def <span class="ident">gif_traversals</span></span>(<span>self, data, n_latents=None, n_per_gif=15)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Generates a grid of gifs of latent posterior traversals where the rows
+are the latent dimensions and the columns are random images.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Data to use for computing the latent posteriors. The number of datapoint
+(batchsize) will determine the number of columns of the grid.</dd>
+<dt><strong><code>n_latents</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of latent dimensions to display. I.e. number of rows. If <code>None</code>
+uses all latents.</dd>
+<dt><strong><code>n_per_gif</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of images per gif (number of traversals)</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gif_traversals(self, data, n_latents=None, n_per_gif=15):
+    &#34;&#34;&#34;Generates a grid of gifs of latent posterior traversals where the rows
+    are the latent dimensions and the columns are random images.
+    Parameters
+    ----------
+    data : bool
+        Data to use for computing the latent posteriors. The number of datapoint
+        (batchsize) will determine the number of columns of the grid.
+    n_latents : int, optional
+        The number of latent dimensions to display. I.e. number of rows. If `None`
+        uses all latents.
+    n_per_gif : int, optional
+        Number of images per gif (number of traversals)
+    &#34;&#34;&#34;
+    n_images, _, _, width_col = data.shape
+    width_col = int(width_col * self.upsample_factor)
+    all_cols = [[] for c in range(n_per_gif)]
+    for i in range(n_images):
+        grid = self.traversals(data=data[i:i + 1, ...], is_reorder_latents=True,
+                               n_per_latent=n_per_gif, n_latents=n_latents,
+                               is_force_return=True)
+
+        height, width, c = grid.shape
+        padding_width = (width - width_col * n_per_gif) // (n_per_gif + 1)
+
+        # split the grids into a list of column images (and removes padding)
+        for j in range(n_per_gif):
+            all_cols[j].append(grid[:, [(j + 1) * padding_width + j * width_col + i
+                                        for i in range(width_col)], :])
+
+    pad_values = (1) * 255
+    all_cols = [concatenate_pad(cols, pad_size=2, pad_values=pad_values, axis=1)
+                for cols in all_cols]
+
+    filename = os.path.join(self.model_dir, PLOT_NAMES[&#34;gif_traversals&#34;])
+    imageio.mimsave(filename, all_cols, fps=FPS_GIF)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.Visualizer.reconstruct"><code class="name flex">
+<span>def <span class="ident">reconstruct</span></span>(<span>self, data, size=(8, 8), is_original=True, is_force_return=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Generate reconstructions of data through the model.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Data to be reconstructed. Shape (N, C, H, W)</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>tuple</code> of <code>ints</code>, optional</dt>
+<dd>Size of grid on which reconstructions will be plotted. The number
+of rows should be even when <code>is_original</code>, so that upper
+half contains true data and bottom half contains reconstructions.contains</dd>
+<dt><strong><code>is_original</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to exclude the original plots.</dd>
+<dt><strong><code>is_force_return</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Force returning instead of saving the image.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reconstruct(self, data, size=(8, 8), is_original=True, is_force_return=False):
+    &#34;&#34;&#34;Generate reconstructions of data through the model.
+    Parameters
+    ----------
+    data : torch.Tensor
+        Data to be reconstructed. Shape (N, C, H, W)
+    size : tuple of ints, optional
+        Size of grid on which reconstructions will be plotted. The number
+        of rows should be even when `is_original`, so that upper
+        half contains true data and bottom half contains reconstructions.contains
+    is_original : bool, optional
+        Whether to exclude the original plots.
+    is_force_return : bool, optional
+        Force returning instead of saving the image.
+    &#34;&#34;&#34;
+    if is_original:
+        if size[0] % 2 != 0:
+            raise ValueError(&#34;Should be even number of rows when showing originals not {}&#34;.format(size[0]))
+        n_samples = size[0] // 2 * size[1]
+    else:
+        n_samples = size[0] * size[1]
+
+    with torch.no_grad():
+        originals = data.to(self.device)[:n_samples, ...]
+        recs, _, _ = self.model(originals)
+
+    originals = originals.cpu()
+    recs = recs.view(-1, *self.model.img_size).cpu()
+
+    to_plot = torch.cat([originals, recs]) if is_original else recs
+    return self._save_or_return(to_plot, size, PLOT_NAMES[&#34;reconstruct&#34;],
+                                is_force_return=is_force_return)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.Visualizer.reconstruct_traverse"><code class="name flex">
+<span>def <span class="ident">reconstruct_traverse</span></span>(<span>self, data, is_posterior=True, n_per_latent=8, n_latents=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Creates a figure whith first row for original images, second are
+reconstructions, rest are traversals (prior or posterior) of the latent
+dimensions.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Data to be reconstructed. Shape (N, C, H, W)</dd>
+<dt><strong><code>n_per_latent</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of points to include in the traversal of a latent dimension.
+I.e. number of columns.</dd>
+<dt><strong><code>n_latents</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of latent dimensions to display. I.e. number of rows. If <code>None</code>
+uses all latents.</dd>
+<dt><strong><code>is_posterior</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to sample from the posterior.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reconstruct_traverse(self, data,
+                         is_posterior=True,
+                         n_per_latent=8,
+                         n_latents=None):
+    &#34;&#34;&#34;
+    Creates a figure whith first row for original images, second are
+    reconstructions, rest are traversals (prior or posterior) of the latent
+    dimensions.
+    Parameters
+    ----------
+    data : torch.Tensor
+        Data to be reconstructed. Shape (N, C, H, W)
+    n_per_latent : int, optional
+        The number of points to include in the traversal of a latent dimension.
+        I.e. number of columns.
+    n_latents : int, optional
+        The number of latent dimensions to display. I.e. number of rows. If `None`
+        uses all latents.
+    is_posterior : bool, optional
+        Whether to sample from the posterior.
+    &#34;&#34;&#34;
+    n_latents = n_latents if n_latents is not None else self.latent_dim
+
+    reconstructions = self.reconstruct(data[:2 * n_per_latent, ...],
+                                       size=(2, n_per_latent),
+                                       is_force_return=True)
+    traversals = self.traversals(data=data[0:1, ...] if is_posterior else None,
+                                 is_reorder_latents=True,
+                                 n_per_latent=n_per_latent,
+                                 n_latents=n_latents,
+                                 is_force_return=True)
+
+    concatenated = np.concatenate((reconstructions, traversals), axis=0)
+    concatenated = Image.fromarray(concatenated)
+
+    filename = os.path.join(self.model_dir, PLOT_NAMES[&#34;reconstruct_traverse&#34;])
+    concatenated.save(filename)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.visualize.Visualizer.traversals"><code class="name flex">
+<span>def <span class="ident">traversals</span></span>(<span>self, data=None, n_per_latent=8, n_latents=None, is_force_return=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Plot traverse through all latent dimensions (prior or posterior) one
+by one and plots a grid of images where each row corresponds to a latent
+traversal of one latent dimension.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Data to use for computing the latent posterior. If <code>None</code> traverses
+the prior.</dd>
+<dt><strong><code>n_per_latent</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of points to include in the traversal of a latent dimension.
+I.e. number of columns.</dd>
+<dt><strong><code>n_latents</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of latent dimensions to display. I.e. number of rows. If <code>None</code>
+uses all latents.</dd>
+<dt><strong><code>is_force_return</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Force returning instead of saving the image.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def traversals(self,
+               data=None,
+               n_per_latent=8,
+               n_latents=None,
+               is_force_return=False):
+    &#34;&#34;&#34;Plot traverse through all latent dimensions (prior or posterior) one
+    by one and plots a grid of images where each row corresponds to a latent
+    traversal of one latent dimension.
+    Parameters
+    ----------
+    data : bool, optional
+        Data to use for computing the latent posterior. If `None` traverses
+        the prior.
+    n_per_latent : int, optional
+        The number of points to include in the traversal of a latent dimension.
+        I.e. number of columns.
+    n_latents : int, optional
+        The number of latent dimensions to display. I.e. number of rows. If `None`
+        uses all latents.
+    is_force_return : bool, optional
+        Force returning instead of saving the image.
+    &#34;&#34;&#34;
+    n_latents = n_latents if n_latents is not None else self.latent_dim
+    latent_samples = [self._traverse_line(dim, n_per_latent, data=data)
+                      for dim in range(self.latent_dim)]
+    decoded_traversal = self._decode_latents(torch.cat(latent_samples, dim=0))
+    decoded_traversal = decoded_traversal[range(n_per_latent * n_latents), ...]
+
+    size = (n_latents, n_per_latent)
+    sampling_type = &#34;prior&#34; if data is None else &#34;posterior&#34;
+    filename = &#34;{}_{}&#34;.format(sampling_type, PLOT_NAMES[&#34;traversals&#34;])
+
+    return self._save_or_return(decoded_traversal.data, size, filename,
+                                is_force_return=is_force_return)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="adaptive_wavelets" href="index.html">adaptive_wavelets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="adaptive_wavelets.visualize.add_labels" href="#adaptive_wavelets.visualize.add_labels">add_labels</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.get_samples" href="#adaptive_wavelets.visualize.get_samples">get_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.make_grid_img" href="#adaptive_wavelets.visualize.make_grid_img">make_grid_img</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="adaptive_wavelets.visualize.GifTraversalsTraining" href="#adaptive_wavelets.visualize.GifTraversalsTraining">GifTraversalsTraining</a></code></h4>
+<ul class="">
+<li><code><a title="adaptive_wavelets.visualize.GifTraversalsTraining.save_reset" href="#adaptive_wavelets.visualize.GifTraversalsTraining.save_reset">save_reset</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="adaptive_wavelets.visualize.Visualizer" href="#adaptive_wavelets.visualize.Visualizer">Visualizer</a></code></h4>
+<ul class="">
+<li><code><a title="adaptive_wavelets.visualize.Visualizer.data_samples" href="#adaptive_wavelets.visualize.Visualizer.data_samples">data_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.Visualizer.generate_samples" href="#adaptive_wavelets.visualize.Visualizer.generate_samples">generate_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.Visualizer.gif_traversals" href="#adaptive_wavelets.visualize.Visualizer.gif_traversals">gif_traversals</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.Visualizer.reconstruct" href="#adaptive_wavelets.visualize.Visualizer.reconstruct">reconstruct</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.Visualizer.reconstruct_traverse" href="#adaptive_wavelets.visualize.Visualizer.reconstruct_traverse">reconstruct_traverse</a></code></li>
+<li><code><a title="adaptive_wavelets.visualize.Visualizer.traversals" href="#adaptive_wavelets.visualize.Visualizer.traversals">traversals</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

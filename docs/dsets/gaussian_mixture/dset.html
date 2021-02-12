@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>src.dsets.gaussian_mixture.dset API documentation</title>
+<title>adaptive_wavelets.dsets.gaussian_mixture.dset API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.dsets.gaussian_mixture.dset</code></h1>
+<h1 class="title">Module <code>adaptive_wavelets.dsets.gaussian_mixture.dset</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -31,8 +31,9 @@ from torch import nn
 
 # DATASET and DATALOADER
 class myDataset(torch.utils.data.Dataset):
-    def __init__(self, data, transform=None):
+    def __init__(self, data, lat_samples, transform=None):
         self.data = data
+        self.lat_samples = lat_samples
         self.transform = transform
 
     def __len__(self):
@@ -40,9 +41,10 @@ class myDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         data = self.data[index]
+        lat_samples = self.lat_samples[index]
         if self.transform:
             data = self.transform(data)
-        return data
+        return (data, lat_samples)
 
 
 def get_dataloaders(n_samples_per_cluster,
@@ -51,18 +53,14 @@ def get_dataloaders(n_samples_per_cluster,
                     extra_dim=8,
                     var=0.01,
                     batch_size=100, 
-                    shuffle=True,
-                    return_latents=False):
+                    shuffle=True):
     &#34;&#34;&#34;A generic data loader
     &#34;&#34;&#34;
     latent_samples = generate_latent_samples(n_samples_per_cluster, latent_means, latent_vars)
     data = generate_full_samples(latent_samples, extra_dim, var) 
     kwargs = {&#39;num_workers&#39;: 1, &#39;pin_memory&#39;: True} if torch.cuda.is_available() else {}
-    data_loader = torch.utils.data.DataLoader(myDataset(data), batch_size=batch_size, shuffle=shuffle, **kwargs)  
-    if return_latents:
-        return data_loader, latent_samples
-    else:
-        return data_loader
+    data_loader = torch.utils.data.DataLoader(myDataset(data, latent_samples), batch_size=batch_size, shuffle=shuffle, **kwargs)  
+    return data_loader
     
 
 def samples(mu, var, nb_samples=500):
@@ -115,7 +113,7 @@ def generate_full_samples(latent_samples, extra_dim, var):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="src.dsets.gaussian_mixture.dset.generate_full_samples"><code class="name flex">
+<dt id="adaptive_wavelets.dsets.gaussian_mixture.dset.generate_full_samples"><code class="name flex">
 <span>def <span class="ident">generate_full_samples</span></span>(<span>latent_samples, extra_dim, var)</span>
 </code></dt>
 <dd>
@@ -137,7 +135,7 @@ def generate_full_samples(latent_samples, extra_dim, var):
     return torch.stack(out, dim=0)    </code></pre>
 </details>
 </dd>
-<dt id="src.dsets.gaussian_mixture.dset.generate_latent_samples"><code class="name flex">
+<dt id="adaptive_wavelets.dsets.gaussian_mixture.dset.generate_latent_samples"><code class="name flex">
 <span>def <span class="ident">generate_latent_samples</span></span>(<span>nb_samples, latent_means, latent_vars)</span>
 </code></dt>
 <dd>
@@ -160,8 +158,8 @@ def generate_full_samples(latent_samples, extra_dim, var):
     return torch.cat(latent_data, dim=0) </code></pre>
 </details>
 </dd>
-<dt id="src.dsets.gaussian_mixture.dset.get_dataloaders"><code class="name flex">
-<span>def <span class="ident">get_dataloaders</span></span>(<span>n_samples_per_cluster, latent_means, latent_vars, extra_dim=8, var=0.01, batch_size=100, shuffle=True, return_latents=False)</span>
+<dt id="adaptive_wavelets.dsets.gaussian_mixture.dset.get_dataloaders"><code class="name flex">
+<span>def <span class="ident">get_dataloaders</span></span>(<span>n_samples_per_cluster, latent_means, latent_vars, extra_dim=8, var=0.01, batch_size=100, shuffle=True)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>A generic data loader</p></section>
@@ -175,21 +173,17 @@ def generate_full_samples(latent_samples, extra_dim, var):
                     extra_dim=8,
                     var=0.01,
                     batch_size=100, 
-                    shuffle=True,
-                    return_latents=False):
+                    shuffle=True):
     &#34;&#34;&#34;A generic data loader
     &#34;&#34;&#34;
     latent_samples = generate_latent_samples(n_samples_per_cluster, latent_means, latent_vars)
     data = generate_full_samples(latent_samples, extra_dim, var) 
     kwargs = {&#39;num_workers&#39;: 1, &#39;pin_memory&#39;: True} if torch.cuda.is_available() else {}
-    data_loader = torch.utils.data.DataLoader(myDataset(data), batch_size=batch_size, shuffle=shuffle, **kwargs)  
-    if return_latents:
-        return data_loader, latent_samples
-    else:
-        return data_loader</code></pre>
+    data_loader = torch.utils.data.DataLoader(myDataset(data, latent_samples), batch_size=batch_size, shuffle=shuffle, **kwargs)  
+    return data_loader</code></pre>
 </details>
 </dd>
-<dt id="src.dsets.gaussian_mixture.dset.samples"><code class="name flex">
+<dt id="adaptive_wavelets.dsets.gaussian_mixture.dset.samples"><code class="name flex">
 <span>def <span class="ident">samples</span></span>(<span>mu, var, nb_samples=500)</span>
 </code></dt>
 <dd>
@@ -221,14 +215,14 @@ from the parameterized gaussian.
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="src.dsets.gaussian_mixture.dset.myDataset"><code class="flex name class">
+<dt id="adaptive_wavelets.dsets.gaussian_mixture.dset.myDataset"><code class="flex name class">
 <span>class <span class="ident">myDataset</span></span>
-<span>(</span><span>data, transform=None)</span>
+<span>(</span><span>data, lat_samples, transform=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>An abstract class representing a :class:<code>Dataset</code>.</p>
 <p>All datasets that represent a map from keys to data samples should subclass
-it. All subclasses should overrite :meth:<code>__getitem__</code>, supporting fetching a
+it. All subclasses should overwrite :meth:<code>__getitem__</code>, supporting fetching a
 data sample for a given key. Subclasses could also optionally overwrite
 :meth:<code>__len__</code>, which is expected to return the size of the dataset by many
 :class:<code>~torch.utils.data.Sampler</code> implementations and the default options
@@ -245,8 +239,9 @@ dataset with non-integral indices/keys, a custom sampler must be provided.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class myDataset(torch.utils.data.Dataset):
-    def __init__(self, data, transform=None):
+    def __init__(self, data, lat_samples, transform=None):
         self.data = data
+        self.lat_samples = lat_samples
         self.transform = transform
 
     def __len__(self):
@@ -254,13 +249,15 @@ dataset with non-integral indices/keys, a custom sampler must be provided.</p>
 
     def __getitem__(self, index):
         data = self.data[index]
+        lat_samples = self.lat_samples[index]
         if self.transform:
             data = self.transform(data)
-        return data</code></pre>
+        return (data, lat_samples)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>torch.utils.data.dataset.Dataset</li>
+<li>typing.Generic</li>
 </ul>
 </dd>
 </dl>
@@ -274,21 +271,21 @@ dataset with non-integral indices/keys, a custom sampler must be provided.</p>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src.dsets.gaussian_mixture" href="index.html">src.dsets.gaussian_mixture</a></code></li>
+<li><code><a title="adaptive_wavelets.dsets.gaussian_mixture" href="index.html">adaptive_wavelets.dsets.gaussian_mixture</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="src.dsets.gaussian_mixture.dset.generate_full_samples" href="#src.dsets.gaussian_mixture.dset.generate_full_samples">generate_full_samples</a></code></li>
-<li><code><a title="src.dsets.gaussian_mixture.dset.generate_latent_samples" href="#src.dsets.gaussian_mixture.dset.generate_latent_samples">generate_latent_samples</a></code></li>
-<li><code><a title="src.dsets.gaussian_mixture.dset.get_dataloaders" href="#src.dsets.gaussian_mixture.dset.get_dataloaders">get_dataloaders</a></code></li>
-<li><code><a title="src.dsets.gaussian_mixture.dset.samples" href="#src.dsets.gaussian_mixture.dset.samples">samples</a></code></li>
+<li><code><a title="adaptive_wavelets.dsets.gaussian_mixture.dset.generate_full_samples" href="#adaptive_wavelets.dsets.gaussian_mixture.dset.generate_full_samples">generate_full_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.dsets.gaussian_mixture.dset.generate_latent_samples" href="#adaptive_wavelets.dsets.gaussian_mixture.dset.generate_latent_samples">generate_latent_samples</a></code></li>
+<li><code><a title="adaptive_wavelets.dsets.gaussian_mixture.dset.get_dataloaders" href="#adaptive_wavelets.dsets.gaussian_mixture.dset.get_dataloaders">get_dataloaders</a></code></li>
+<li><code><a title="adaptive_wavelets.dsets.gaussian_mixture.dset.samples" href="#adaptive_wavelets.dsets.gaussian_mixture.dset.samples">samples</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="src.dsets.gaussian_mixture.dset.myDataset" href="#src.dsets.gaussian_mixture.dset.myDataset">myDataset</a></code></h4>
+<h4><code><a title="adaptive_wavelets.dsets.gaussian_mixture.dset.myDataset" href="#adaptive_wavelets.dsets.gaussian_mixture.dset.myDataset">myDataset</a></code></h4>
 </li>
 </ul>
 </li>

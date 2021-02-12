@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>src.vae.training API documentation</title>
+<title>adaptive_wavelets.vae.training API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.vae.training</code></h1>
+<h1 class="title">Module <code>adaptive_wavelets.vae.training</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -26,6 +26,9 @@
 </summary>
 <pre><code class="python">import numpy as np
 import os, sys
+opj = os.path.join
+import logging
+from collections import defaultdict
 
 from tqdm import trange
 import torch
@@ -34,12 +37,28 @@ from copy import deepcopy
 
 # trim modules
 sys.path.append(&#39;../../lib/trim&#39;)
-sys.path.append(&#39;lib/trim&#39;)
-from trim import DecoderEncoder
+sys.path.append(&#39;../../../lib/trim&#39;)
+# from trim import DecoderEncoder
+
 
 class Trainer():
     &#34;&#34;&#34;
     Class to handle training of model.
+
+    Parameters
+    ----------
+    model: torch.model
+    
+    optimizer: torch.optim.Optimizer
+    
+    loss_f: vae.models.BaseLoss
+        Loss function.
+        
+    device: torch.device, optional
+        Device on which to run the code.
+        
+    use_residuals : boolean, optional
+        Use residuals to map latent to latent.
     &#34;&#34;&#34;
     def __init__(self, model, optimizer, loss_f,
                  device=torch.device(&#34;cpu&#34;),
@@ -47,12 +66,13 @@ class Trainer():
 
         self.device = device
         self.model = model.to(self.device)
-        self.loss_f = loss_f
         self.optimizer = optimizer
+        self.loss_f = loss_f
         self.use_residuals = use_residuals
-        self._create_latent_map()        
+        self._create_latent_map()   
+    
 
-    def __call__(self, train_loader, test_loader, epochs=10):
+    def __call__(self, train_loader, test_loader=None, epochs=10):
         &#34;&#34;&#34;
         Trains the model.
 
@@ -62,15 +82,23 @@ class Trainer():
 
         epochs: int, optional
             Number of epochs to train the model for.
-
-        checkpoint_every: int, optional
-            Save a checkpoint of the trained model every n epoch.
         &#34;&#34;&#34;
+        self.train_losses = np.empty(epochs)
+        self.test_losses = np.empty(epochs)
         for epoch in range(epochs):
-            mean_epoch_loss = self._train_epoch(train_loader, epoch)
-            mean_epoch_test_loss = self._test_epoch(test_loader)
-            print(&#39;====&gt; Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})&#39;.format(epoch, mean_epoch_loss, 
-                                                                                              mean_epoch_test_loss))
+            if test_loader is not None:
+                mean_epoch_loss = self._train_epoch(train_loader)
+                mean_epoch_test_loss = self._test_epoch(test_loader)
+                print(&#39;====&gt; Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})&#39;.format(epoch, mean_epoch_loss, 
+                                                                                                  mean_epoch_test_loss))
+                self.train_losses[epoch] = mean_epoch_loss
+                self.test_losses[epoch] = mean_epoch_test_loss
+                
+            else:
+                mean_epoch_loss = self._train_epoch(train_loader)
+                print(&#39;====&gt; Epoch: {} Average train loss: {:.4f}&#39;.format(epoch, mean_epoch_loss))
+                self.train_losses[epoch] = mean_epoch_loss    
+
         
     def _create_latent_map(self):
         &#34;&#34;&#34;
@@ -81,7 +109,7 @@ class Trainer():
         &#34;&#34;&#34;
         self.latent_map = DecoderEncoder(self.model, use_residuals=self.use_residuals)
 
-    def _train_epoch(self, data_loader, epoch):
+    def _train_epoch(self, data_loader):
         &#34;&#34;&#34;
         Trains the model for one epoch.
 
@@ -97,19 +125,13 @@ class Trainer():
         mean_epoch_loss: float
         &#34;&#34;&#34;
         self.model.train()
-        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
-        for batch_idx, data in enumerate(data_loader):
-            iter_loss = self._train_iteration(data, n_data)
-            epoch_loss += iter_loss
-            
-            if batch_idx % 10 == -1:
-                print(&#39;Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}&#39;.format(
-                    epoch, batch_idx * len(data), len(data_loader.dataset),
-                    100. * batch_idx / len(data_loader),
-                    epoch_loss / (batch_idx+1)))            
+        for batch_idx, (data, _) in enumerate(data_loader):
+            iter_loss = self._train_iteration(data, n_data=None)
+            epoch_loss += iter_loss         
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
+        self.model.eval()
         return mean_epoch_loss
 
     def _train_iteration(self, data, n_data):
@@ -126,7 +148,8 @@ class Trainer():
 
         recon_data, latent_dist, latent_sample = self.model(data)
         latent_output = self.latent_map(latent_sample, data)
-        loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)  
+        loss = self.loss_f(data, recon_data, latent_dist, self.model.training, storer=None,
+                           latent_sample=latent_sample, latent_output=latent_output, n_data=None)  
         
         self.optimizer.zero_grad()
         loss.backward()
@@ -150,18 +173,21 @@ class Trainer():
         mean_epoch_loss: float
         &#34;&#34;&#34;
         self.model.eval()
-        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
-        for batch_idx, data in enumerate(data_loader):
+        for batch_idx, (data, _) in enumerate(data_loader):
             data = data.to(self.device)
             recon_data, latent_dist, latent_sample = self.model(data)
             latent_output = self.latent_map(latent_sample, data)
-            loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)                  
+            loss = self.loss_f(data, recon_data, latent_dist, self.model.training, storer=None,
+                               latent_sample=latent_sample, latent_output=latent_output, n_data=None)                              
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
-        return mean_epoch_loss    </code></pre>
+        return mean_epoch_loss    
+    
+    
+    </code></pre>
 </details>
 </section>
 <section>
@@ -173,12 +199,25 @@ class Trainer():
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="src.vae.training.Trainer"><code class="flex name class">
+<dt id="adaptive_wavelets.vae.training.Trainer"><code class="flex name class">
 <span>class <span class="ident">Trainer</span></span>
 <span>(</span><span>model, optimizer, loss_f, device=device(type='cpu'), use_residuals=True)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Class to handle training of model.</p></section>
+<section class="desc"><p>Class to handle training of model.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>torch.model</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>optimizer</code></strong> :&ensp;<code>torch.optim.Optimizer</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>loss_f</code></strong> :&ensp;<code>vae.models.BaseLoss</code></dt>
+<dd>Loss function.</dd>
+<dt><strong><code>device</code></strong> :&ensp;<code>torch.device</code>, optional</dt>
+<dd>Device on which to run the code.</dd>
+<dt><strong><code>use_residuals</code></strong> :&ensp;<code>boolean</code>, optional</dt>
+<dd>Use residuals to map latent to latent.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -186,6 +225,21 @@ class Trainer():
 <pre><code class="python">class Trainer():
     &#34;&#34;&#34;
     Class to handle training of model.
+
+    Parameters
+    ----------
+    model: torch.model
+    
+    optimizer: torch.optim.Optimizer
+    
+    loss_f: vae.models.BaseLoss
+        Loss function.
+        
+    device: torch.device, optional
+        Device on which to run the code.
+        
+    use_residuals : boolean, optional
+        Use residuals to map latent to latent.
     &#34;&#34;&#34;
     def __init__(self, model, optimizer, loss_f,
                  device=torch.device(&#34;cpu&#34;),
@@ -193,12 +247,13 @@ class Trainer():
 
         self.device = device
         self.model = model.to(self.device)
-        self.loss_f = loss_f
         self.optimizer = optimizer
+        self.loss_f = loss_f
         self.use_residuals = use_residuals
-        self._create_latent_map()        
+        self._create_latent_map()   
+    
 
-    def __call__(self, train_loader, test_loader, epochs=10):
+    def __call__(self, train_loader, test_loader=None, epochs=10):
         &#34;&#34;&#34;
         Trains the model.
 
@@ -208,15 +263,23 @@ class Trainer():
 
         epochs: int, optional
             Number of epochs to train the model for.
-
-        checkpoint_every: int, optional
-            Save a checkpoint of the trained model every n epoch.
         &#34;&#34;&#34;
+        self.train_losses = np.empty(epochs)
+        self.test_losses = np.empty(epochs)
         for epoch in range(epochs):
-            mean_epoch_loss = self._train_epoch(train_loader, epoch)
-            mean_epoch_test_loss = self._test_epoch(test_loader)
-            print(&#39;====&gt; Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})&#39;.format(epoch, mean_epoch_loss, 
-                                                                                              mean_epoch_test_loss))
+            if test_loader is not None:
+                mean_epoch_loss = self._train_epoch(train_loader)
+                mean_epoch_test_loss = self._test_epoch(test_loader)
+                print(&#39;====&gt; Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})&#39;.format(epoch, mean_epoch_loss, 
+                                                                                                  mean_epoch_test_loss))
+                self.train_losses[epoch] = mean_epoch_loss
+                self.test_losses[epoch] = mean_epoch_test_loss
+                
+            else:
+                mean_epoch_loss = self._train_epoch(train_loader)
+                print(&#39;====&gt; Epoch: {} Average train loss: {:.4f}&#39;.format(epoch, mean_epoch_loss))
+                self.train_losses[epoch] = mean_epoch_loss    
+
         
     def _create_latent_map(self):
         &#34;&#34;&#34;
@@ -227,7 +290,7 @@ class Trainer():
         &#34;&#34;&#34;
         self.latent_map = DecoderEncoder(self.model, use_residuals=self.use_residuals)
 
-    def _train_epoch(self, data_loader, epoch):
+    def _train_epoch(self, data_loader):
         &#34;&#34;&#34;
         Trains the model for one epoch.
 
@@ -243,19 +306,13 @@ class Trainer():
         mean_epoch_loss: float
         &#34;&#34;&#34;
         self.model.train()
-        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
-        for batch_idx, data in enumerate(data_loader):
-            iter_loss = self._train_iteration(data, n_data)
-            epoch_loss += iter_loss
-            
-            if batch_idx % 10 == -1:
-                print(&#39;Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}&#39;.format(
-                    epoch, batch_idx * len(data), len(data_loader.dataset),
-                    100. * batch_idx / len(data_loader),
-                    epoch_loss / (batch_idx+1)))            
+        for batch_idx, (data, _) in enumerate(data_loader):
+            iter_loss = self._train_iteration(data, n_data=None)
+            epoch_loss += iter_loss         
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
+        self.model.eval()
         return mean_epoch_loss
 
     def _train_iteration(self, data, n_data):
@@ -272,7 +329,8 @@ class Trainer():
 
         recon_data, latent_dist, latent_sample = self.model(data)
         latent_output = self.latent_map(latent_sample, data)
-        loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)  
+        loss = self.loss_f(data, recon_data, latent_dist, self.model.training, storer=None,
+                           latent_sample=latent_sample, latent_output=latent_output, n_data=None)  
         
         self.optimizer.zero_grad()
         loss.backward()
@@ -296,13 +354,13 @@ class Trainer():
         mean_epoch_loss: float
         &#34;&#34;&#34;
         self.model.eval()
-        n_data = data_loader.dataset.data.shape[0]
         epoch_loss = 0.
-        for batch_idx, data in enumerate(data_loader):
+        for batch_idx, (data, _) in enumerate(data_loader):
             data = data.to(self.device)
             recon_data, latent_dist, latent_sample = self.model(data)
             latent_output = self.latent_map(latent_sample, data)
-            loss = self.loss_f(data, recon_data, latent_dist, latent_sample, n_data, latent_output)                  
+            loss = self.loss_f(data, recon_data, latent_dist, self.model.training, storer=None,
+                               latent_sample=latent_sample, latent_output=latent_output, n_data=None)                              
             iter_loss = loss.item()
             epoch_loss += iter_loss       
 
@@ -321,13 +379,13 @@ class Trainer():
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src.vae" href="index.html">src.vae</a></code></li>
+<li><code><a title="adaptive_wavelets.vae" href="index.html">adaptive_wavelets.vae</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="src.vae.training.Trainer" href="#src.vae.training.Trainer">Trainer</a></code></h4>
+<h4><code><a title="adaptive_wavelets.vae.training.Trainer" href="#adaptive_wavelets.vae.training.Trainer">Trainer</a></code></h4>
 </li>
 </ul>
 </li>

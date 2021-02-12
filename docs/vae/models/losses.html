@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2" />
+<title>adaptive_wavelets.vae.models.losses API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>adaptive_wavelets.vae.models.losses</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import abc
+import math
+import os, sys
+import numpy as np
+import torch
+import torch.nn as nn
+from torch.nn import functional as F
+from torch import optim
+
+sys.path.append(&#39;../../&#39;)
+sys.path.append(&#39;../../../&#39;)
+from adaptive_wavelets.vae.utils.math import matrix_log_density_gaussian, log_density_gaussian, log_importance_weight_matrix, logsumexp
+from adaptive_wavelets.vae.models.loss_hessian import hessian_penalty
+
+RECON_DIST = [&#34;bernoulli&#34;, &#34;laplace&#34;, &#34;gaussian&#34;]
+
+
+def get_loss_f(**kwargs_parse):
+    &#34;&#34;&#34;Return the loss function given the argparse arguments.&#34;&#34;&#34;
+    kwargs_all = dict(rec_dist=kwargs_parse[&#34;rec_dist&#34;],
+                      steps_anneal=kwargs_parse[&#34;reg_anneal&#34;])
+    return Loss(beta=kwargs_parse[&#34;beta&#34;],
+                lamPT=kwargs_parse[&#34;lamPT&#34;],
+                lamNN=kwargs_parse[&#34;lamNN&#34;],
+                lamH=kwargs_parse[&#34;lamH&#34;],
+                lamSP=kwargs_parse[&#34;lamSP&#34;],
+                decoder=kwargs_parse[&#34;decoder&#34;],
+                **kwargs_all)
+
+
+
+class BaseLoss(abc.ABC):
+    &#34;&#34;&#34;
+    Base class for losses.
+    Parameters
+    ----------
+    record_loss_every: int, optional
+        Every how many steps to recorsd the loss.
+    rec_dist: {&#34;bernoulli&#34;, &#34;gaussian&#34;, &#34;laplace&#34;}, optional
+        Reconstruction distribution istribution of the likelihood on the each pixel.
+        Implicitely defines the reconstruction loss. Bernoulli corresponds to a
+        binary cross entropy (bse), Gaussian corresponds to MSE, Laplace
+        corresponds to L1.
+    steps_anneal: nool, optional
+        Number of annealing steps where gradually adding the regularisation.
+    &#34;&#34;&#34;
+
+    def __init__(self, record_loss_every=50, rec_dist=&#34;bernoulli&#34;, steps_anneal=0):
+        self.n_train_steps = 0
+        self.record_loss_every = record_loss_every
+        self.rec_dist = rec_dist
+        self.steps_anneal = steps_anneal
+
+    @abc.abstractmethod
+    def __call__(self, data, recon_data, latent_dist, is_train, storer, **kwargs):
+        &#34;&#34;&#34;
+        Calculates loss for a batch of data.
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+        latent_dist : tuple of torch.tensor
+            sufficient statistics of the latent dimension. E.g. for gaussian
+            (mean, log_var) each of shape : (batch_size, latent_dim).
+        is_train : bool
+            Whether currently in train mode.
+        storer : dict
+            Dictionary in which to store important variables for vizualisation.
+        kwargs:
+            Loss specific arguments
+        &#34;&#34;&#34;
+
+    def _pre_call(self, is_train, storer):
+        if is_train:
+            self.n_train_steps += 1
+
+        if not is_train or self.n_train_steps % self.record_loss_every == 1:
+            storer = storer
+        else:
+            storer = None
+
+        return storer
+    
+
+
+class Loss(BaseLoss):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    def __init__(self, beta=0., lamPT=0., lamNN=0., lamH=0., lamSP=0.,
+                 is_mss=True, decoder=None, **kwargs):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        beta : float
+            Hyperparameter for beta-VAE term.
+            
+        lamPT : float
+            Hyperparameter for penalizing change in one latent induced by another.
+            
+        lamNN : float
+            Hyperparameter for penalizing distance to nearest neighbors in each batch
+            
+        lamH : float
+            Hyperparameter for penalizing Hessian
+        
+        lamSP : float
+            Hyperparameter for sparisty of Jacobian
+            
+        decoder: func
+            Torch module which maps from latent space to reconstruction            
+        &#34;&#34;&#34;    
+        super().__init__(**kwargs)
+        self.beta = beta
+        self.lamPT = lamPT
+        self.lamNN = lamNN        
+        self.lamH = lamH
+        self.lamSP = lamSP
+        self.is_mss = is_mss
+        self.decoder = decoder
+
+    def __call__(self, data, recon_data, latent_dist, is_train, storer, 
+                 latent_sample=None, latent_output=None, n_data=None):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+            
+        latent_dist: list of torch.Tensor
+            Encoder latent distribution [mean, logvar]. Shape : (batch_size, latent_dim).
+            
+        latent_sample: torch.Tensor
+            Latent samples. Shape : (batch_size, latent_dim).
+            
+        latent_output: torch.Tensor, optional
+            Output of the Decoder-&gt;Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
+            
+        n_data: int, optional
+            Total number of training examples.             
+
+        Return
+        ------
+        loss : torch.Tensor
+        &#34;&#34;&#34;        
+        storer = self._pre_call(is_train, storer)
+        batch_size, latent_dim = latent_sample.shape
+        
+        self.rec_loss = _reconstruction_loss(data, recon_data,
+                                             storer=storer, 
+                                             distribution=self.rec_dist)
+        self.kl_loss = _kl_normal_loss(*latent_dist, storer)
+        
+        # total loss
+        loss = self.rec_loss + (self.beta * self.kl_loss)                         
+        
+        # pointwise independence loss
+        self.pt_loss = 0
+        if self.lamPT &gt; 0 and latent_output is not None:
+            jac = jacobian(latent_output, latent_sample)
+            for i in range(latent_dim):
+                jac[:,i,i] = 0 # make partial i / partial i zero
+            self.pt_loss += abs(jac).sum()/batch_size
+            loss += self.lamPT * self.pt_loss 
+        
+        # nearest-neighbor batch loss
+        self.nearest_neighbor_loss = 0
+        if self.lamNN &gt; 0:
+            for i in range(batch_size):
+                dists = torch.pairwise_distance(latent_sample[i], latent_sample)
+                self.nearest_neighbor_loss += dists.sort()[0][1] # exclude distance to itself
+            loss += self.lamNN * self.nearest_neighbor_loss
+            
+        # Hessian loss
+        self.hessian_loss = 0
+        if self.lamH &gt; 0:
+            # print(&#39;calculating hessian loss...&#39;)
+            self.hessian_loss += hessian_penalty(self.decoder, latent_sample, k=10)
+            loss += self.lamH * self.hessian_loss
+    
+        # sparsity loss
+        self.sp_loss = 0
+        if self.lamSP &gt; 0:
+            decoded_data = self.decoder(latent_sample)
+            self.sp_loss += abs(jacobian(decoded_data, latent_sample)).sum()/batch_size
+            loss += self.lamSP * self.sp_loss
+            
+        # total correlation loss
+        if n_data is not None:
+            log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx = _get_log_pz_qz_prodzi_qzCx(latent_sample,
+                                                                                          latent_dist,
+                                                                                          n_data,
+                                                                                          is_mss=self.is_mss)      
+            # I[z;x] = KL[q(z,x)||q(x)q(z)] = E_x[KL[q(z|x)||q(z)]]
+            self.mi_loss = (log_q_zCx - log_qz).mean()
+            # TC[z] = KL[q(z)||\prod_i z_i]
+            self.tc_loss = (log_qz - log_prod_qzi).mean()
+            # dw_kl_loss is KL[q(z)||p(z)] instead of usual KL[q(z|x)||p(z))]
+            self.dw_kl_loss = (log_prod_qzi - log_pz).mean()              
+            
+        if storer is not None:
+            storer[&#39;loss&#39;].append(loss.item())
+            storer[&#39;pt_loss&#39;].append(self.pt_loss.item())
+            storer[&#39;nn_loss&#39;].append(self.nearest_neighbor_loss.item())
+            storer[&#39;h_loss&#39;].append(self.hessian_loss.item())
+            storer[&#39;sp_loss&#39;].append(self.sp_loss.item())      
+        
+        return loss
+            
+
+
+def _reconstruction_loss(data, recon_data, distribution=&#34;bernoulli&#34;, storer=None):
+    &#34;&#34;&#34;
+    Calculates the per image reconstruction loss for a batch of data. I.e. negative
+    log likelihood.
+    
+    Parameters
+    ----------
+    data : torch.Tensor
+        Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+        height, width).
+    recon_data : torch.Tensor
+        Reconstructed data. Shape : (batch_size, n_chan, height, width).
+    distribution : {&#34;bernoulli&#34;, &#34;gaussian&#34;, &#34;laplace&#34;}
+        Distribution of the likelihood on the each pixel. Implicitely defines the
+        loss Bernoulli corresponds to a binary cross entropy (bse) loss and is the
+        most commonly used. It has the issue that it doesn&#39;t penalize the same
+        way (0.1,0.2) and (0.4,0.5), which might not be optimal. Gaussian
+        distribution corresponds to MSE, and is sometimes used, but hard to train
+        ecause it ends up focusing only a few pixels that are very wrong. Laplace
+        distribution corresponds to L1 solves partially the issue of MSE.
+    storer : dict
+        Dictionary in which to store important variables for vizualisation.
+        
+    Returns
+    -------
+    loss : torch.Tensor
+        Per image cross entropy (i.e. normalized per batch but not pixel and
+        channel)
+    &#34;&#34;&#34;
+    batch_size = recon_data.size(0)
+
+    if distribution == &#34;bernoulli&#34;:
+        loss = F.binary_cross_entropy(recon_data, data, reduction=&#34;sum&#34;)
+    elif distribution == &#34;gaussian&#34;:
+        loss = F.mse_loss(recon_data, data, reduction=&#34;sum&#34;)
+    elif distribution == &#34;laplace&#34;:
+        loss = F.l1_loss(recon_data, data, reduction=&#34;sum&#34;)
+        loss = loss * (loss != 0)  # masking to avoid nan
+    else:
+        assert distribution not in RECON_DIST
+        raise ValueError(&#34;Unkown distribution: {}&#34;.format(distribution))
+
+    loss = loss / batch_size
+
+    if storer is not None:
+        storer[&#39;recon_loss&#39;].append(loss.item())
+
+    return loss
+
+
+def _kl_normal_loss(mean, logvar, storer=None):
+    &#34;&#34;&#34;
+    Calculates the KL divergence between a normal distribution
+    with diagonal covariance and a unit normal distribution.
+    
+    Parameters
+    ----------
+    mean : torch.Tensor
+        Mean of the normal distribution. Shape (batch_size, latent_dim) where
+        D is dimension of distribution.
+    logvar : torch.Tensor
+        Diagonal log variance of the normal distribution. Shape (batch_size,
+        latent_dim)
+    storer : dict
+        Dictionary in which to store important variables for vizualisation.
+    &#34;&#34;&#34;
+    latent_dim = mean.size(1)
+    # batch mean of kl for each latent dimension
+    latent_kl = 0.5 * (-1 - logvar + mean.pow(2) + logvar.exp()).mean(dim=0)
+    total_kl = latent_kl.sum()
+
+    if storer is not None:
+        storer[&#39;kl_loss&#39;].append(total_kl.item())
+        for i in range(latent_dim):
+            storer[&#39;kl_loss_&#39; + str(i)].append(latent_kl[i].item())
+
+    return total_kl
+
+
+def gradient(y, x, grad_outputs=None):
+    &#34;&#34;&#34;Compute dy/dx @ grad_outputs&#34;&#34;&#34;
+    if grad_outputs is None:
+        grad_outputs = torch.ones_like(y)
+    grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
+    return grad
+
+
+def jacobian(y, x):
+    &#34;&#34;&#34;Compute dy/dx = dy/dx @ grad_outputs; 
+    for grad_outputs in [1, 0, ..., 0], [0, 1, 0, ..., 0], ...., [0, ..., 0, 1]
+    
+    y : torch.Tensor Size: (batch_size, y_dim)
+    x : torch.Tensor Size: (batch_size, x_dim)
+    
+    Return
+    ------
+    jac : torch.Tensor Size: (batch_size, y_dim, x_dim) 
+        Jacobian of y w.r.t. x
+    &#34;&#34;&#34;
+    grads = []
+    for i in range(y.shape[1]):
+        grad_outputs = torch.zeros_like(y)
+        grad_outputs[:,i] = 1
+        grads.append(gradient(y, x, grad_outputs=grad_outputs).unsqueeze(1))
+    jac = torch.cat(grads, dim=1)
+    return jac
+
+
+def _get_log_pz_qz_prodzi_qzCx(latent_sample, latent_dist, n_data, is_mss=True):
+    batch_size, hidden_dim = latent_sample.shape
+
+    # calculate log q(z|x)
+    log_q_zCx = log_density_gaussian(latent_sample, *latent_dist).sum(dim=1)
+
+    # calculate log p(z)
+    # mean and log var is 0
+    zeros = torch.zeros_like(latent_sample)
+    log_pz = log_density_gaussian(latent_sample, zeros, zeros).sum(1)
+    
+    # calculate log q(z)
+    mat_log_qz = matrix_log_density_gaussian(latent_sample, *latent_dist)
+
+    if is_mss:
+        # use stratification
+        log_iw_mat = log_importance_weight_matrix(batch_size, n_data).to(latent_sample.device)
+        mat_log_qzi = mat_log_qz + log_iw_mat.view(batch_size, batch_size, 1)
+        
+    log_qz = logsumexp(mat_log_qz.sum(2) + log_iw_mat, dim=1, keepdim=False)
+    log_qzi = logsumexp(mat_log_qzi, dim=1, keepdim=False)
+    log_prod_qzi = log_qzi.sum(1)
+
+    return log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx
+
+
+def _get_log_qz_qzi_perb(latent_sample_perb, latent_dist, n_data, is_mss=True):
+    batch_size, hidden_dim, perb_size = latent_sample_perb.shape
+    mu, logvar = latent_dist
+    
+    latent_sample_perb = latent_sample_perb.view(batch_size, 1, hidden_dim, perb_size)    
+    mu = mu.view(1, batch_size, hidden_dim, 1)
+    logvar = logvar.view(1, batch_size, hidden_dim, 1)
+    
+    # calculate log q(z)
+    mat_log_qz = log_density_gaussian(latent_sample_perb, mu, logvar)
+
+    if is_mss:
+        # use stratification
+        log_iw_mat = log_importance_weight_matrix(batch_size, n_data).to(latent_sample_perb.device)
+        mat_log_qzi = mat_log_qz + log_iw_mat.view(batch_size, batch_size, 1, 1)
+        
+    log_qz = logsumexp(mat_log_qz.sum(2) + log_iw_mat.view(batch_size, batch_size, 1), dim=1, keepdim=False)
+    log_qzi = logsumexp(mat_log_qzi, dim=1, keepdim=False)
+
+    return log_qz, log_qzi
+
+    
+    </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="adaptive_wavelets.vae.models.losses.get_loss_f"><code class="name flex">
+<span>def <span class="ident">get_loss_f</span></span>(<span>**kwargs_parse)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return the loss function given the argparse arguments.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_loss_f(**kwargs_parse):
+    &#34;&#34;&#34;Return the loss function given the argparse arguments.&#34;&#34;&#34;
+    kwargs_all = dict(rec_dist=kwargs_parse[&#34;rec_dist&#34;],
+                      steps_anneal=kwargs_parse[&#34;reg_anneal&#34;])
+    return Loss(beta=kwargs_parse[&#34;beta&#34;],
+                lamPT=kwargs_parse[&#34;lamPT&#34;],
+                lamNN=kwargs_parse[&#34;lamNN&#34;],
+                lamH=kwargs_parse[&#34;lamH&#34;],
+                lamSP=kwargs_parse[&#34;lamSP&#34;],
+                decoder=kwargs_parse[&#34;decoder&#34;],
+                **kwargs_all)</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.vae.models.losses.gradient"><code class="name flex">
+<span>def <span class="ident">gradient</span></span>(<span>y, x, grad_outputs=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Compute dy/dx @ grad_outputs</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gradient(y, x, grad_outputs=None):
+    &#34;&#34;&#34;Compute dy/dx @ grad_outputs&#34;&#34;&#34;
+    if grad_outputs is None:
+        grad_outputs = torch.ones_like(y)
+    grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
+    return grad</code></pre>
+</details>
+</dd>
+<dt id="adaptive_wavelets.vae.models.losses.jacobian"><code class="name flex">
+<span>def <span class="ident">jacobian</span></span>(<span>y, x)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Compute dy/dx = dy/dx @ grad_outputs;
+for grad_outputs in [1, 0, &hellip;, 0], [0, 1, 0, &hellip;, 0], ...., [0, &hellip;, 0, 1]</p>
+<p>y : torch.Tensor Size: (batch_size, y_dim)
+x : torch.Tensor Size: (batch_size, x_dim)</p>
+<h2 id="return">Return</h2>
+<dl>
+<dt><strong><code>jac</code></strong> :&ensp;<code>torch.Tensor</code> <code>Size</code>: (<code>batch_size</code>, <code>y_dim</code>, <code>x_dim</code>)</dt>
+<dd>Jacobian of y w.r.t. x</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def jacobian(y, x):
+    &#34;&#34;&#34;Compute dy/dx = dy/dx @ grad_outputs; 
+    for grad_outputs in [1, 0, ..., 0], [0, 1, 0, ..., 0], ...., [0, ..., 0, 1]
+    
+    y : torch.Tensor Size: (batch_size, y_dim)
+    x : torch.Tensor Size: (batch_size, x_dim)
+    
+    Return
+    ------
+    jac : torch.Tensor Size: (batch_size, y_dim, x_dim) 
+        Jacobian of y w.r.t. x
+    &#34;&#34;&#34;
+    grads = []
+    for i in range(y.shape[1]):
+        grad_outputs = torch.zeros_like(y)
+        grad_outputs[:,i] = 1
+        grads.append(gradient(y, x, grad_outputs=grad_outputs).unsqueeze(1))
+    jac = torch.cat(grads, dim=1)
+    return jac</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="adaptive_wavelets.vae.models.losses.BaseLoss"><code class="flex name class">
+<span>class <span class="ident">BaseLoss</span></span>
+<span>(</span><span>record_loss_every=50, rec_dist='bernoulli', steps_anneal=0)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Base class for losses.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>record_loss_every</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Every how many steps to recorsd the loss.</dd>
+<dt><strong><code>rec_dist</code></strong> :&ensp;{<code>"bernoulli"</code>, <code>"gaussian"</code>, <code>"laplace"</code>}, optional</dt>
+<dd>Reconstruction distribution istribution of the likelihood on the each pixel.
+Implicitely defines the reconstruction loss. Bernoulli corresponds to a
+binary cross entropy (bse), Gaussian corresponds to MSE, Laplace
+corresponds to L1.</dd>
+<dt><strong><code>steps_anneal</code></strong> :&ensp;<code>nool</code>, optional</dt>
+<dd>Number of annealing steps where gradually adding the regularisation.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BaseLoss(abc.ABC):
+    &#34;&#34;&#34;
+    Base class for losses.
+    Parameters
+    ----------
+    record_loss_every: int, optional
+        Every how many steps to recorsd the loss.
+    rec_dist: {&#34;bernoulli&#34;, &#34;gaussian&#34;, &#34;laplace&#34;}, optional
+        Reconstruction distribution istribution of the likelihood on the each pixel.
+        Implicitely defines the reconstruction loss. Bernoulli corresponds to a
+        binary cross entropy (bse), Gaussian corresponds to MSE, Laplace
+        corresponds to L1.
+    steps_anneal: nool, optional
+        Number of annealing steps where gradually adding the regularisation.
+    &#34;&#34;&#34;
+
+    def __init__(self, record_loss_every=50, rec_dist=&#34;bernoulli&#34;, steps_anneal=0):
+        self.n_train_steps = 0
+        self.record_loss_every = record_loss_every
+        self.rec_dist = rec_dist
+        self.steps_anneal = steps_anneal
+
+    @abc.abstractmethod
+    def __call__(self, data, recon_data, latent_dist, is_train, storer, **kwargs):
+        &#34;&#34;&#34;
+        Calculates loss for a batch of data.
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+        latent_dist : tuple of torch.tensor
+            sufficient statistics of the latent dimension. E.g. for gaussian
+            (mean, log_var) each of shape : (batch_size, latent_dim).
+        is_train : bool
+            Whether currently in train mode.
+        storer : dict
+            Dictionary in which to store important variables for vizualisation.
+        kwargs:
+            Loss specific arguments
+        &#34;&#34;&#34;
+
+    def _pre_call(self, is_train, storer):
+        if is_train:
+            self.n_train_steps += 1
+
+        if not is_train or self.n_train_steps % self.record_loss_every == 1:
+            storer = storer
+        else:
+            storer = None
+
+        return storer</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="adaptive_wavelets.vae.models.losses.Loss" href="#adaptive_wavelets.vae.models.losses.Loss">Loss</a></li>
+</ul>
+</dd>
+<dt id="adaptive_wavelets.vae.models.losses.Loss"><code class="flex name class">
+<span>class <span class="ident">Loss</span></span>
+<span>(</span><span>beta=0.0, lamPT=0.0, lamNN=0.0, lamH=0.0, lamSP=0.0, is_mss=True, decoder=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>beta</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for beta-VAE term.</dd>
+<dt><strong><code>lamPT</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for penalizing change in one latent induced by another.</dd>
+<dt><strong><code>lamNN</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for penalizing distance to nearest neighbors in each batch</dd>
+<dt><strong><code>lamH</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for penalizing Hessian</dd>
+<dt><strong><code>lamSP</code></strong> :&ensp;<code>float</code></dt>
+<dd>Hyperparameter for sparisty of Jacobian</dd>
+<dt><strong><code>decoder</code></strong> :&ensp;<code>func</code></dt>
+<dd>Torch module which maps from latent space to reconstruction</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Loss(BaseLoss):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    def __init__(self, beta=0., lamPT=0., lamNN=0., lamH=0., lamSP=0.,
+                 is_mss=True, decoder=None, **kwargs):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        beta : float
+            Hyperparameter for beta-VAE term.
+            
+        lamPT : float
+            Hyperparameter for penalizing change in one latent induced by another.
+            
+        lamNN : float
+            Hyperparameter for penalizing distance to nearest neighbors in each batch
+            
+        lamH : float
+            Hyperparameter for penalizing Hessian
+        
+        lamSP : float
+            Hyperparameter for sparisty of Jacobian
+            
+        decoder: func
+            Torch module which maps from latent space to reconstruction            
+        &#34;&#34;&#34;    
+        super().__init__(**kwargs)
+        self.beta = beta
+        self.lamPT = lamPT
+        self.lamNN = lamNN        
+        self.lamH = lamH
+        self.lamSP = lamSP
+        self.is_mss = is_mss
+        self.decoder = decoder
+
+    def __call__(self, data, recon_data, latent_dist, is_train, storer, 
+                 latent_sample=None, latent_output=None, n_data=None):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        data : torch.Tensor
+            Input data (e.g. batch of images). Shape : (batch_size, n_chan,
+            height, width).
+
+        recon_data : torch.Tensor
+            Reconstructed data. Shape : (batch_size, n_chan, height, width).
+            
+        latent_dist: list of torch.Tensor
+            Encoder latent distribution [mean, logvar]. Shape : (batch_size, latent_dim).
+            
+        latent_sample: torch.Tensor
+            Latent samples. Shape : (batch_size, latent_dim).
+            
+        latent_output: torch.Tensor, optional
+            Output of the Decoder-&gt;Encoder mapping of latent sample. Shape : (batch_size, latent_dim).
+            
+        n_data: int, optional
+            Total number of training examples.             
+
+        Return
+        ------
+        loss : torch.Tensor
+        &#34;&#34;&#34;        
+        storer = self._pre_call(is_train, storer)
+        batch_size, latent_dim = latent_sample.shape
+        
+        self.rec_loss = _reconstruction_loss(data, recon_data,
+                                             storer=storer, 
+                                             distribution=self.rec_dist)
+        self.kl_loss = _kl_normal_loss(*latent_dist, storer)
+        
+        # total loss
+        loss = self.rec_loss + (self.beta * self.kl_loss)                         
+        
+        # pointwise independence loss
+        self.pt_loss = 0
+        if self.lamPT &gt; 0 and latent_output is not None:
+            jac = jacobian(latent_output, latent_sample)
+            for i in range(latent_dim):
+                jac[:,i,i] = 0 # make partial i / partial i zero
+            self.pt_loss += abs(jac).sum()/batch_size
+            loss += self.lamPT * self.pt_loss 
+        
+        # nearest-neighbor batch loss
+        self.nearest_neighbor_loss = 0
+        if self.lamNN &gt; 0:
+            for i in range(batch_size):
+                dists = torch.pairwise_distance(latent_sample[i], latent_sample)
+                self.nearest_neighbor_loss += dists.sort()[0][1] # exclude distance to itself
+            loss += self.lamNN * self.nearest_neighbor_loss
+            
+        # Hessian loss
+        self.hessian_loss = 0
+        if self.lamH &gt; 0:
+            # print(&#39;calculating hessian loss...&#39;)
+            self.hessian_loss += hessian_penalty(self.decoder, latent_sample, k=10)
+            loss += self.lamH * self.hessian_loss
+    
+        # sparsity loss
+        self.sp_loss = 0
+        if self.lamSP &gt; 0:
+            decoded_data = self.decoder(latent_sample)
+            self.sp_loss += abs(jacobian(decoded_data, latent_sample)).sum()/batch_size
+            loss += self.lamSP * self.sp_loss
+            
+        # total correlation loss
+        if n_data is not None:
+            log_pz, log_qz, log_qzi, log_prod_qzi, log_q_zCx = _get_log_pz_qz_prodzi_qzCx(latent_sample,
+                                                                                          latent_dist,
+                                                                                          n_data,
+                                                                                          is_mss=self.is_mss)      
+            # I[z;x] = KL[q(z,x)||q(x)q(z)] = E_x[KL[q(z|x)||q(z)]]
+            self.mi_loss = (log_q_zCx - log_qz).mean()
+            # TC[z] = KL[q(z)||\prod_i z_i]
+            self.tc_loss = (log_qz - log_prod_qzi).mean()
+            # dw_kl_loss is KL[q(z)||p(z)] instead of usual KL[q(z|x)||p(z))]
+            self.dw_kl_loss = (log_prod_qzi - log_pz).mean()              
+            
+        if storer is not None:
+            storer[&#39;loss&#39;].append(loss.item())
+            storer[&#39;pt_loss&#39;].append(self.pt_loss.item())
+            storer[&#39;nn_loss&#39;].append(self.nearest_neighbor_loss.item())
+            storer[&#39;h_loss&#39;].append(self.hessian_loss.item())
+            storer[&#39;sp_loss&#39;].append(self.sp_loss.item())      
+        
+        return loss</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="adaptive_wavelets.vae.models.losses.BaseLoss" href="#adaptive_wavelets.vae.models.losses.BaseLoss">BaseLoss</a></li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="adaptive_wavelets.vae.models" href="index.html">adaptive_wavelets.vae.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="adaptive_wavelets.vae.models.losses.get_loss_f" href="#adaptive_wavelets.vae.models.losses.get_loss_f">get_loss_f</a></code></li>
+<li><code><a title="adaptive_wavelets.vae.models.losses.gradient" href="#adaptive_wavelets.vae.models.losses.gradient">gradient</a></code></li>
+<li><code><a title="adaptive_wavelets.vae.models.losses.jacobian" href="#adaptive_wavelets.vae.models.losses.jacobian">jacobian</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="adaptive_wavelets.vae.models.losses.BaseLoss" href="#adaptive_wavelets.vae.models.losses.BaseLoss">BaseLoss</a></code></h4>
+</li>
+<li>
+<h4><code><a title="adaptive_wavelets.vae.models.losses.Loss" href="#adaptive_wavelets.vae.models.losses.Loss">Loss</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

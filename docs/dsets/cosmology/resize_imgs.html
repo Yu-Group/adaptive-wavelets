@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>adaptive_wavelets.vae API documentation</title>
+<title>adaptive_wavelets.dsets.cosmology.resize_imgs API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,30 +17,110 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>adaptive_wavelets.vae</code></h1>
+<h1 class="title">Module <code>adaptive_wavelets.dsets.cosmology.resize_imgs</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+import os,sys
+opj = os.path.join
+from astropy.io import fits
+from torch.utils.data import Dataset, DataLoader
+data_path = &#39;./data&#39;
+
+def downsample(parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10):
+    &#39;&#39;&#39;
+    downsample cosmolgy image
+    &#39;&#39;&#39;
+    print(&#39;preprocessing...&#39;)
+    img_size = 256
+    params_ = np.loadtxt(parameter_file)[:ncosmo]
+    
+    image = []
+    params = []
+    for idx in range(nsamples):
+        img_name = opj(root_dir,&#39;model%03d/WLconv_z1.00_%04dr.fits&#39;%(idx % len(params_), idx // len(params_)))
+        start1 = np.random.randint(0, img_size-resize-1, 1)[0]
+        start2 = np.random.randint(0, img_size-resize-1, 1)[0]
+        end1 = start1 + resize
+        end2 = start2 + resize
+        hdu_list = fits.open(img_name, memmap=False)
+        img_data = hdu_list[0].data
+        image.append(img_data[start1:end1, start2:end2])
+        hdu_list.close()
+        params.append(params_[idx % len(params_), 1:-1])  
+        print(&#39;\r idx: {}/{}&#39;.format(idx, nsamples), end=&#39;&#39;)
+    
+    image = np.stack(image, axis=0)
+    params = np.stack(params, axis=0)
+    # save
+    np.savez(opj(data_path, &#39;cosmo_resize_{}.npz&#39;.format(resize)), imgs=image, params=params)
+    
+    
+if __name__ == &#39;__main__&#39;:    
+    parameter_file = opj(data_path, &#39;cosmological_parameters.txt&#39;)
+    root_dir = opj(data_path, &#39;z1_256&#39;)
+    resize = 64
+
+    # save
+    downsample(parameter_file, root_dir, resize)   
+
+    # load
+    dataset_zip = np.load(opj(data_path, &#39;cosmo_resize_{}.npz&#39;.format(resize)))
+    imgs = dataset_zip[&#39;imgs&#39;]
+    params = dataset_zip[&#39;params&#39;]
+    print(imgs.shape, params.shape)</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="adaptive_wavelets.vae.models" href="models/index.html">adaptive_wavelets.vae.models</a></code></dt>
+<dt id="adaptive_wavelets.dsets.cosmology.resize_imgs.downsample"><code class="name flex">
+<span>def <span class="ident">downsample</span></span>(<span>parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10)</span>
+</code></dt>
 <dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="adaptive_wavelets.vae.training" href="training.html">adaptive_wavelets.vae.training</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="adaptive_wavelets.vae.utils" href="utils/index.html">adaptive_wavelets.vae.utils</a></code></dt>
-<dd>
-<section class="desc"></section>
+<section class="desc"><p>downsample cosmolgy image</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def downsample(parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10):
+    &#39;&#39;&#39;
+    downsample cosmolgy image
+    &#39;&#39;&#39;
+    print(&#39;preprocessing...&#39;)
+    img_size = 256
+    params_ = np.loadtxt(parameter_file)[:ncosmo]
+    
+    image = []
+    params = []
+    for idx in range(nsamples):
+        img_name = opj(root_dir,&#39;model%03d/WLconv_z1.00_%04dr.fits&#39;%(idx % len(params_), idx // len(params_)))
+        start1 = np.random.randint(0, img_size-resize-1, 1)[0]
+        start2 = np.random.randint(0, img_size-resize-1, 1)[0]
+        end1 = start1 + resize
+        end2 = start2 + resize
+        hdu_list = fits.open(img_name, memmap=False)
+        img_data = hdu_list[0].data
+        image.append(img_data[start1:end1, start2:end2])
+        hdu_list.close()
+        params.append(params_[idx % len(params_), 1:-1])  
+        print(&#39;\r idx: {}/{}&#39;.format(idx, nsamples), end=&#39;&#39;)
+    
+    image = np.stack(image, axis=0)
+    params = np.stack(params, axis=0)
+    # save
+    np.savez(opj(data_path, &#39;cosmo_resize_{}.npz&#39;.format(resize)), imgs=image, params=params)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -53,14 +133,12 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="adaptive_wavelets" href="../index.html">adaptive_wavelets</a></code></li>
+<li><code><a title="adaptive_wavelets.dsets.cosmology" href="index.html">adaptive_wavelets.dsets.cosmology</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="adaptive_wavelets.vae.models" href="models/index.html">adaptive_wavelets.vae.models</a></code></li>
-<li><code><a title="adaptive_wavelets.vae.training" href="training.html">adaptive_wavelets.vae.training</a></code></li>
-<li><code><a title="adaptive_wavelets.vae.utils" href="utils/index.html">adaptive_wavelets.vae.utils</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="adaptive_wavelets.dsets.cosmology.resize_imgs.downsample" href="#adaptive_wavelets.dsets.cosmology.resize_imgs.downsample">downsample</a></code></li>
 </ul>
 </li>
 </ul>
