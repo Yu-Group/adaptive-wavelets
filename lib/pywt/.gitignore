@@ -1,0 +1,39 @@
+__pycache__
+*.py[co]
+*.pyd
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+.installed.cfg
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+
+# Editors
+.idea
+.project
+.pydevproject
+.settings
+
+# Project working files
+# Expanded Cython
+pywt/_extensions/*.[ch]
+pywt/_c99_config.py
+pywt/_extensions/config.pxi
+cythonize.dat
+pywt/version.py
+build.log
+
+# asv files
+asv/env
+asv/html
+asv/pywt
+asv/results

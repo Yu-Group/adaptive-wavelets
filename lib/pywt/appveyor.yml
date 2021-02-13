@@ -1,0 +1,47 @@
+# AppVeyor.com is a Continuous Integration service to build and run tests under
+# Windows
+# https://ci.appveyor.com/project/PyWavelets/pywt
+
+# This file is built on the template here:
+# http://python-packaging-user-guide.readthedocs.org/en/latest/appveyor/
+
+environment:
+  # as of Nov 2020, the default image has Visual Studio 2015, but Python 3.9
+  # is only available on the Visual Studio 2019 image.
+  matrix:
+    - PYTHON: "C:\\Python37"
+    - PYTHON: "C:\\Python37-x64"
+    - PYTHON: "C:\\Python38"
+    - PYTHON: "C:\\Python38-x64"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: "C:\\Python39"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: "C:\\Python39-x64"
+
+build: off
+
+install:
+  - "util\\appveyor\\build.cmd %PYTHON%\\python.exe -m pip install --upgrade pip"
+  - "util\\appveyor\\build.cmd %PYTHON%\\python.exe -m pip install --upgrade wheel"
+  - "util\\appveyor\\build.cmd %PYTHON%\\python.exe -m pip install
+     numpy --cache-dir c:\\tmp\\pip-cache"
+  - "util\\appveyor\\build.cmd %PYTHON%\\python.exe -m pip install
+     Cython pytest coverage matplotlib futures --cache-dir c:\\tmp\\pip-cache"
+
+test_script:
+  - "util\\appveyor\\build.cmd %PYTHON%\\python.exe -m pip install -e . -v"
+  - "cd demo"
+  - "%PYTHON%\\Scripts\\pytest --pyargs pywt"
+  - "cd .."
+
+after_test:
+  - "util\\appveyor\\build.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
+
+artifacts:
+  # Archive the generated wheel package in the ci.appveyor.com build report.
+  - path: dist\*
+
+cache:
+  # Cache can be manuall cleared like this:
+  # https://github.com/appveyor/ci/issues/207
+  - "c:\\tmp\\pip-cache"

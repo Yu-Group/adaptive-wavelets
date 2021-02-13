@@ -14,7 +14,7 @@ from train import Trainer, Validator
 from wavelet_transform import Wavelet_Transform, Attributer, get_2dfilts, initialize_filters
 from utils import tuple_L1Loss, tuple_L2Loss, thresh_attrs, viz_list
 
-sys.path.append('../../adaptive_wavelets/dsets/cosmology')
+sys.path.append('../../src/dsets/cosmology')
 from dset import get_dataloader
 
 
@@ -44,7 +44,7 @@ class p:
     '''
     # parameters for generating data
     seed = 1
-    data_path = "../../adaptive_wavelets/dsets/cosmology/data"
+    data_path = "../../src/dsets/cosmology/data"
     
     # parameters for model architecture
     img_size = (1, 256, 256)

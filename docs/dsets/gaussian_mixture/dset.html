@@ -222,7 +222,7 @@ from the parameterized gaussian.
 <dd>
 <section class="desc"><p>An abstract class representing a :class:<code>Dataset</code>.</p>
 <p>All datasets that represent a map from keys to data samples should subclass
-it. All subclasses should overwrite :meth:<code>__getitem__</code>, supporting fetching a
+it. All subclasses should overrite :meth:<code>__getitem__</code>, supporting fetching a
 data sample for a given key. Subclasses could also optionally overwrite
 :meth:<code>__len__</code>, which is expected to return the size of the dataset by many
 :class:<code>~torch.utils.data.Sampler</code> implementations and the default options
@@ -257,7 +257,6 @@ dataset with non-integral indices/keys, a custom sampler must be provided.</p>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>torch.utils.data.dataset.Dataset</li>
-<li>typing.Generic</li>
 </ul>
 </dd>
 </dl>
