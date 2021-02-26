@@ -8,11 +8,13 @@ from random import randint
 from copy import deepcopy
 import pickle as pkl
 import argparse
+
+sys.path.append('../../src/adaptive_wavelets')
 from models import load_model
 from losses import get_loss_f
 from train import Trainer, Validator
-from wavelet_transform import Wavelet_Transform, Attributer, get_2dfilts, initialize_filters
-from utils import tuple_L1Loss, tuple_L2Loss, thresh_attrs, viz_list
+# from wavelet_transform import Wavelet_Transform, Attributer, get_2dfilts, initialize_filters
+# from utils import tuple_L1Loss, tuple_L2Loss, thresh_attrs
 
 sys.path.append('../../src/dsets/cosmology')
 from dset import get_dataloader

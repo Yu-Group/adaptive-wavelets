@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from utils import tuple_L1Loss, thresh_attrs
+from wave_attributions import thresh_attrs
 
 
 def get_loss_f(**kwargs_parse):
@@ -93,3 +93,27 @@ def _L1_attribution_loss(attributions):
     loss = loss / batch_size
 
     return loss
+
+
+def tuple_Sum(x):
+    output = 0
+    num = len(x)
+    for i in range(num):
+        output += torch.sum(x[i])
+    return output/num    
+
+
+def tuple_L1Loss(x):
+    output = 0
+    num = len(x)
+    for i in range(num):
+        output += torch.sum(abs(x[i]))
+    return output/num
+
+
+def tuple_L2Loss(x):
+    output = 0
+    num = len(x)
+    for i in range(num):
+        output += torch.sum(x[i]**2)
+    return output/num  
