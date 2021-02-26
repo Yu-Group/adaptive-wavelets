@@ -32,10 +32,9 @@ class Trainer():
         Use residuals to compute TRIM score.
     """
     def __init__(self, model, w_transform, attributer, optimizer, loss_f,
-                 device=torch.device("cpu"),
+                 device=torch.device("cuda"),
                  use_residuals=True,
-                 attr_methods='InputXGradient',
-                 out_dir="/home/ubuntu/local-vae/notebooks/ex_cosmology/results"):
+                 attr_methods='InputXGradient'):
 
         self.device = device
         self.model = model.to(self.device)
@@ -44,7 +43,6 @@ class Trainer():
         self.loss_f = loss_f
         self.mt = TrimModel(model, w_transform.inverse, use_residuals=use_residuals)    
         self.attributer = attributer(self.mt, attr_methods=attr_methods, device=self.device)
-        self.out_dir = out_dir
 
     def __call__(self, train_loader, test_loader=None, epochs=10):
         """

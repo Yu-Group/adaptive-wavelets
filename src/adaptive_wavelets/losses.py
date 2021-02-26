@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from wave_attributions import thresh_attrs
 
 
 def get_loss_f(**kwargs_parse):
@@ -38,7 +37,7 @@ class Loss():
             Input data after wavelet transform.
             
         attributions: torch.Tensor
-            Attribution scores.          
+            Input attribution scores.          
 
         Return
         ------
@@ -52,7 +51,7 @@ class Loss():
             self.L1attr_loss += _L1_attribution_loss(attributions)
 
         # total loss
-        loss = self.rec_loss + self.lamL1attr * self.L1attr_loss 
+        loss = self.rec_loss + self.lamL1attr*self.L1attr_loss 
         
         return loss
             
