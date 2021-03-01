@@ -22,8 +22,8 @@ def load_wavelet(wave: str, device=None):
         return (h0, h1, g0, g1)
 
     
-class DWT(nn.Module):
-    '''Class of wavelet transform 
+class DWT2d(nn.Module):
+    '''Class of 2d wavelet transform 
     Params
     ------
     wt_type: str
@@ -71,7 +71,7 @@ class DWT(nn.Module):
         
         self.J = J
         self.mode = mode
-        self.wt_type = 'DWT'        
+        self.wt_type = 'DWT2d'        
 
     def forward(self, x):
         """ Forward pass of the DWT.

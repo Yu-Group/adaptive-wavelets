@@ -67,17 +67,31 @@ def pad_within(x, stride=2, start_row=0, start_col=0):
     return F.conv_transpose2d(x, w.expand(x.size(1), 1, stride, stride), stride=stride, groups=x.size(1)).squeeze()
 
 
+def get_1dfilts(w_transform):
+    '''Get 1d filters from one-dimensional wavelets
+    Params
+    ------
+    w_transform: obj
+        wavelet object
+    '''    
+    if w_transform.wt_type == 'DWT1d':
+        h0 = F.pad(w_transform.h0.squeeze(), pad=(2,2), mode='constant', value=0)
+        h1 = F.pad(w_transform.h1.squeeze(), pad=(2,2), mode='constant', value=0)      
+        
+        return (h0.detach().cpu(), h1.detach().cpu())
+    
+    else:
+        raise ValueError('no such type of wavelet transform is supported')    
+
+
 def get_2dfilts(w_transform):
-    ### TO DO: implement 2d filters for inverse transform ###
     '''Get 2d filters from one-dimensional wavelets
     Params
     ------
     w_transform: obj
         wavelet object
-    wt_type: str
-        indicate either dual-tree complex wavelet transform (DTCWT) or discrete wavelet transform (DWT)
     '''    
-    if w_transform.wt_type == 'DTCWT':
+    if w_transform.wt_type == 'DTCWT2d':
         h0o = w_transform.xfm.h0o.data
         h1o = w_transform.xfm.h1o.data
         h0a = w_transform.xfm.h0a.data
@@ -159,7 +173,7 @@ def get_2dfilts(w_transform):
         
         return (fl_filt_reals, fl_filt_imags), (sl_filt_reals, sl_filt_imags)
     
-    elif w_transform.wt_type == 'DWT':
+    elif w_transform.wt_type == 'DWT2d':
         h0_col = F.pad(w_transform.h0.squeeze(), pad=(2,2), mode='constant', value=0)
         h1_col = F.pad(w_transform.h1.squeeze(), pad=(2,2), mode='constant', value=0)
         h0_row = F.pad(w_transform.h0.squeeze(), pad=(2,2), mode='constant', value=0)

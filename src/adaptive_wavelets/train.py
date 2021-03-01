@@ -32,6 +32,7 @@ class Trainer():
         Use residuals to compute TRIM score.
     """
     def __init__(self, model, w_transform, attributer, optimizer, loss_f,
+                 target=1,
                  device=torch.device("cuda"),
                  use_residuals=True,
                  attr_methods='InputXGradient'):
@@ -43,6 +44,7 @@ class Trainer():
         self.loss_f = loss_f
         self.mt = TrimModel(model, w_transform.inverse, use_residuals=use_residuals)    
         self.attributer = attributer(self.mt, attr_methods=attr_methods, device=self.device)
+        self.target = target
 
     def __call__(self, train_loader, test_loader=None, epochs=10):
         """
@@ -118,7 +120,7 @@ class Trainer():
         # reconstruction
         recon_data = self.w_transform.inverse(data_t)
         # TRIM score
-        attributions = self.attributer(data_t, target=1, additional_forward_args=deepcopy(data))
+        attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data)) if self.loss_f.lamL1attr > 0 else None
         # loss
         loss = self.loss_f(data, recon_data, data_t, attributions)
 
@@ -150,7 +152,7 @@ class Trainer():
             data = data.to(self.device)
             data_t = self.w_transform(data)
             recon_data = self.w_transform.inverse(data_t)
-            attributions = self.attributer(data_t, target=1, additional_forward_args=deepcopy(data))
+            attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data))
             loss = self.loss_f(data, recon_data, data_t, attributions)                  
             iter_loss = loss.item()
             epoch_loss += iter_loss   
@@ -184,6 +186,7 @@ class Validator():
         Use residuals to compute TRIM score.
     """
     def __init__(self, model, w_transform, attributer, loss_f,
+                 target=1,
                  device=torch.device("cpu"),
                  attr_methods='InputXGradient',
                  use_residuals=True):
@@ -194,6 +197,7 @@ class Validator():
         self.loss_f = loss_f
         self.mt = TrimModel(model, w_transform.inverse, use_residuals=use_residuals)    
         self.attributer = attributer(self.mt, attr_methods=attr_methods, device=self.device)
+        self.target = target
  
     def __call__(self, data_loader):
         """
@@ -215,7 +219,7 @@ class Validator():
             data = data.to(self.device)
             data_t = self.w_transform(data)
             recon_data = self.w_transform.inverse(data_t)
-            attributions = self.attributer(data_t, target=1, additional_forward_args=deepcopy(data))
+            attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data))
             loss = self.loss_f(data, recon_data, data_t, attributions)                  
             iter_loss = loss.item()
             epoch_loss += iter_loss   

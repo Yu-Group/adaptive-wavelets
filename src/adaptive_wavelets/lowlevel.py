@@ -291,6 +291,41 @@ class AFB2D(Function):
         low = y[:,:,0].contiguous()
         highs = y[:,:,1:].contiguous()
         return low, highs
+    
+    
+class AFB1D(Function):
+    """ Does a single level 1d wavelet decomposition of an input.
+
+    Needs to have the tensors in the right form. Because this function defines
+    its own backward pass, saves on memory by not having to save the input
+    tensors.
+
+    Inputs:
+        x (torch.Tensor): Input to decompose
+        h0: lowpass
+        h1: highpass
+        mode (int): use mode_to_int to get the int code here
+
+    We encode the mode as an integer rather than a string as gradcheck causes an
+    error when a string is provided.
+
+    Returns:
+        x0: Tensor of shape (N, C, L') - lowpass
+        x1: Tensor of shape (N, C, L') - highpass
+    """
+    @staticmethod
+    def forward(x, h0, h1, mode):
+        mode = int_to_mode(mode)
+
+        # Make inputs 4d
+        x = x[:, :, None, :]
+        h0 = h0[:, :, None, :]
+        h1 = h1[:, :, None, :]
+
+        lohi = afb1d(x, h0, h1, mode=mode, dim=3)
+        x0 = lohi[:, ::2, 0].contiguous()
+        x1 = lohi[:, 1::2, 0].contiguous()
+        return x0, x1 
 
 
 class SFB2D(Function):
@@ -325,6 +360,38 @@ class SFB2D(Function):
         hi = sfb1d(hl, hh, g0_col, g1_col, mode=mode, dim=2)
         y = sfb1d(lo, hi, g0_row, g1_row, mode=mode, dim=3)
         return y
+    
+    
+class SFB1D(Function):
+    """ Does a single level 1d wavelet decomposition of an input.
+
+    Needs to have the tensors in the right form. Because this function defines
+    its own backward pass, saves on memory by not having to save the input
+    tensors.
+
+    Inputs:
+        low (torch.Tensor): Lowpass to reconstruct of shape (N, C, L)
+        high (torch.Tensor): Highpass to reconstruct of shape (N, C, L)
+        g0: lowpass
+        g1: highpass
+        mode (int): use mode_to_int to get the int code here
+
+    We encode the mode as an integer rather than a string as gradcheck causes an
+    error when a string is provided.
+
+    Returns:
+        y: Tensor of shape (N, C*2, L')
+    """
+    @staticmethod
+    def forward(low, high, g0, g1, mode):
+        mode = int_to_mode(mode)
+        # Make into a 2d tensor with 1 row
+        low = low[:, :, None, :]
+        high = high[:, :, None, :]
+        g0 = g0[:, :, None, :]
+        g1 = g1[:, :, None, :]
+
+        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]    
 
 
 def prep_filt_sfb2d(g0_col, g1_col, g0_row=None, g1_row=None, device=None):

@@ -22,7 +22,7 @@ class Loss():
         """    
         self.lamL1attr = lamL1attr
 
-    def __call__(self, data, recon_data, data_t, attributions):
+    def __call__(self, data, recon_data, data_t, attributions=None):
         """
         Parameters
         ----------
