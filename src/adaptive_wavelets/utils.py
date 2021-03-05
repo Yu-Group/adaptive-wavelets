@@ -67,29 +67,39 @@ def pad_within(x, stride=2, start_row=0, start_col=0):
     return F.conv_transpose2d(x, w.expand(x.size(1), 1, stride, stride), stride=stride, groups=x.size(1)).squeeze()
 
 
+def low_to_high(x):
+    """Converts lowpass filter to highpass filter. Input must be of shape (1,1,n) where n is length of filter
+    """
+    n = x.size(2)
+    seq = (-1)**torch.arange(n, device=x.device)
+    y = torch.flip(x, (0,2)) * seq
+    return y
+
+
 def get_1dfilts(w_transform):
-    '''Get 1d filters from one-dimensional wavelets
+    '''Get 1d filters from DWT1d object.
     Params
     ------
     w_transform: obj
-        wavelet object
+        DWT1d object
     '''    
     if w_transform.wt_type == 'DWT1d':
-        h0 = F.pad(w_transform.h0.squeeze(), pad=(2,2), mode='constant', value=0)
-        h1 = F.pad(w_transform.h1.squeeze(), pad=(2,2), mode='constant', value=0)      
-        
-        return (h0.detach().cpu(), h1.detach().cpu())
-    
+        h0 = w_transform.h0.squeeze().detach().cpu()
+        h1 = low_to_high(w_transform.h0)
+        h1 = h1.squeeze().detach().cpu()
+        h0 = F.pad(h0, pad=(2,2), mode='constant', value=0)
+        h1 = F.pad(h1, pad=(2,2), mode='constant', value=0)              
+        return (h0, h1)   
     else:
         raise ValueError('no such type of wavelet transform is supported')    
 
 
 def get_2dfilts(w_transform):
-    '''Get 2d filters from one-dimensional wavelets
+    '''Get 2d filters from DWT2d object.
     Params
     ------
     w_transform: obj
-        wavelet object
+        DWT2d object
     '''    
     if w_transform.wt_type == 'DTCWT2d':
         h0o = w_transform.xfm.h0o.data
