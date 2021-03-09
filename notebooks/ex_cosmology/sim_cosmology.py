@@ -61,6 +61,7 @@ class p:
     num_epochs = 30
     attr_methods = 'Saliency'
     lamL1attr = 1
+    target = 1
     
     # SAVE MODEL
     out_dir = "/home/ubuntu/local-vae/notebooks/ex_cosmology/results" 

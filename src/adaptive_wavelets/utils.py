@@ -28,12 +28,34 @@ def reflect(x, minx, maxx):
     return np.array(out, dtype=x.dtype) 
 
 
-def compute_tuple_dim(x):
+def tuple_dim(x):
     tot_dim = 0
     for i in range(len(x)):
         shape = torch.tensor(x[i].shape)
         tot_dim += torch.prod(shape).item()
     return tot_dim
+
+
+def tuple_to_tensor(x):
+    batch_size = x[0].size(0)
+    J = len(x)
+    y = torch.tensor([]).to(x[0].device)
+    list_of_size = [0]    
+    for j in range(J):
+        a = x[j].reshape(batch_size, -1)
+        y = torch.cat((y,a), dim=1)
+        list_of_size.append(list_of_size[-1] + a.shape[1])
+    return (y, list_of_size)
+
+
+def tensor_to_tuple(y, d, list_of_size):
+    x = []
+    J = len(list_of_size) - 1
+    for j in range(J):
+        n0 = list_of_size[j]
+        n1 = list_of_size[j+1]
+        x.append(y[:,n0:n1].reshape(d[j].shape))
+    return tuple(x)
 
 
 def add_noise(x, init_factor, noise_factor):
