@@ -34,14 +34,14 @@ class Attributer(nn.Module):
         
     def InputXGradient(self, x: tuple, target=1, additional_forward_args=None):
         outputs = self.mt(x, additional_forward_args)[:,target]
-        grads = torch.autograd.grad(torch.unbind(outputs), x)        
+        grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
         # input * gradient
         attributions = tuple(xi * gi for xi, gi in zip(x, grads))
         return attributions    
     
     def Saliency(self, x: tuple, target=1, additional_forward_args=None):
         outputs = self.mt(x, additional_forward_args)[:,target]
-        grads = torch.autograd.grad(torch.unbind(outputs), x)        
+        grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
         return grads
     
     ### TO DO!! ###

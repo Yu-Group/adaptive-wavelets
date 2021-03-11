@@ -125,7 +125,8 @@ class Trainer():
         # reconstruction
         recon_data = self.w_transform.inverse(data_t)
         # TRIM score
-        attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data)) if self.loss_f.lamL1attr > 0 else None
+        with torch.backends.cudnn.flags(enabled=False):
+            attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data)) if self.loss_f.lamL1attr > 0 else None
         # loss
         loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)
 

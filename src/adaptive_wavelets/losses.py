@@ -95,6 +95,7 @@ class Loss():
         # total loss
         loss = self.rec_loss + self.lamSum*self.sum_loss + self.lamL2norm*self.L2norm_loss + \
                 + self.lamCMF*self.CMF_loss + self.lamL1wave*self.L1wave_loss + self.lamL1attr*self.L1attr_loss 
+#         loss = self.lamL1attr*self.L1attr_loss         
         
         return loss
             

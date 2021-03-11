@@ -129,8 +129,8 @@ class ReshapeModel(nn.Module):
         x = x.squeeze()
         return self.model(x)
 
-    
 if __name__ == '__main__':
+    
     args = parser.parse_args()
     for arg in vars(args):
         setattr(p, arg, getattr(args, arg))
