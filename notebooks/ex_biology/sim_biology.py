@@ -130,7 +130,7 @@ def warm_start(p, out_dir):
         for fname in fnames:
             if fname[-3:] == 'pkl':
                 result = pkl.load(open(opj(out_dir, fname), 'rb'))
-                params.append(result[p.lamL1attr])
+                params.append(result['lamL1attr'])
             if fname[-3:] == 'pth':
                 m = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
                 m.load_state_dict(torch.load(opj(out_dir, fname)))
