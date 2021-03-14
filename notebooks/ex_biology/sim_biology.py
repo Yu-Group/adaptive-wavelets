@@ -55,6 +55,7 @@ class p:
     # parameters for generating data
     seed = 1
     data_path = "../../../src/dsets/biology/data"
+    model_path = "../../../src/dsets/biology/data"
     
     # parameters for initialization
     wave = 'db5'
@@ -104,8 +105,12 @@ def load_dataloader_and_pretrained_model(p):
     """
     data_loader = get_dataloader(p.data_path, 
                                  batch_size=p.batch_size) 
+    model = load_model(p)
     
-    results = pkl.load(open(opj(p.data_path, 'dnn_full_long_normalized_across_track_1_feat.pkl'), 'rb'))
+    return data_loader, model
+
+def load_model(p):
+    results = pkl.load(open(opj(p.model_path, 'dnn_full_long_normalized_across_track_1_feat.pkl'), 'rb'))
     dnn = neural_networks.neural_net_sklearn(D_in=40, H=20, p=0, arch='lstm')
     dnn.model.load_state_dict(results['model_state_dict'])
     m = deepcopy(dnn.model)
@@ -113,8 +118,9 @@ def load_dataloader_and_pretrained_model(p):
     for param in m.parameters():
         param.requires_grad = False  
     model = ReshapeModel(m)
+    return model
 
-    return data_loader, model
+    
 
 
 def warm_start(p, out_dir):
