@@ -109,6 +109,7 @@ def load_dataloader_and_pretrained_model(p):
     
     return data_loader, model
 
+
 def load_model(p):
     results = pkl.load(open(opj(p.model_path, 'dnn_full_long_normalized_across_track_1_feat.pkl'), 'rb'))
     dnn = neural_networks.neural_net_sklearn(D_in=40, H=20, p=0, arch='lstm')
@@ -119,8 +120,6 @@ def load_model(p):
         param.requires_grad = False  
     model = ReshapeModel(m)
     return model
-
-    
 
 
 def warm_start(p, out_dir):
@@ -144,6 +143,40 @@ def warm_start(p, out_dir):
         max_idx = np.argmax(np.array(params))
         model = models[max_idx]
     return model
+
+
+def dataloader_to_nparrays(w_transform, train_loader, test_loader):
+    w_transform = w_transform.to('cpu')
+    J = w_transform.J
+    X = []
+    y = []
+    for data, labels in train_loader:
+        data_t = w_transform(data)
+        for j in range(J):
+            if j == 0:
+                x = deepcopy(data_t[j].detach())
+            else:
+                x = torch.cat((x, data_t[j].detach()), axis=2)    
+        X.append(x)
+        y.append(labels)
+    X = torch.cat(X).squeeze().numpy()
+    y = torch.cat(y).squeeze().numpy()
+
+    X_test = []
+    y_test = []
+    for data, labels in test_loader:
+        data_t = w_transform(data)
+        for j in range(J):
+            if j == 0:
+                x = deepcopy(data_t[j].detach())
+            else:
+                x = torch.cat((x, data_t[j].detach()), axis=2)          
+        X_test.append(x)
+        y_test.append(labels)
+    X_test = torch.cat(X_test).squeeze().numpy()
+    y_test = torch.cat(y_test).squeeze().numpy()   
+    
+    return (X, y), (X_test, y_test)
 
 
 class ReshapeModel(nn.Module):
