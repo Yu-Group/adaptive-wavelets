@@ -222,7 +222,7 @@ if __name__ == '__main__':
     # calculate losses
     print('calculating losses and metric...')   
     validator = Validator(model, test_loader)
-    rec_loss, sum_loss, L2norm_loss, CMF_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=0)
+    rec_loss, sum_loss, L2norm_loss, CMF_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
     s.train_losses = trainer.train_losses
     s.rec_loss = rec_loss
     s.sum_loss = sum_loss
