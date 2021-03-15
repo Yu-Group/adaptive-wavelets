@@ -206,16 +206,17 @@ def get_2dfilts(w_transform):
         return (fl_filt_reals, fl_filt_imags), (sl_filt_reals, sl_filt_imags)
     
     elif w_transform.wt_type == 'DWT2d':
-        h0_col = F.pad(w_transform.h0.squeeze(), pad=(2,2), mode='constant', value=0)
-        h1_col = F.pad(w_transform.h1.squeeze(), pad=(2,2), mode='constant', value=0)
-        h0_row = F.pad(w_transform.h0.squeeze(), pad=(2,2), mode='constant', value=0)
-        h1_row = F.pad(w_transform.h1.squeeze(), pad=(2,2), mode='constant', value=0)        
-   
-        filt_lh = h0_row.unsqueeze(0)*h1_col.unsqueeze(1)
-        filt_hl = h1_row.unsqueeze(0)*h0_col.unsqueeze(1)
-        filt_hh = h1_row.unsqueeze(0)*h1_col.unsqueeze(1)
+        h0 = w_transform.h0.squeeze().detach().cpu()
+        h1 = low_to_high(w_transform.h0)
+        h1 = h1.squeeze().detach().cpu()
+        h0 = F.pad(h0, pad=(2,2), mode='constant', value=0)
+        h1 = F.pad(h1, pad=(2,2), mode='constant', value=0)              
         
-        return (filt_lh.detach().cpu(), filt_hl.detach().cpu(), filt_hh.detach().cpu())
+        filt_lh = h0.unsqueeze(0)*h1.unsqueeze(1)
+        filt_hl = h1.unsqueeze(0)*h0.unsqueeze(1)
+        filt_hh = h1.unsqueeze(0)*h1.unsqueeze(1)
+        
+        return (h0, h1), (filt_lh, filt_hl, filt_hh)
     
     else:
         raise ValueError('no such type of wavelet transform is supported')        

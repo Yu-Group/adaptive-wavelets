@@ -2,38 +2,28 @@ import torch.nn as nn
 import pywt
 import lowlevel
 import torch
-from utils import add_noise
+from utils import add_noise, low_to_high
 
 
 def load_wavelet(wave: str, device=None):
     '''
-    load 1-d wavelet from pywt allow both orthogonal and bi-orthogonal wavelets
+    load 1-d wavelet from pywt currently only allow orthogonal wavelets
     '''
     wave = pywt.Wavelet(wave)
     h0, h1 = wave.dec_lo, wave.dec_hi
     g0, g1 = wave.rec_lo, wave.rec_hi
     # Prepare the filters
-    if h0[::-1] == g0 and h1[::-1] == g1:
-        h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
-        return (h0, h1)
-    else:
-        h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
-        g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
-        return (h0, h1, g0, g1)
-
+    h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
+    g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
+    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
+        raise ValueError('currently only orthogonal wavelets are supported')
+    return (h0, h1)    
+    
     
 class DWT2d(nn.Module):
     '''Class of 2d wavelet transform 
     Params
     ------
-    wt_type: str
-        indicate either dual-tree complex wavelet transform (DTCWT) or discrete wavelet transform (DWT)
-    biort: str
-        one of 'antonini', 'legall', 'near_sym_a', 'near_sym_b'. Specifies the first level biorthogonal wavelet filters. Can also
-        give a two tuple for the low and highpass filters directly
-    qshift: str
-        one of 'qshift_06', 'qshift_a', 'qshift_b', 'qshift_c', 'qshift_d'. Specifies the second level quarter shift filters. Can
-            also give a 4-tuple for the low tree a, low tree b, high tree a and high tree b filters directly
     J: int
         number of levels of decomposition
     wave: str
@@ -47,27 +37,11 @@ class DWT2d(nn.Module):
     '''
     def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0):
         super().__init__() 
-        wave = load_wavelet(wave)
-        if len(wave) == 2:
-            h0, h1 = wave[0], wave[1]
-            g0, g1 = None, None
-            self.is_bior = False
-        elif len(wave) == 4:
-            h0, h1, g0, g1 = wave[0], wave[1], wave[2], wave[3]   
-            self.is_bior = True
-        # prepare filts
+        h0, _ = load_wavelet(wave)
         # initialize
         h0 = add_noise(h0, init_factor, noise_factor)
-        h1 = add_noise(h1, init_factor, noise_factor)
-        if self.is_bior:
-            g0 = add_noise(g0, init_factor, noise_factor)
-            g1 = add_noise(g1, init_factor, noise_factor)
         # parameterize
-        self.h0 = nn.Parameter(h0, requires_grad=True)
-        self.h1 = nn.Parameter(h1, requires_grad=True)
-        if self.is_bior:
-            self.g0 = nn.Parameter(g0, requires_grad=True)
-            self.g1 = nn.Parameter(g1, requires_grad=True)
+        self.h0 = nn.Parameter(h0, requires_grad=True)        
         
         self.J = J
         self.mode = mode
@@ -96,10 +70,11 @@ class DWT2d(nn.Module):
         ll = x
         mode = lowlevel.mode_to_int(self.mode)
         
+        h1 = low_to_high(self.h0)
         h0_col = self.h0.reshape((1, 1, -1, 1))
-        h1_col = self.h1.reshape((1, 1, -1, 1))
+        h1_col = h1.reshape((1, 1, -1, 1))
         h0_row = self.h0.reshape((1, 1, 1, -1))
-        h1_row = self.h1.reshape((1, 1, 1, -1))          
+        h1_row = h1.reshape((1, 1, 1, -1))          
 
         # Do a multilevel transform
         for j in range(self.J):
@@ -135,17 +110,12 @@ class DWT2d(nn.Module):
         yh = coeffs
         ll = yl
         mode = lowlevel.mode_to_int(self.mode)
-        
-        if self.is_bior:
-            g0_col = self.g0.reshape((1, 1, -1, 1))
-            g1_col = self.g1.reshape((1, 1, -1, 1))
-            g0_row = self.g0.reshape((1, 1, 1, -1))
-            g1_row = self.g1.reshape((1, 1, 1, -1))              
-        else:
-            g0_col = self.h0.reshape((1, 1, -1, 1))
-            g1_col = self.h1.reshape((1, 1, -1, 1))
-            g0_row = self.h0.reshape((1, 1, 1, -1))
-            g1_row = self.h1.reshape((1, 1, 1, -1))            
+
+        h1 = low_to_high(self.h0)
+        g0_col = self.h0.reshape((1, 1, -1, 1))
+        g1_col = h1.reshape((1, 1, -1, 1))
+        g0_row = self.h0.reshape((1, 1, 1, -1))
+        g1_row = h1.reshape((1, 1, 1, -1))            
 
         # Do a multilevel inverse transform
         for h in yh[::-1]:
