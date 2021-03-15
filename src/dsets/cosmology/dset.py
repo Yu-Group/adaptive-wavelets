@@ -31,12 +31,12 @@ def get_dataloader(root_dir, img_size=64, shuffle=True, split_train_test=True, p
     pin_memory = pin_memory and torch.cuda.is_available  # only pin if GPU available
     dataset = MassMapsDatasetResized(root_dir, img_size)
     if split_train_test is True:
-        train_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(25000)),
+        train_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(20000)),
                                   batch_size=batch_size,
                                   shuffle=shuffle,
                                   pin_memory=pin_memory,
                                   **kwargs)
-        test_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(25000, 27000)),
+        test_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(20000, 23000)),
                                  batch_size=batch_size,
                                  shuffle=False,
                                  pin_memory=pin_memory,
