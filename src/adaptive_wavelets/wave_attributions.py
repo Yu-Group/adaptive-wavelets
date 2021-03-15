@@ -15,10 +15,11 @@ class Attributer(nn.Module):
     device: str
         use GPU or CPU
     '''    
-    def __init__(self, mt, attr_methods='InputXGradient', device='cuda'): 
+    def __init__(self, mt, attr_methods='InputXGradient', is_train=True, device='cuda'): 
         super().__init__()
         self.mt = mt.to(device)
         self.attr_methods = attr_methods   
+        self.is_train = is_train
         self.device = device
         
     def forward(self, x: tuple, target=1, additional_forward_args=None):
@@ -34,14 +35,20 @@ class Attributer(nn.Module):
         
     def InputXGradient(self, x: tuple, target=1, additional_forward_args=None):
         outputs = self.mt(x, additional_forward_args)[:,target]
-        grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+        if self.is_train:
+            grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+        else:
+            grads = torch.autograd.grad(torch.unbind(outputs), x)        
         # input * gradient
         attributions = tuple(xi * gi for xi, gi in zip(x, grads))
         return attributions    
     
     def Saliency(self, x: tuple, target=1, additional_forward_args=None):
         outputs = self.mt(x, additional_forward_args)[:,target]
-        grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+        if self.is_train:
+            grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+        else:
+            grads = torch.autograd.grad(torch.unbind(outputs), x) 
         return grads
     
     ### TO DO!! ###

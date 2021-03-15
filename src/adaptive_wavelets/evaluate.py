@@ -53,8 +53,8 @@ class Validator():
         w_transform = w_transform.eval()
         mt = TrimModel(self.model, w_transform.inverse, use_residuals=self.use_residuals) 
         
-        Saliency = Attributer(mt, attr_methods='Saliency', device=self.device)
-        Inputxgrad = Attributer(mt, attr_methods='InputXGradient', device=self.device)
+        Saliency = Attributer(mt, attr_methods='Saliency', is_train=False, device=self.device)
+        Inputxgrad = Attributer(mt, attr_methods='InputXGradient', is_train=False, device=self.device)
         
         rec_loss = 0.
         sum_loss = 0.
