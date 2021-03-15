@@ -106,7 +106,6 @@ def load_dataloader_and_pretrained_model(p):
     data_loader = get_dataloader(p.data_path, 
                                  batch_size=p.batch_size) 
     model = load_model(p)
-    
     return data_loader, model
 
 

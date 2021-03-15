@@ -8,16 +8,21 @@ from random import randint
 from copy import deepcopy
 import pickle as pkl
 import argparse
-
-sys.path.append('../../src/adaptive_wavelets')
+sys.path.append('models')
 from models import load_model
-from losses import get_loss_f
-from train import Trainer, Validator
-# from wavelet_transform import Wavelet_Transform, Attributer, get_2dfilts, initialize_filters
-# from utils import tuple_L1Loss, tuple_L2Loss, thresh_attrs
-
 sys.path.append('../../src/dsets/cosmology')
 from dset import get_dataloader
+# adaptive-wavelets modules
+sys.path.append('../../src')
+sys.path.append('../../../src')
+sys.path.append('../../src/adaptive_wavelets')
+sys.path.append('../../../src/adaptive_wavelets')
+from losses import get_loss_f
+from train import Trainer
+from evaluate import Validator
+from transform2d import DWT2d
+from utils import get_1dfilts, get_2dfilts
+from wave_attributions import Attributer
 
 
 parser = argparse.ArgumentParser(description='Cosmology Example')
@@ -47,6 +52,7 @@ class p:
     # parameters for generating data
     seed = 1
     data_path = "../../src/dsets/cosmology/data"
+    model_path = "../../src/dsets/biology/data"
     
     # parameters for model architecture
     img_size = (1, 256, 256)
@@ -93,13 +99,18 @@ def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True)
                                  img_size=img_size,
                                  split_train_test=split_train_test,
                                  batch_size=p.batch_size) 
+    
+    model = load__pretrained_model(p)  
+    return data_loader, model
+
+
+def load__pretrained_model(p):
     model = load_model(model_name='resnet18', device=device, data_path=p.data_path)
     model = model.eval()
     # freeze layers
     for param in model.parameters():
-        param.requires_grad = False    
-
-    return data_loader, model
+        param.requires_grad = False  
+    return model
 
 
 if __name__ == '__main__':
