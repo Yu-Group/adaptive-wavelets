@@ -10,6 +10,7 @@ from copy import deepcopy
 import pickle as pkl
 import argparse
 sys.path.append('models')
+sys.path.append('../models')
 from models import load_model
 sys.path.append('../../src/dsets/cosmology')
 sys.path.append('../../../src/dsets/cosmology')
@@ -22,7 +23,7 @@ sys.path.append('../../../src/adaptive_wavelets')
 from losses import get_loss_f
 from train import Trainer
 from evaluate import Validator
-from transform1d import DWT2d
+from transform2d import DWT2d
 from utils import get_1dfilts, get_2dfilts
 from wave_attributions import Attributer
 
