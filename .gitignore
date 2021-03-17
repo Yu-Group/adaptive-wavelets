@@ -5,10 +5,10 @@ max-activation*
 **wooseok*
 **/cosmo
 **/data
-**/results
 **/old
 **/experiments
 **slurm*
+**.pth
 **.pkl
 **.DS_Store
 **.pt
