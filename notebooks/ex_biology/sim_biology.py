@@ -56,6 +56,7 @@ class p:
     seed = 1
     data_path = "../../../src/dsets/biology/data"
     model_path = "../../../src/dsets/biology/data"
+    is_continuous = False
     
     # parameters for initialization
     wave = 'db5'
@@ -104,7 +105,8 @@ def load_dataloader_and_pretrained_model(p):
     """A generic data loader
     """
     data_loader = get_dataloader(p.data_path, 
-                                 batch_size=p.batch_size) 
+                                 batch_size=p.batch_size,
+                                 is_continuous=p.is_continuous) 
     model = load_model(p)
     return data_loader, model
 

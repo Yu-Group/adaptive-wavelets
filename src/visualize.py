@@ -136,7 +136,7 @@ def plot_1dreconstruct(data, recon):
     plt.show()      
     
     
-def plot_1dfilts(filts: list, figsize=(10, 10)):
+def plot_1dfilts(filts: list, is_title=False, figsize=(10, 10)):
     '''Plot filters in the list
     Params
     ------
@@ -151,7 +151,7 @@ def plot_1dfilts(filts: list, figsize=(10, 10)):
     for i in range(ls):
         v_min = min(filts[i].min(), v_min)
         v_max = max(filts[i].max(), v_max)
-    titles = ['low pass', 'high pass']
+    titles = ['lowpass', 'highpass']
         
     plt.figure(figsize=figsize, dpi=200)
     for i in range(ls):
@@ -159,6 +159,28 @@ def plot_1dfilts(filts: list, figsize=(10, 10)):
         plt.plot(filts[i])
         plt.ylim((v_min - 1, v_max + 1))
         plt.axis('off')
-    plt.show()        
+        if is_title is True:
+            plt.title(titles[i])
+    plt.show()  
+    
+    
+def plot_wavefun(waves: tuple, is_title=False, figsize=(10, 10)):
+    '''Plot filters in the list
+    Params
+    ------
+    waves: tuple
+        tuple of scaling and wavelet functions
+    figsize: tuple
+        figure size    
+    '''       
+    titles = ['scaling', 'wavelet']
+    plt.figure(figsize=figsize, dpi=300)
+    for i in range(2):
+        plt.subplot(1, 2, i + 1)
+        plt.plot(waves[-1], waves[i])
+        plt.axis('off')
+        if is_title is True:
+            plt.title(titles[i])
+    plt.show()     
     
     

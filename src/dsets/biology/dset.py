@@ -14,7 +14,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, **kwargs):
+def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, is_continuous=False, **kwargs):
     """A generic data loader
 
     Parameters
@@ -35,15 +35,13 @@ def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, **kwa
     # input to the model (n x 40)
     X = np.vstack([x for x in df[track_name].values])
     X = X.reshape(-1,1,40)
-    y = df['y_consec_thresh'].values  
-#     y = df['Y_sig_mean_normalized'].values
+    y = df['y_consec_thresh'].values if is_continuous is False else df['Y_sig_mean_normalized'].values  
                              
     # test data
     # input to the model (n x 40)
     X_test = np.vstack([x for x in df_test[track_name].values])
     X_test = X_test.reshape(-1,1,40)
-    y_test = df_test['y_consec_thresh'].values   
-#     y_test = df_test['Y_sig_mean_normalized'].values    
+    y_test = df_test['y_consec_thresh'].values if is_continuous is False else df_test['Y_sig_mean_normalized'].values     
                                                           
     inputs = torch.tensor(X, dtype=torch.float)
     labels = torch.tensor(y.reshape(-1, 1), dtype=torch.float)

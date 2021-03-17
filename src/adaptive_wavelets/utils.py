@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from copy import deepcopy
 import matplotlib.pyplot as plt
 from skimage.transform import rescale
+import pywt
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
@@ -96,6 +97,27 @@ def low_to_high(x):
     seq = (-1)**torch.arange(n, device=x.device)
     y = torch.flip(x, (0,2)) * seq
     return y
+
+
+def get_wavefun(w_transform, level=5):
+    '''Get wavelet function from wavelet object.
+    Params
+    ------
+    w_transform: obj
+        DWT1d or DWT2d object
+    '''        
+    h0 = w_transform.h0
+    h1 = low_to_high(h0)
+
+    h0 = list(h0.squeeze().detach().cpu().numpy())[::-1]
+    h1 = list(h1.squeeze().detach().cpu().numpy())[::-1]   
+    
+    my_filter_bank = (h0, h1, h0[::-1], h1[::-1])
+    my_wavelet = pywt.Wavelet('My Wavelet', filter_bank=my_filter_bank)   
+    wave = my_wavelet.wavefun(level=level)
+    (phi, psi, x) = wave[0], wave[1], wave[4]
+
+    return phi, psi, x
 
 
 def get_1dfilts(w_transform):
