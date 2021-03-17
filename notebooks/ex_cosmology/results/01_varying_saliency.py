@@ -16,9 +16,9 @@ if __name__ == '__main__':
         'lr': [0.001],
         'num_epochs': [10],
         'attr_methods': ['Saliency'],
-        'lamL1wave': [0],
+        'lamL1wave': [0.01],
         'lamL1attr': np.round(np.geomspace(0.01, 100, 50), 5),
-        'dirname': ['db5_saliency_warmstart_lamL1wave=0_seed=100'],
+        'dirname': ['db5_saliency_warmstart_lamL1wave=0.01_seed=100_lr=0.001'],
         'warm_start': [True]
     }
     ks = sorted(params_to_vary.keys())
