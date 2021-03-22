@@ -3,26 +3,32 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from utils import low_to_high
 
 
 def get_loss_f(**kwargs_parse):
     """Return the loss function given the argparse arguments."""
-    return Loss(lamSum=kwargs_parse["lamSum"], 
+    return Loss(lamlSum=kwargs_parse["lamlSum"], 
+                lamhSum=kwargs_parse["lamhSum"], 
                 lamL2norm=kwargs_parse["lamL2norm"],
-                lamCMF = kwargs_parse["lamCMF"],
-                lamL1wave = kwargs_parse["lamL1wave"],
+                lamCMF=kwargs_parse["lamCMF"],
+                lamConv=kwargs_parse["lamConv"],
+                lamL1wave=kwargs_parse["lamL1wave"],
                 lamL1attr=kwargs_parse["lamL1attr"])
 
 
 class Loss():
     """Class of calculating loss functions
     """
-    def __init__(self, lamSum=0., lamL2norm=0., lamCMF=0., lamL1wave=0., lamL1attr=0.):
+    def __init__(self, lamlSum=1., lamhSum=1., lamL2norm=1., lamCMF=1., lamConv=1., lamL1wave=1., lamL1attr=1.):
         """
         Parameters
         ----------
-        lamSum : float
+        lamlSum : float
             Hyperparameter for penalizing sum of lowpass filter
+            
+        lamhSum : float
+            Hyperparameter for penalizing sum of highpass filter            
             
         lamL2norm : float
             Hyperparameter to enforce unit norm of lowpass filter
@@ -30,15 +36,20 @@ class Loss():
         lamCMF : float 
             Hyperparameter to enforce conjugate mirror filter   
             
+        lamConv : float
+            Hyperparameter to enforce convolution constraint
+            
         lamL1wave : float
             Hyperparameter for penalizing L1 norm of wavelet coeffs
         
         lamL1attr : float
             Hyperparameter for penalizing L1 norm of attributions
         """    
-        self.lamSum = lamSum
+        self.lamlSum = lamlSum
+        self.lamhSum = lamhSum
         self.lamL2norm = lamL2norm
         self.lamCMF = lamCMF
+        self.lamConv = lamConv
         self.lamL1wave = lamL1wave
         self.lamL1attr = lamL1attr
 
@@ -68,9 +79,14 @@ class Loss():
         self.rec_loss = _reconstruction_loss(data, recon_data)
         
         # sum of lowpass filter
-        self.sum_loss = 0
-        if self.lamSum > 0:
-            self.sum_loss += _sum_loss(w_transform)
+        self.lsum_loss = 0
+        if self.lamlSum > 0:
+            self.lsum_loss += _lsum_loss(w_transform)
+            
+        # sum of highpass filter
+        self.hsum_loss = 0
+        if self.lamhSum > 0:
+            self.hsum_loss += _hsum_loss(w_transform)            
             
         # l2norm of lowpass filter
         self.L2norm_loss = 0
@@ -81,6 +97,11 @@ class Loss():
         self.CMF_loss = 0
         if self.lamCMF > 0:
             self.CMF_loss += _CMF_loss(w_transform)
+            
+        # convolution constraint
+        self.conv_loss = 0
+        if self.lamConv > 0:
+            self.conv_loss += _conv_loss(w_transform)
             
         # L1 penalty on wavelet coeffs
         self.L1wave_loss = 0
@@ -93,12 +114,11 @@ class Loss():
             self.L1attr_loss += _L1_attribution_loss(attributions)
 
         # total loss
-        loss = self.rec_loss + self.lamSum*self.sum_loss + self.lamL2norm*self.L2norm_loss + \
-                + self.lamCMF*self.CMF_loss + self.lamL1wave*self.L1wave_loss + self.lamL1attr*self.L1attr_loss    
+        loss = self.rec_loss + self.lamlSum*self.lsum_loss + self.lamhSum*self.hsum_loss + self.lamL2norm*self.L2norm_loss + \
+                + self.lamCMF*self.CMF_loss + self.lamConv*self.conv_loss + self.lamL1wave*self.L1wave_loss + self.lamL1attr*self.L1attr_loss    
         
         return loss
             
-
 
 def _reconstruction_loss(data, recon_data):
     """
@@ -126,12 +146,23 @@ def _reconstruction_loss(data, recon_data):
     return loss
 
 
-def _sum_loss(w_transform):
+def _lsum_loss(w_transform):
     """
     Calculate sum of lowpass filter
     """    
     h0 = w_transform.h0
     loss = .5*(h0.sum() - np.sqrt(2))**2
+    
+    return loss
+
+
+def _hsum_loss(w_transform):
+    """
+    Calculate sum of highpass filter
+    """    
+    h0 = w_transform.h0
+    h1 = low_to_high(h0)
+    loss = .5*h1.sum()**2
     
     return loss
 
@@ -156,7 +187,22 @@ def _CMF_loss(w_transform):
     h_f = torch.fft(torch.stack((h0, torch.zeros_like(h0)),dim=3), 1)
     mod = (h_f**2).sum(axis=3)
     cmf_identity = mod[0,0,:n//2] + mod[0,0,n//2:]  
-    loss = torch.sum((cmf_identity - 2)**2)/n
+    loss = .5*torch.sum((cmf_identity - 2)**2)
+    
+    return loss
+
+
+def _conv_loss(w_transform):
+    """
+    Calculate convolution of lowpass filter
+    """
+    h0 = w_transform.h0
+    n = h0.size(2)
+    assert n%2==0, "length of lowpass filter should be even"
+    v = F.conv1d(h0, h0, stride=2, padding=n)
+    e = torch.zeros_like(v)
+    e[0,0,n//2] = 1
+    loss = .5*torch.sum((v - e)**2)
     
     return loss
 

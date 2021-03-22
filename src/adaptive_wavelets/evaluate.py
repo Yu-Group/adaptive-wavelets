@@ -5,7 +5,7 @@ opj = os.path.join
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 from copy import deepcopy
 from wave_attributions import Attributer
-from losses import _L1_attribution_loss, _reconstruction_loss, _sum_loss, _L2norm_loss, _CMF_loss, _L1_wave_loss
+from losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, _conv_loss, _L1_wave_loss, _L1_attribution_loss
 
 sys.path.append('../../lib/trim')
 from trim import TrimModel
@@ -57,9 +57,11 @@ class Validator():
         Inputxgrad = Attributer(mt, attr_methods='InputXGradient', is_train=False, device=self.device)
         
         rec_loss = 0.
-        sum_loss = 0.
+        lsum_loss = 0.
+        hsum_loss = 0.
         L2norm_loss = 0.
         CMF_loss = 0.
+        conv_loss = 0.
         L1wave_loss = 0.        
         L1saliency_loss = 0.
         L1inputxgrad_loss = 0.
@@ -71,21 +73,25 @@ class Validator():
             inputxgrad = Inputxgrad(data_t, target=target, additional_forward_args=deepcopy(data))
             
             rec_loss += _reconstruction_loss(data, recon_data).item()
-            sum_loss += _sum_loss(w_transform).item()
+            lsum_loss += _lsum_loss(w_transform).item()
+            hsum_loss += _hsum_loss(w_transform).item()
             L2norm_loss += _L2norm_loss(w_transform).item()
             CMF_loss += _CMF_loss(w_transform).item()
+            conv_loss += _conv_loss(w_transform).item()
             L1wave_loss += _L1_wave_loss(data_t).item() 
             L1saliency_loss += _L1_attribution_loss(saliency).item()
             L1inputxgrad_loss += _L1_attribution_loss(inputxgrad).item()
 
         mean_rec_loss = rec_loss / (batch_idx + 1)
-        mean_sum_loss = sum_loss / (batch_idx + 1)
+        mean_lsum_loss = lsum_loss / (batch_idx + 1)
+        mean_hsum_loss = hsum_loss / (batch_idx + 1)
         mean_L2norm_loss = L2norm_loss / (batch_idx + 1)
         mean_CMF_loss = CMF_loss / (batch_idx + 1)
+        mean_conv_loss = conv_loss / (batch_idx + 1)
         mean_L1wave_loss = L1wave_loss / (batch_idx + 1)
         mean_L1saliency_loss = L1saliency_loss / (batch_idx + 1)
         mean_L1inputxgrad_loss = L1inputxgrad_loss / (batch_idx + 1)
-        return (mean_rec_loss, mean_sum_loss, mean_L2norm_loss, mean_CMF_loss, mean_L1wave_loss, mean_L1saliency_loss, mean_L1inputxgrad_loss)
+        return (mean_rec_loss, mean_lsum_loss, mean_hsum_loss, mean_L2norm_loss, mean_CMF_loss, mean_conv_loss, mean_L1wave_loss, mean_L1saliency_loss, mean_L1inputxgrad_loss)
     
     
         

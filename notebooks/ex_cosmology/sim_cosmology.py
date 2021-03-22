@@ -38,9 +38,11 @@ parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='in
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--num_epochs', type=int, default=10, metavar='N', help='number of epochs to train (default: 100)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
-parser.add_argument('--lamSum', type=float, default=1, help='weight of sum of lowpass filter')
+parser.add_argument('--lamlSum', type=float, default=1, help='weight of sum of lowpass filter')
+parser.add_argument('--lamhSum', type=float, default=1, help='weight of sum of highpass filter')
 parser.add_argument('--lamL2norm', type=float, default=1, help='weight of L2norm of lowpass filter')
 parser.add_argument('--lamCMF', type=float, default=1, help='weight of CMF condition')
+parser.add_argument('--lamConv', type=float, default=1, help='weight of convolution constraint')
 parser.add_argument('--lamL1wave', type=float, default=0, help='weight of the l1-norm of wavelet coeffs')
 parser.add_argument('--lamL1attr', type=float, default=0, help='weight of the l1-norm of attributions')
 parser.add_argument('--target', type=int, default=1, help='target index to calc interp score')
@@ -70,9 +72,11 @@ class p:
     lr = 0.001
     num_epochs = 10
     attr_methods = 'Saliency'
-    lamSum = 1
+    lamlSum = 1
+    lamhSum = 1
     lamL2norm = 1 
     lamCMF = 1
+    lamConv = 1
     lamL1wave = 0.1
     lamL1attr = 1     
     target = 1
@@ -171,7 +175,7 @@ if __name__ == '__main__':
     # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
-    loss_f = get_loss_f(lamSum=p.lamSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
+    loss_f = get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
     trainer = Trainer(model, wt, optimizer, loss_f, target=p.target, 
                       use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=50)    
     # run
@@ -180,12 +184,14 @@ if __name__ == '__main__':
     # calculate losses
     print('calculating losses and metric...')   
     validator = Validator(model, test_loader)
-    rec_loss, sum_loss, L2norm_loss, CMF_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
+    rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
     s.train_losses = trainer.train_losses
     s.rec_loss = rec_loss
-    s.sum_loss = sum_loss
+    s.lsum_loss = lsum_loss
+    s.hsum_loss = hsum_loss
     s.L2norm_loss = L2norm_loss
     s.CMF_loss = CMF_loss
+    s.conv_loss = conv_loss
     s.L1wave_loss = L1wave_loss
     s.L1saliency_loss = L1saliency_loss
     s.L1inputxgrad_loss = L1inputxgrad_loss
