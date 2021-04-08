@@ -106,13 +106,14 @@ class s:
     
     
 # generate data
-def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True):
+def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True, shuffle=True):
     """A generic data loader
     """
     data_loader = get_dataloader(p.data_path, 
                                  img_size=img_size,
                                  split_train_test=split_train_test,
-                                 batch_size=p.batch_size) 
+                                 batch_size=p.batch_size,
+                                 shuffle=shuffle) 
     
     model = load__pretrained_model(p)  
     return data_loader, model
