@@ -66,7 +66,7 @@ class DWT2d(nn.Module):
             :math:`H_{in}', W_{in}', H_{in}'', W_{in}''` denote the correctly
             downsampled shapes of the DWT pyramid.
         """        
-        yh = []
+        yh = ()
         ll = x
         mode = lowlevel.mode_to_int(self.mode)
         
@@ -81,9 +81,9 @@ class DWT2d(nn.Module):
             # Do 1 level of the transform
             ll, high = lowlevel.AFB2D.forward(
                 ll, h0_col, h1_col, h0_row, h1_row, mode)
-            yh.append(high)
+            yh += (high,)
             
-        return tuple([ll]+[yh[i] for i in range(self.J)])
+        return (ll,) + yh
     
     def inverse(self, coeffs):
         """

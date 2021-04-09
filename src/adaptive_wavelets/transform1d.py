@@ -60,17 +60,17 @@ class DWT1d(nn.Module):
                 being the finest scale coefficients.
         """
         assert x.ndim == 3, "Can only handle 3d inputs (N, C, L)"
-        highs = []
+        highs = ()
         x0 = x
         mode = lowlevel.mode_to_int(self.mode)
-
+        
+        h1 = low_to_high(self.h0)
         # Do a multilevel transform
         for j in range(self.J):
-            h1 = low_to_high(self.h0)
             x0, x1 = lowlevel.AFB1D.forward(x0, self.h0, h1, mode)
-            highs.append(x1)
+            highs += (x1,)
 
-        return tuple([x0]+[highs[i] for i in range(self.J)])    
+        return (x0,) + highs
     
     def inverse(self, coeffs):
         """
@@ -90,6 +90,8 @@ class DWT1d(nn.Module):
         highs = coeffs
         assert x0.ndim == 3, "Can only handle 3d inputs (N, C, L)"
         mode = lowlevel.mode_to_int(self.mode)
+        
+        h1 = low_to_high(self.h0)
         # Do a multilevel inverse transform
         for x1 in highs[::-1]:
             if x1 is None:
@@ -98,7 +100,6 @@ class DWT1d(nn.Module):
             # 'Unpad' added signal
             if x0.shape[-1] > x1.shape[-1]:
                 x0 = x0[..., :-1]
-            h1 = low_to_high(self.h0)
             x0 = lowlevel.SFB1D.forward(x0, x1, self.h0, h1, mode)
         return x0                  
    
