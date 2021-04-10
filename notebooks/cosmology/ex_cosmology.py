@@ -1,31 +1,26 @@
 import numpy as np
 import torch
-import torch.nn as nn
 import random
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
 opj = os.path.join
-from random import randint
 from copy import deepcopy
 import pickle as pkl
 import argparse
-sys.path.append('models')
-sys.path.append('../models')
-from models import load_model
-sys.path.append('../../src/dsets/cosmology')
-sys.path.append('../../../src/dsets/cosmology')
-from dset import get_dataloader
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 # adaptive-wavelets modules
-sys.path.append('../../src')
-sys.path.append('../../../src')
 sys.path.append('../../src/adaptive_wavelets')
-sys.path.append('../../../src/adaptive_wavelets')
 from losses import get_loss_f
 from train import Trainer
 from evaluate import Validator
 from transform2d import DWT2d
-from utils import get_1dfilts, get_2dfilts
 from wave_attributions import Attributer
+
+sys.path.append('../../src/dsets/cosmology')
+from dset import get_dataloader, load_pretrained_model
+
+sys.path.append('../../src')
+from warmstart import warm_start
 
 
 parser = argparse.ArgumentParser(description='Cosmology Example')
@@ -104,52 +99,6 @@ class s:
         return {attr: val for (attr, val) in vars(self).items()
                  if not attr.startswith('_')}
     
-    
-# generate data
-def load_dataloader_and_pretrained_model(p, img_size=256, split_train_test=True, shuffle=True):
-    """A generic data loader
-    """
-    data_loader = get_dataloader(p.data_path, 
-                                 img_size=img_size,
-                                 split_train_test=split_train_test,
-                                 batch_size=p.batch_size,
-                                 shuffle=shuffle) 
-    
-    model = load__pretrained_model(p)  
-    return data_loader, model
-
-
-def load__pretrained_model(p):
-    model = load_model(model_name='resnet18', device=device, data_path=p.model_path)
-    model = model.eval()
-    # freeze layers
-    for param in model.parameters():
-        param.requires_grad = False  
-    return model
-
-
-def warm_start(p, out_dir):
-    '''load results and initialize model 
-    '''
-    print('\twarm starting...')
-    fnames = sorted(os.listdir(out_dir))
-    params = []
-    models = []
-    if len(fnames) == 0:
-        model = DWT2d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
-    else:
-        for fname in fnames:
-            if fname[-3:] == 'pkl':
-                result = pkl.load(open(opj(out_dir, fname), 'rb'))
-                params.append(result['lamL1attr'])
-            if fname[-3:] == 'pth':
-                m = DWT2d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
-                m.load_state_dict(torch.load(opj(out_dir, fname)))
-                models.append(m)
-        max_idx = np.argmax(np.array(params))
-        model = models[max_idx]
-    return model
-
 
 if __name__ == '__main__':
     args = parser.parse_args()

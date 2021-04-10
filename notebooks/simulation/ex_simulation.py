@@ -16,9 +16,6 @@ from evaluate import Validator
 from transform1d import DWT1d
 from wave_attributions import Attributer
 
-sys.path.append('../../src/models')
-from models import Feedforward
-
 sys.path.append('../../src/dsets/simulation')
 from dset import get_dataloader, load_pretrained_model
 
