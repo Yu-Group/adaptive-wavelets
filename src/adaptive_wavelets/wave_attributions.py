@@ -81,39 +81,6 @@ class Attributer(nn.Module):
             scores.append(imps)   
         return tuple(scores)    
     
-    
-def thresh_attrs(attributions: tuple, sp_level):
-    """ 
-    Threshold attributions retaining those with top absolute attributions 
-    """    
-    batch_size = attributions[0].shape[0]
-    J = len(attributions)
-    b = torch.tensor([]).to(device)
-    list_of_size = [0]    
-    for j in range(J):
-        a = abs(attributions[j]).reshape(batch_size, -1)
-        if j == 0:
-            b = deepcopy(a.detach())
-        else:
-            b = torch.cat((b,a), dim=1)
-        list_of_size.append(list_of_size[-1] + a.shape[1])
-    sort_indexes = torch.argsort(b, dim=1, descending=True)      
-    
-    m = torch.zeros_like(sort_indexes)
-    for i in range(batch_size):
-        m[i][sort_indexes[i,:sp_level]] = 1
 
-    list_of_masks = []
-    for j in range(J):
-        n0 = list_of_size[j]
-        n1 = list_of_size[j+1]
-        list_of_masks.append(m[:,n0:n1].reshape(attributions[j].shape))
-
-    output = []
-    for j in range(J):
-        output.append(torch.mul(list_of_masks[j], attributions[j]))
-    return tuple(output)       
-    
-    
     
 

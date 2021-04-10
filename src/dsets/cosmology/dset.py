@@ -1,14 +1,8 @@
-from __future__ import print_function, division
-import os, sys
+import os,sys
 opj = os.path.join
 import torch
-from skimage import io, transform
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
-from astropy.io import fits
-import random
-data_path = './data'
 
 # Ignore warnings
 import warnings
