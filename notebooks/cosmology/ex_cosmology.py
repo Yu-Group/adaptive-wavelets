@@ -31,7 +31,7 @@ parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='i
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
-parser.add_argument('--num_epochs', type=int, default=10, metavar='N', help='number of epochs to train (default: 100)')
+parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
 parser.add_argument('--lamlSum', type=float, default=1, help='weight of sum of lowpass filter')
 parser.add_argument('--lamhSum', type=float, default=1, help='weight of sum of highpass filter')
@@ -40,23 +40,24 @@ parser.add_argument('--lamCMF', type=float, default=1, help='weight of CMF condi
 parser.add_argument('--lamConv', type=float, default=1, help='weight of convolution constraint')
 parser.add_argument('--lamL1wave', type=float, default=0, help='weight of the l1-norm of wavelet coeffs')
 parser.add_argument('--lamL1attr', type=float, default=0, help='weight of the l1-norm of attributions')
-parser.add_argument('--target', type=int, default=1, help='target index to calc interp score')
-parser.add_argument('--dirname', default='vary', help='name of directory')
+parser.add_argument('--target', type=int, default=1, help='target index to calculate interp score')
+parser.add_argument('--dirname', default='dirname', help='name of directory')
 parser.add_argument('--warm_start', default=None, help='indicate whether warmstart or not')
 
 
 class p:
     '''Parameters for cosmology data
     '''
+    # data & model path
+    data_path = "../../src/dsets/cosmology/data"
+    model_path = "../../src/dsets/cosmology/data"
+    wt_type = 'DWT2d'
+    
     # parameters for generating data
     seed = 1
-    data_path = "../../../src/dsets/cosmology/data"
-    model_path = "../../../src/dsets/cosmology/data"
-    
-    # parameters for model architecture
     img_size = (1, 256, 256)
     
-    # parameters for initialization
+    # parameters for wavelet initialization
     wave = 'db5'
     J = 4
     init_factor = 1
@@ -65,7 +66,7 @@ class p:
     # parameters for training
     batch_size = 100
     lr = 0.001
-    num_epochs = 10
+    num_epochs = 50
     attr_methods = 'Saliency'
     lamlSum = 1
     lamhSum = 1
@@ -76,11 +77,13 @@ class p:
     lamL1attr = 1     
     target = 1
     
+    # run with warmstart
+    warm_start = None      
+    
     # SAVE MODEL
-    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/ex_cosmology/results" 
-    dirname = "vary"
-    pid = ''.join(["%s" % randint(0, 9) for num in range(0, 10)])
-    warm_start = None    
+    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/cosmology/results" 
+    dirname = "dirname"
+    pid = ''.join(["%s" % random.randint(0, 9) for num in range(0, 10)])  
 
     def _str(self):
         vals = vars(p)
@@ -107,27 +110,35 @@ if __name__ == '__main__':
     
     # create dir
     out_dir = opj(p.out_dir, p.dirname)
-    os.makedirs(out_dir, exist_ok=True)        
-
-    # get dataloader and model
-    (train_loader, test_loader), model = load_dataloader_and_pretrained_model(p, img_size=p.img_size[2])
+    os.makedirs(out_dir, exist_ok=True)     
+    
+    # load data and model
+    train_loader, test_loader = get_dataloader(p.data_path, 
+                                               img_size=p.img_size[2],
+                                               split_train_test=True,
+                                               batch_size=p.batch_size)  
+    
+    model = load_pretrained_model(model_name='resnet18', device=device, data_path=p.model_path)    
     
     # prepare model
     random.seed(p.seed)
     np.random.seed(p.seed)
-    torch.manual_seed(p.seed)   
-
+    torch.manual_seed(p.seed) 
+    
     if p.warm_start is None:
         wt = DWT2d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+        wt.train()
     else:
-        wt = warm_start(p, out_dir)    
+        wt = warm_start(p, out_dir)        
+        wt.train()
         
     # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
     loss_f = get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
     trainer = Trainer(model, wt, optimizer, loss_f, target=p.target, 
-                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=50)    
+                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)      
+    
     # run
     trainer(train_loader, epochs=p.num_epochs)          
 
@@ -145,12 +156,12 @@ if __name__ == '__main__':
     s.L1wave_loss = L1wave_loss
     s.L1saliency_loss = L1saliency_loss
     s.L1inputxgrad_loss = L1inputxgrad_loss
-    s.net = wt
+    s.net = wt    
     
     # save
     results = {**p._dict(p), **s._dict(s)}
     pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))    
-    torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth')) 
+    torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))   
     
     
     
