@@ -5,9 +5,11 @@ import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 import pickle as pkl
+from copy import deepcopy
 sys.path.append('../../../notebooks/ex_biology/preprocessing')
 import data
 import neural_networks
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Ignore warnings
 import warnings
@@ -48,14 +50,41 @@ def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, is_co
     dataset = TensorDataset(inputs, labels)
     train_loader = DataLoader(dataset, 
                               batch_size=batch_size,
-                              shuffle=shuffle) 
+                              shuffle=shuffle,
+                              pin_memory=pin_memory) 
 
     inputs_test = torch.tensor(X_test, dtype=torch.float)
     labels_test = torch.tensor(y_test.reshape(-1, 1), dtype=torch.float)
     dataset_test = TensorDataset(inputs_test, labels_test)
     test_loader = DataLoader(dataset_test, 
                              batch_size=batch_size,
-                             shuffle=False)                              
+                             shuffle=False,
+                             pin_memory=pin_memory) 
     
-    return (train_loader, test_loader)
+    return train_loader, test_loader
+
+
+def load_pretrained_model(root_dir, device=device):
+    """load pretrained model for interpretation
+    """      
+    results = pkl.load(open(opj(root_dir, 'dnn_full_long_normalized_across_track_1_feat.pkl'), 'rb'))
+    dnn = neural_networks.neural_net_sklearn(D_in=40, H=20, p=0, arch='lstm')
+    dnn.model.load_state_dict(results['model_state_dict'])
+    m = deepcopy(dnn.model)
+    m = m.eval()
+    # freeze layers
+    for param in m.parameters():
+        param.requires_grad = False  
+    model = ReshapeModel(m)
+    return model
+
+
+class ReshapeModel(torch.nn.Module):
+    def __init__(self, model):
+        super(ReshapeModel, self).__init__()
+        self.model = model
+
+    def forward(self, x):
+        x = x.squeeze()
+        return self.model(x)
     

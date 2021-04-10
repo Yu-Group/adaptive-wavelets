@@ -1,32 +1,30 @@
 import numpy as np
 import torch
-import torch.nn as nn
 import random
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 import os,sys
 opj = os.path.join
-from random import randint
 from copy import deepcopy
 import pickle as pkl
 import argparse
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 sys.path.append('preprocessing')
-sys.path.append('../preprocessing')
 import data
 import neural_networks
-sys.path.append('../../src/dsets/biology')
-sys.path.append('../../../src/dsets/biology')
-from dset import get_dataloader
+
 # adaptive-wavelets modules
-sys.path.append('../../src')
-sys.path.append('../../../src')
 sys.path.append('../../src/adaptive_wavelets')
-sys.path.append('../../../src/adaptive_wavelets')
 from losses import get_loss_f
 from train import Trainer
 from evaluate import Validator
 from transform1d import DWT1d
-from utils import get_1dfilts
 from wave_attributions import Attributer
+
+sys.path.append('../../src/dsets/biology')
+from dset import get_dataloader, load_pretrained_model
+
+sys.path.append('../../src')
+from warmstart import warm_start
 
 
 parser = argparse.ArgumentParser(description='Biology Example')
@@ -37,7 +35,7 @@ parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='i
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
-parser.add_argument('--num_epochs', type=int, default=100, metavar='N', help='number of epochs to train (default: 100)')
+parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
 parser.add_argument('--lamlSum', type=float, default=1, help='weight of sum of lowpass filter')
 parser.add_argument('--lamhSum', type=float, default=1, help='weight of sum of highpass filter')
@@ -46,18 +44,21 @@ parser.add_argument('--lamCMF', type=float, default=1, help='weight of CMF condi
 parser.add_argument('--lamConv', type=float, default=1, help='weight of convolution constraint')
 parser.add_argument('--lamL1wave', type=float, default=0, help='weight of the l1-norm of wavelet coeffs')
 parser.add_argument('--lamL1attr', type=float, default=0, help='weight of the l1-norm of attributions')
-parser.add_argument('--target', type=int, default=0, help='target index to calc interp score')
-parser.add_argument('--dirname', default='vary', help='name of directory')
+parser.add_argument('--target', type=int, default=0, help='target index to calculate interp score')
+parser.add_argument('--dirname', default='dirname', help='name of directory')
 parser.add_argument('--warm_start', default=None, help='indicate whether warmstart or not')
 
 
 class p:
     '''Parameters for cosmology data
     '''
+    # data & model path
+    data_path = "../../src/dsets/biology/data"
+    model_path = "../../src/dsets/biology/data"
+    wt_type = 'DWT1d'    
+    
     # parameters for generating data
     seed = 1
-    data_path = "../../../src/dsets/biology/data"
-    model_path = "../../../src/dsets/biology/data"
     is_continuous = False
     
     # parameters for initialization
@@ -69,7 +70,7 @@ class p:
     # parameters for training
     batch_size = 100
     lr = 0.001
-    num_epochs = 100
+    num_epochs = 50
     attr_methods = 'Saliency'
     lamlSum = 1
     lamhSum = 1
@@ -80,11 +81,13 @@ class p:
     lamL1attr = 1     
     target = 0
     
+    # run with warmstart
+    warm_start = None       
+    
     # SAVE MODEL
     out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/biology/results" 
-    dirname = "vary"
-    pid = ''.join(["%s" % randint(0, 9) for num in range(0, 10)])
-    warm_start = None
+    dirname = "dirname"
+    pid = ''.join(["%s" % random.randint(0, 9) for num in range(0, 10)])
 
     def _str(self):
         vals = vars(p)
@@ -102,52 +105,6 @@ class s:
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
                  if not attr.startswith('_')}
-    
-    
-# generate data
-def load_dataloader_and_pretrained_model(p):
-    """A generic data loader
-    """
-    data_loader = get_dataloader(p.data_path, 
-                                 batch_size=p.batch_size,
-                                 is_continuous=p.is_continuous) 
-    model = load_model(p)
-    return data_loader, model
-
-
-def load_model(p):
-    results = pkl.load(open(opj(p.model_path, 'dnn_full_long_normalized_across_track_1_feat.pkl'), 'rb'))
-    dnn = neural_networks.neural_net_sklearn(D_in=40, H=20, p=0, arch='lstm')
-    dnn.model.load_state_dict(results['model_state_dict'])
-    m = deepcopy(dnn.model)
-    # freeze layers
-    for param in m.parameters():
-        param.requires_grad = False  
-    model = ReshapeModel(m)
-    return model
-
-
-def warm_start(p, out_dir):
-    '''load results and initialize model 
-    '''
-    print('\twarm starting...')
-    fnames = sorted(os.listdir(out_dir))
-    params = []
-    models = []
-    if len(fnames) == 0:
-        model = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
-    else:
-        for fname in fnames:
-            if fname[-3:] == 'pkl':
-                result = pkl.load(open(opj(out_dir, fname), 'rb'))
-                params.append(result['lamL1attr'])
-            if fname[-3:] == 'pth':
-                m = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
-                m.load_state_dict(torch.load(opj(out_dir, fname)))
-                models.append(m)
-        max_idx = np.argmax(np.array(params))
-        model = models[max_idx]
-    return model
 
 
 def dataloader_to_nparrays(w_transform, train_loader, test_loader):
@@ -183,16 +140,6 @@ def dataloader_to_nparrays(w_transform, train_loader, test_loader):
     
     return (X, y), (X_test, y_test)
 
-
-class ReshapeModel(nn.Module):
-    def __init__(self, model):
-        super(ReshapeModel, self).__init__()
-        self.model = model
-
-    def forward(self, x):
-        x = x.squeeze()
-        return self.model(x)
-
     
 if __name__ == '__main__':    
     args = parser.parse_args()
@@ -201,10 +148,14 @@ if __name__ == '__main__':
     
     # create dir
     out_dir = opj(p.out_dir, p.dirname)
-    os.makedirs(out_dir, exist_ok=True)        
-
-    # get dataloader and model
-    (train_loader, test_loader), model = load_dataloader_and_pretrained_model(p)
+    os.makedirs(out_dir, exist_ok=True)    
+    
+    # load data and model
+    data_loader = get_dataloader(p.data_path, 
+                                 batch_size=p.batch_size,
+                                 is_continuous=p.is_continuous)   
+    
+    model = load_pretrained_model(p.model_path, device=device)    
     
     # prepare model
     random.seed(p.seed)
@@ -213,15 +164,18 @@ if __name__ == '__main__':
 
     if p.warm_start is None:
         wt = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+        wt.train()
     else:
         wt = warm_start(p, out_dir)        
+        wt.train()     
     
     # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
     loss_f = get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
     trainer = Trainer(model, wt, optimizer, loss_f, target=p.target, 
-                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=50)       
+                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)      
+    
     # run
     trainer(train_loader, epochs=p.num_epochs)    
     
@@ -244,4 +198,4 @@ if __name__ == '__main__':
     # save
     results = {**p._dict(p), **s._dict(s)}
     pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))    
-    torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth')) 
+    torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))  
