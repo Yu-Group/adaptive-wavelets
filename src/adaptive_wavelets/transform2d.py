@@ -2,7 +2,7 @@ import torch.nn as nn
 import pywt
 import lowlevel
 import torch
-from utils import add_noise, low_to_high
+from utils import init_filter, low_to_high
 
 
 def load_wavelet(wave: str, device=None):
@@ -35,11 +35,11 @@ class DWT2d(nn.Module):
     mode: str
         'zero', 'symmetric', 'reflect' or 'periodization'. The padding scheme
     '''
-    def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0):
+    def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0):
         super().__init__() 
         h0, _ = load_wavelet(wave)
         # initialize
-        h0 = add_noise(h0, init_factor, noise_factor)
+        h0 = init_filter(h0, init_factor, noise_factor, const_factor)
         # parameterize
         self.h0 = nn.Parameter(h0, requires_grad=True)        
         

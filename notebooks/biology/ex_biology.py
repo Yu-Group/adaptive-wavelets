@@ -33,6 +33,7 @@ parser.add_argument('--wave', type=str, default='db5', help='type of wavelet')
 parser.add_argument('--J', type=int, default=4, help='level of resolution')
 parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
+parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
 parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
@@ -66,6 +67,7 @@ class p:
     J = 4
     init_factor = 1
     noise_factor = 0.1    
+    const_factor = 0
     
     # parameters for training
     batch_size = 100

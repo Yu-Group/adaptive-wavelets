@@ -59,7 +59,7 @@ def tensor_to_tuple(y, d, list_of_size):
     return tuple(x)
 
 
-def add_noise(x, init_factor, noise_factor):
+def init_filter(x, init_factor, noise_factor, const_factor):
     '''add random noise to tensor
     Params
     ------
@@ -69,9 +69,12 @@ def add_noise(x, init_factor, noise_factor):
 
     noise_factor: float
         amount of noise added to original filter
+        
+    const_factor: float
+        amount of constant added to original filter
     '''    
     shape = x.shape
-    x = init_factor*x + noise_factor*torch.randn(shape)
+    x = init_factor*x + noise_factor*torch.randn(shape) + const_factor*torch.ones(shape)
     return x
 
 
