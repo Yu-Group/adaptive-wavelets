@@ -135,11 +135,20 @@ if __name__ == '__main__':
     torch.manual_seed(p.seed)   
 
     if p.warm_start is None:
-        wt = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+        wt = DWT1d(wave=p.wave, mode='zero', J=p.J, 
+                   init_factor=p.init_factor, 
+                   noise_factor=p.noise_factor,
+                   const_factor=p.const_factor).to(device)
         wt.train()
     else:
-        wt = warm_start(p, out_dir)        
+        wt = warm_start(p, out_dir).to(device)        
         wt.train()
+        
+    # check if we have multiple GPUs
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        model = torch.nn.DataParallel(model)        
+        wt = torch.nn.DataParallel(wt)
     
     # train
     params = list(wt.parameters())
