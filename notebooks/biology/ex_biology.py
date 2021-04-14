@@ -153,9 +153,9 @@ if __name__ == '__main__':
     os.makedirs(out_dir, exist_ok=True)    
     
     # load data and model
-    data_loader = get_dataloader(p.data_path, 
-                                 batch_size=p.batch_size,
-                                 is_continuous=p.is_continuous)   
+    train_loader, test_loader = get_dataloader(p.data_path, 
+                                               batch_size=p.batch_size,
+                                               is_continuous=p.is_continuous)   
     
     model = load_pretrained_model(p.model_path, device=device)    
     
