@@ -118,6 +118,7 @@ def plot_1dreconstruct(data, recon):
              top=1.-0.5/(R+1), bottom=0.5/(R+1), 
              left=0.5/(C+1), right=1-0.5/(C+1))     
     
+    labs = ['Original', 'Reconstruction', 'Residual']
     for r in range(R):
         for c in range(C):
             ax = plt.subplot(gs[r,c])
@@ -133,6 +134,8 @@ def plot_1dreconstruct(data, recon):
                 left=False,
                 right=False,
                 labelbottom=False) 
+            if c == 0:
+                plt.ylabel(labs[r])
     plt.show()      
     
     
