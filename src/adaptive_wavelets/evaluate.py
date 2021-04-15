@@ -51,7 +51,9 @@ class Validator():
         """
         w_transform = w_transform.to(self.device)
         w_transform = w_transform.eval()
-        mt = TrimModel(self.model, w_transform.inverse, use_residuals=self.use_residuals) 
+        is_parallel = 'data_parallel' in str(type(w_transform))
+        wt_inverse = w_transform.module.inverse if is_parallel else w_transform.inverse # use multiple GPUs or not        
+        mt = TrimModel(self.model, wt_inverse, use_residuals=self.use_residuals) 
         
         Saliency = Attributer(mt, attr_methods='Saliency', is_train=False, device=self.device)
         Inputxgrad = Attributer(mt, attr_methods='InputXGradient', is_train=False, device=self.device)
@@ -68,16 +70,16 @@ class Validator():
         for batch_idx, (data, _) in enumerate(self.data_loader):
             data = data.to(self.device)
             data_t = w_transform(data)
-            recon_data = w_transform.inverse(data_t)
+            recon_data = wt_inverse(data_t)
             saliency = Saliency(data_t, target=target, additional_forward_args=deepcopy(data))
             inputxgrad = Inputxgrad(data_t, target=target, additional_forward_args=deepcopy(data))
             
             rec_loss += _reconstruction_loss(data, recon_data).item()
-            lsum_loss += _lsum_loss(w_transform).item()
-            hsum_loss += _hsum_loss(w_transform).item()
-            L2norm_loss += _L2norm_loss(w_transform).item()
-            CMF_loss += _CMF_loss(w_transform).item()
-            conv_loss += _conv_loss(w_transform).item()
+            lsum_loss += _lsum_loss(w_transform.module).item() if is_parallel else _lsum_loss(w_transform).item()
+            hsum_loss += _hsum_loss(w_transform.module).item() if is_parallel else _hsum_loss(w_transform).item()
+            L2norm_loss += _L2norm_loss(w_transform.module).item() if is_parallel else _L2norm_loss(w_transform).item()
+            CMF_loss += _CMF_loss(w_transform.module).item() if is_parallel else _CMF_loss(w_transform).item()
+            conv_loss += _conv_loss(w_transform.module).item() if is_parallel else _conv_loss(w_transform).item()
             L1wave_loss += _L1_wave_loss(data_t).item() 
             L1saliency_loss += _L1_attribution_loss(saliency).item()
             L1inputxgrad_loss += _L1_attribution_loss(inputxgrad).item()
