@@ -6,7 +6,7 @@ opj = os.path.join
 from copy import deepcopy
 import pickle as pkl
 import argparse
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
 sys.path.append('../../src/adaptive_wavelets')

@@ -6,7 +6,6 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 from skimage.transform import rescale
 import pywt
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def reflect(x, minx, maxx):

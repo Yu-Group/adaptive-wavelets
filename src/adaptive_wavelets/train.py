@@ -40,9 +40,11 @@ class Trainer():
         self.device = device
         self.model = model.to(self.device)
         self.w_transform = w_transform.to(self.device)
+        self.is_parallel = 'data_parallel' in str(type(w_transform))
+        self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse # use multiple GPUs or not
         self.optimizer = optimizer
         self.loss_f = loss_f
-        self.mt = TrimModel(model, w_transform.inverse, use_residuals=use_residuals)    
+        self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals) 
         self.attributer = Attributer(self.mt, attr_methods=attr_methods, device=self.device)
         self.target = target
         self.n_print = n_print
@@ -122,12 +124,15 @@ class Trainer():
         # transform
         data_t = self.w_transform(data)
         # reconstruction
-        recon_data = self.w_transform.inverse(data_t)
+        recon_data = self.wt_inverse(data_t)
         # TRIM score
         with torch.backends.cudnn.flags(enabled=False):
             attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data)) if self.loss_f.lamL1attr > 0 else None
         # loss
-        loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)
+        if self.is_parallel:
+            loss = self.loss_f(self.w_transform.module, data, recon_data, data_t, attributions) 
+        else:
+            loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions) 
 
         # backward
         loss.backward()
@@ -156,7 +161,7 @@ class Trainer():
         for batch_idx, (data, _) in enumerate(data_loader):
             data = data.to(self.device)
             data_t = self.w_transform(data)
-            recon_data = self.w_transform.inverse(data_t)
+            recon_data = self.wt_inverse(data_t)
             attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data))
             loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)                  
             iter_loss = loss.item()
