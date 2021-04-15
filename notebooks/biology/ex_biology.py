@@ -209,5 +209,8 @@ if __name__ == '__main__':
     
     # save
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))    
-    torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))  
+    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))  
+    if torch.cuda.device_count() > 1:
+        torch.save(wt.module.state_dict(), opj(out_dir, p._str(p) + '.pth'))   
+    else:
+        torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))  
