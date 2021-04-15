@@ -91,7 +91,9 @@ class Validator():
         mean_L1wave_loss = L1wave_loss / (batch_idx + 1)
         mean_L1saliency_loss = L1saliency_loss / (batch_idx + 1)
         mean_L1inputxgrad_loss = L1inputxgrad_loss / (batch_idx + 1)
-        return (mean_rec_loss, mean_lsum_loss, mean_hsum_loss, mean_L2norm_loss, mean_CMF_loss, mean_conv_loss, mean_L1wave_loss, mean_L1saliency_loss, mean_L1inputxgrad_loss)
+        return (mean_rec_loss, mean_lsum_loss, mean_hsum_loss, 
+                mean_L2norm_loss, mean_CMF_loss, mean_conv_loss, 
+                mean_L1wave_loss, mean_L1saliency_loss, mean_L1inputxgrad_loss)
     
     
         

@@ -192,6 +192,7 @@ if __name__ == '__main__':
     
     # calculate losses
     print('calculating losses and metric...')   
+    model.train() # cudnn RNN backward can only be called in training mode
     validator = Validator(model, test_loader)
     rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
     s.train_losses = trainer.train_losses
