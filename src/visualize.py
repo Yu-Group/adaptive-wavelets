@@ -151,6 +151,7 @@ def plot_1dfilts(filts: list, is_title=False, figsize=(10, 10)):
     ls = len(filts)
     v_min = 1e4
     v_max = -1e4
+    
     for i in range(ls):
         v_min = min(filts[i].min(), v_min)
         v_max = max(filts[i].max(), v_max)
@@ -167,7 +168,7 @@ def plot_1dfilts(filts: list, is_title=False, figsize=(10, 10)):
     plt.show()  
     
     
-def plot_wavefun(waves: tuple, is_title=False, figsize=(10, 10)):
+def plot_wavefun(waves: tuple, is_title=False, figsize=(10, 10), flip_wavelet=False):
     '''Plot filters in the list
     Params
     ------
@@ -176,6 +177,7 @@ def plot_wavefun(waves: tuple, is_title=False, figsize=(10, 10)):
     figsize: tuple
         figure size    
     '''       
+    
     titles = ['scaling', 'wavelet']
     plt.figure(figsize=figsize, dpi=300)
     for i in range(2):
