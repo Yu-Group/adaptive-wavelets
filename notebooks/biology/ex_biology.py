@@ -107,20 +107,28 @@ class s:
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
                  if not attr.startswith('_')}
-
-
-def dataloader_to_nparrays(w_transform, train_loader, test_loader):
+    
+    
+def ftr_transform(w_transform, train_loader, test_loader):
     w_transform = w_transform.to('cpu')
     J = w_transform.J
     X = []
     y = []
     for data, labels in train_loader:
         data_t = w_transform(data)
-        for j in range(J):
+        for j in range(J+1):
             if j == 0:
-                x = deepcopy(data_t[j].detach())
+                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
+                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
+                x = x1[:,None]
             else:
-                x = torch.cat((x, data_t[j].detach()), axis=2)    
+                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])                  
+                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
+                x = torch.cat((x,x1[:,None]), axis=1)
         X.append(x)
         y.append(labels)
     X = torch.cat(X).squeeze().numpy()
@@ -130,17 +138,25 @@ def dataloader_to_nparrays(w_transform, train_loader, test_loader):
     y_test = []
     for data, labels in test_loader:
         data_t = w_transform(data)
-        for j in range(J):
+        for j in range(J+1):
             if j == 0:
-                x = deepcopy(data_t[j].detach())
+                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
+                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
+                x = x1[:,None]
             else:
-                x = torch.cat((x, data_t[j].detach()), axis=2)          
+                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])                
+                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
+                x = torch.cat((x,x1[:,None]), axis=1)
         X_test.append(x)
         y_test.append(labels)
     X_test = torch.cat(X_test).squeeze().numpy()
     y_test = torch.cat(y_test).squeeze().numpy()   
     
-    return (X, y), (X_test, y_test)
+    return (X, y), (X_test, y_test)    
 
     
 if __name__ == '__main__':    
