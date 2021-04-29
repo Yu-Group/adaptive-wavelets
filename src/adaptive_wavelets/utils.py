@@ -122,6 +122,39 @@ def get_wavefun(w_transform, level=5):
     return phi, psi, x
 
 
+def dist(wt1, wt2):
+    """function to compute distance between two wavelet filters 
+    """
+    h = wt1.h0.squeeze().detach().cpu()
+    g = wt2.h0.squeeze().detach().cpu()
+    return dist_filters(h, g)
+
+
+def dist_filters(h, g):
+    """function to compute distance between two filters 
+    """
+    # zero-pad filters with short length
+    if len(h) < len(g):
+        h = F.pad(h, pad=(0,len(g)-len(h)), mode='constant', value=0)
+    if len(g) < len(h):
+        g = F.pad(g, pad=(0,len(h)-len(g)), mode='constant', value=0)        
+    
+    distance = []
+    # circular shift 
+    for i in range(len(h)):
+        h_r = torch.roll(h, i)
+        d = 1 - torch.sum(h_r * g)/(torch.norm(h_r) * torch.norm(g))
+        distance.append(d.item())
+    # flip filter
+    h_f = torch.flip(h, (0,))
+    for i in range(len(h)):
+        h_r = torch.roll(h_f, i)
+        d = 1 - torch.sum(h_r * g)/(torch.norm(h_r) * torch.norm(g))
+        distance.append(d.item())    
+        
+    return min(distance)
+
+
 def get_1dfilts(w_transform):
     '''Get 1d filters from DWT1d object.
     Params
@@ -246,5 +279,8 @@ def get_2dfilts(w_transform):
         raise ValueError('no such type of wavelet transform is supported')        
     
 
+
+        
+    
     
     
