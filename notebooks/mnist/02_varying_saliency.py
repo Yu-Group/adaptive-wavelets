@@ -21,7 +21,7 @@ if __name__ == '__main__':
         'attr_methods': ['Saliency'],
         'lamL1wave': np.round(list(np.geomspace(0.0001, 0.005, 5)), 5),
         'lamL1attr': np.round([0] + list(np.geomspace(0.0001, 10, 20)), 5),
-        'model': ['cnn'],
+        'model': ['ffn'],
         'dirname': ['db5_saliency_warmstart_seed=1'],
         'warm_start': [True]
     }

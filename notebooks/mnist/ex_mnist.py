@@ -6,14 +6,14 @@ opj = os.path.join
 from copy import deepcopy
 import pickle as pkl
 import argparse
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
 sys.path.append('../../src/adaptive_wavelets')
 from losses import get_loss_f
 from train import Trainer
 from evaluate import Validator
-from transform1d import DWT1d
+from transform2d import DWT2d
 from wave_attributions import Attributer
 
 sys.path.append('../../src/models')
@@ -24,19 +24,47 @@ sys.path.append('../../src')
 from warmstart import warm_start
 
 
+parser = argparse.ArgumentParser(description='Mnist Example')
+parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
+parser.add_argument('--wave', type=str, default='db5', help='type of wavelet')
+parser.add_argument('--J', type=int, default=4, help='level of resolution')
+parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
+parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
+parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
+parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
+parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
+parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
+parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
+parser.add_argument('--lamlSum', type=float, default=1, help='weight of sum of lowpass filter')
+parser.add_argument('--lamhSum', type=float, default=1, help='weight of sum of highpass filter')
+parser.add_argument('--lamL2norm', type=float, default=1, help='weight of L2norm of lowpass filter')
+parser.add_argument('--lamCMF', type=float, default=1, help='weight of CMF condition')
+parser.add_argument('--lamConv', type=float, default=1, help='weight of convolution constraint')
+parser.add_argument('--lamL1wave', type=float, default=0, help='weight of the l1-norm of wavelet coeffs')
+parser.add_argument('--lamL1attr', type=float, default=0, help='weight of the l1-norm of attributions')
+parser.add_argument('--target', type=int, default=6, help='target index to calculate interp score')
+parser.add_argument('--model', type=str, default='cnn', help='interpret cnn or ffn')
+parser.add_argument('--dirname', default='dirname', help='name of directory')
+parser.add_argument('--warm_start', default=None, help='indicate whether warmstart or not')
+
+
 class p:
     """Parameters for simulated data
     """
     # data & model path
     data_path = "../../src/dsets/mnist/data"
     model_path = "../../src/dsets/mnist/data"
-    wt_type = 'DWT1d'
+    wt_type = 'DWT2d'
+    
+    # parameters for generating data
+    seed = 1
+    img_size = (1, 28, 28)    
     
     # parameters for wavelet initialization
     wave = 'db5'
     J = 4
     init_factor = 1
-    noise_factor = 0.3
+    noise_factor = 0.1
     const_factor = 0
     
     # parameters for training
@@ -51,13 +79,14 @@ class p:
     lamConv = 1
     lamL1wave = 0.1
     lamL1attr = 1     
-    target = 0
+    target = 6
+    model = 'cnn'
     
     # run with warmstart
     warm_start = None    
     
     # SAVE MODEL
-    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/simulation/results" 
+    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/mnist/results" 
     dirname = "dirname"
     pid = ''.join(["%s" % random.randint(0, 9) for num in range(0, 10)])
 
@@ -92,21 +121,25 @@ if __name__ == '__main__':
     train_loader, test_loader = get_dataloader(p.data_path,
                                                batch_size=p.batch_size)
 
-    model = load_pretrained_model(p.model_path)    
+    pretrained_models = load_pretrained_model(p.model_path)  
+    if p.model == 'cnn':
+        model = pretrained_models[0]
+    else:
+        model = pretrained_models[1]
     
     # prepare model
     random.seed(p.seed)
     np.random.seed(p.seed)
     torch.manual_seed(p.seed)   
-
+    
     if p.warm_start is None:
-        wt = DWT1d(wave=p.wave, mode='zero', J=p.J, 
+        wt = DWT2d(wave=p.wave, mode='zero', J=p.J, 
                    init_factor=p.init_factor, 
                    noise_factor=p.noise_factor,
                    const_factor=p.const_factor).to(device)
         wt.train()
     else:
-        wt = warm_start(p, out_dir).to(device)        
+        wt = warm_start(p, out_dir).to(device)     
         wt.train()
         
     # check if we have multiple GPUs
