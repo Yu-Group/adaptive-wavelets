@@ -9,7 +9,7 @@ DIR_FILE = os.path.dirname(os.path.realpath(__file__)) # directory of the config
 if __name__ == '__main__':
     
     params_to_vary = {
-        'seed': [2],
+        'seed': [1],
         'wave': ['db5'],
         'J': [4],
         'init_factor': [1],
@@ -18,10 +18,10 @@ if __name__ == '__main__':
         'batch_size': [100],
         'lr': [0.001],
         'num_epochs': [100],
-        'attr_methods': ['Saliency'],
+        'attr_methods': ['InputXGradient'],
         'lamL1wave': np.round(list(np.geomspace(0.0001, 0.005, 5)), 5),
         'lamL1attr': np.round([0] + list(np.geomspace(0.0001, 10, 20)), 5),
-        'dirname': ['db5_saliency_warmstart_seed=2'],
+        'dirname': ['db5_inputxgrad_warmstart_seed=1'],
         'warm_start': [True]
     }
     ks = sorted(params_to_vary.keys())

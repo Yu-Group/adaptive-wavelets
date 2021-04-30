@@ -13,9 +13,13 @@ def ftr_transform(w_transform, train_loader, test_loader):
         data_t = w_transform(data)
         for j in range(J+1):
             if j == 0:
-                x = deepcopy(data_t[j].detach())
+                x = deepcopy(data_t[j].detach()).squeeze()
             else:
-                x = torch.cat((x, data_t[j].detach()), axis=2)    
+                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
+                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f                        
+                x = torch.cat((x,x1[:,None]), axis=1)  
         X.append(x)
         y.append(labels)
     X = torch.cat(X).squeeze().numpy()
@@ -27,9 +31,13 @@ def ftr_transform(w_transform, train_loader, test_loader):
         data_t = w_transform(data)
         for j in range(J+1):
             if j == 0:
-                x = deepcopy(data_t[j].detach())
+                x = deepcopy(data_t[j].detach()).squeeze()
             else:
-                x = torch.cat((x, data_t[j].detach()), axis=2)             
+                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
+                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f                        
+                x = torch.cat((x,x1[:,None]), axis=1)            
         X_test.append(x)
         y_test.append(labels)
     X_test = torch.cat(X_test).squeeze().numpy()
@@ -46,17 +54,13 @@ def max_ftr_transform(w_transform, train_loader, test_loader):
     for data, labels in train_loader:
         data_t = w_transform(data)
         for j in range(J+1):
+            a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+            b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
+            f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+            x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f                        
             if j == 0:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
                 x = x1[:,None]
             else:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])                  
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
                 x = torch.cat((x,x1[:,None]), axis=1)
         X.append(x)
         y.append(labels)
@@ -68,74 +72,20 @@ def max_ftr_transform(w_transform, train_loader, test_loader):
     for data, labels in test_loader:
         data_t = w_transform(data)
         for j in range(J+1):
+            a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
+            b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
+            f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
+            x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f            
             if j == 0:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
                 x = x1[:,None]
             else:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])                
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
                 x = torch.cat((x,x1[:,None]), axis=1)
         X_test.append(x)
         y_test.append(labels)
     X_test = torch.cat(X_test).squeeze().numpy()
     y_test = torch.cat(y_test).squeeze().numpy()   
     
-    return (X, y), (X_test, y_test)   
-
-
-def max_ftr_transform_n(w_transform, train_loader, test_loader):
-    w_transform = w_transform.to('cpu')
-    J = w_transform.J
-    X = []
-    y = []
-    for data, labels in train_loader:
-        data_t = w_transform(data)
-        for j in range(1,J+1):
-            if j == 1:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
-                x = x1[:,None]
-            else:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])                  
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
-                x = torch.cat((x,x1[:,None]), axis=1)
-        X.append(x)
-        y.append(labels)
-    X = torch.cat(X).squeeze().numpy()
-    y = torch.cat(y).squeeze().numpy()
-
-    X_test = []
-    y_test = []
-    for data, labels in test_loader:
-        data_t = w_transform(data)
-        for j in range(1,J+1):
-            if j == 1:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
-                x = x1[:,None]
-            else:
-                a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
-                b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])                
-                f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
-                x1 = torch.max(torch.cat((a,-b),axis=1),dim=1)[0] * f
-                x = torch.cat((x,x1[:,None]), axis=1)
-        X_test.append(x)
-        y_test.append(labels)
-    X_test = torch.cat(X_test).squeeze().numpy()
-    y_test = torch.cat(y_test).squeeze().numpy()   
-    
-    return (X, y), (X_test, y_test)   
+    return (X, y), (X_test, y_test)    
 
 
 class LogisticRegression:
@@ -198,3 +148,4 @@ class LogisticRegression:
     
     def predict(self, X):
         return self.predict_prob(X).round()
+    
