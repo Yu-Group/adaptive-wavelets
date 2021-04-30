@@ -20,9 +20,9 @@ def warm_start(p, out_dir):
     models = []
     if len(fnames) == 0:
         if p.wt_type == 'DWT1d':
-            model = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+            model = DWT1d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
         elif p.wt_type == 'DWT2d':
-            model = DWT2d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+            model = DWT2d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
     else:
         for fname in fnames:
             if fname[-3:] == 'pkl':
@@ -31,9 +31,9 @@ def warm_start(p, out_dir):
                 lamL1wave.append(result['lamL1wave'])
             if fname[-3:] == 'pth':
                 if p.wt_type == 'DWT1d':
-                    m = DWT1d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+                    m = DWT1d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
                 elif p.wt_type == 'DWT2d':
-                    m = DWT2d(wave=p.wave, mode='zero', J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
+                    m = DWT2d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(device)
                 m.load_state_dict(torch.load(opj(out_dir, fname)))
                 models.append(m)
         lamL1attr = np.array(lamL1attr)
