@@ -28,6 +28,7 @@ parser = argparse.ArgumentParser(description='Mnist Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 parser.add_argument('--wave', type=str, default='db5', help='type of wavelet')
 parser.add_argument('--J', type=int, default=4, help='level of resolution')
+parser.add_argument('--mode', type=str, default='zero', help='mode of wavelet boundary')
 parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
@@ -63,6 +64,7 @@ class p:
     # parameters for wavelet initialization
     wave = 'db5'
     J = 4
+    mode = 'zero'
     init_factor = 1
     noise_factor = 0.1
     const_factor = 0
@@ -133,7 +135,7 @@ if __name__ == '__main__':
     torch.manual_seed(p.seed)   
     
     if p.warm_start is None:
-        wt = DWT2d(wave=p.wave, mode='zero', J=p.J, 
+        wt = DWT2d(wave=p.wave, mode=p.mode, J=p.J, 
                    init_factor=p.init_factor, 
                    noise_factor=p.noise_factor,
                    const_factor=p.const_factor).to(device)
