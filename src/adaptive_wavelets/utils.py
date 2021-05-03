@@ -143,13 +143,13 @@ def dist_filters(h, g):
     # circular shift 
     for i in range(len(h)):
         h_r = torch.roll(h, i)
-        d = 1 - torch.sum(h_r * g)/(torch.norm(h_r) * torch.norm(g))
+        d = abs(h_r - g).sum()
         distance.append(d.item())
     # flip filter
     h_f = torch.flip(h, (0,))
     for i in range(len(h)):
         h_r = torch.roll(h_f, i)
-        d = 1 - torch.sum(h_r * g)/(torch.norm(h_r) * torch.norm(g))
+        d = abs(h_r - g).sum()
         distance.append(d.item())    
         
     return min(distance)

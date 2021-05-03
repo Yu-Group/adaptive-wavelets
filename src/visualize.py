@@ -19,27 +19,6 @@ def cshow(im):
     plt.imshow(im, cmap='magma', vmax=0.15, vmin=-0.05)
     plt.axis('off')
     
-        
-# def viz_filters(tensors, n_row=4, n_col=8, resize_fac=2, normalize=True, vmax=None, vmin=None, title=None):
-#     plt.figure(figsize=(10,10))
-#     # plot filters
-#     p = tensors.shape[2] + 2
-#     mosaic = np.zeros((p*n_row,p*n_col))
-#     indx = 0
-#     for i in range(n_row):
-#         for j in range(n_col):
-#             im = tensors.data.cpu().numpy()[indx].squeeze()
-#             if normalize:
-#                 im = (im-np.min(im))
-#                 im = im/np.max(im)
-#             mosaic[i*p:(i+1)*p,j*p:(j+1)*p] = np.pad(im,(1,1),mode='constant')
-#             indx += 1
-#     if title is not None:
-#         plt.title(title)
-#     plt.imshow(rescale(mosaic,resize_fac,mode='constant'), cmap='gray')
-#     plt.axis('off')    
-#     plt.show() 
-    
 
 def plot_2dreconstruct(im, recon):
     if 'Tensor' in str(type(im)):
