@@ -53,7 +53,7 @@ def max_ftr_transform(w_transform, train_loader, test_loader):
     y = []
     for data, labels in train_loader:
         data_t = w_transform(data)
-        for j in range(J+1):
+        for j in range(1):
             a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
             b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
             f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1
@@ -71,7 +71,7 @@ def max_ftr_transform(w_transform, train_loader, test_loader):
     y_test = []
     for data, labels in test_loader:
         data_t = w_transform(data)
-        for j in range(J+1):
+        for j in range(1):
             a = deepcopy(torch.max(data_t[j].detach(), dim=2)[0])
             b = deepcopy(-torch.max(-data_t[j].detach(), dim=2)[0])
             f = -2*torch.max(torch.cat((a,-b),axis=1),dim=1)[1] + 1

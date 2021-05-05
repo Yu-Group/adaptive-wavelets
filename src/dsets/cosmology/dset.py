@@ -44,6 +44,26 @@ def get_dataloader(root_dir, img_size=64, shuffle=True, split_train_test=True, p
                           shuffle=shuffle,
                           pin_memory=pin_memory,
                           **kwargs)
+    
+    
+def get_validation(root_dir, img_size=64, pin_memory=True, batch_size=64, **kwargs):
+    """A generic data loader
+
+    Parameters
+    ----------
+    root_dir : str
+        Path to the dataset root.   
+
+    kwargs :
+        Additional arguments to `DataLoader`. Default values are modified.
+    """
+    pin_memory = pin_memory and torch.cuda.is_available  # only pin if GPU available
+    dataset = MassMapsDatasetResized(root_dir, img_size)
+    return DataLoader(torch.utils.data.Subset(dataset, indices=range(23000, 25000)),
+                      batch_size=batch_size,
+                      shuffle=False,
+                      pin_memory=pin_memory,
+                      **kwargs)
 
 
 def load_pretrained_model(model_name='resnet18', device='cuda', num_params=3, inplace=True, data_path='/scratch/users/vision/data/cosmo'):
