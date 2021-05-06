@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 import pickle as pkl
 from copy import deepcopy
-sys.path.append('../../../notebooks/ex_biology/preprocessing')
+sys.path.append('../../../notebooks/biology/preprocessing')
 import data
 import neural_networks
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

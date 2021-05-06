@@ -18,7 +18,6 @@ class PeakCount():
                                              'custom']
         if self.peak_counting_method == 'custom':
             assert kernels is not None, "if using custom kernels, must also pass kernels!"
-            self.center_kernels()
         
         
     def fit(self, dataloader):
