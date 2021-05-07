@@ -11,7 +11,7 @@ if __name__ == '__main__':
     params_to_vary = {
         'seed': [1],
         'wave': ['db3'],
-        'J': [4],
+        'J': [6],
         'mode': ['periodization'],
         'init_factor': [1],
         'noise_factor': [0],
