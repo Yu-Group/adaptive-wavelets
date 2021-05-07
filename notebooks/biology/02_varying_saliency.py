@@ -18,10 +18,10 @@ if __name__ == '__main__':
         'batch_size': [100],
         'lr': [0.001],
         'num_epochs': [100],
-        'attr_methods': ['InputXGradient'],
+        'attr_methods': ['Saliency'],
         'lamL1wave': np.round(list(np.geomspace(0.001, 0.1, 5)), 5),
         'lamL1attr': np.round([0] + list(np.geomspace(0.001, 50, 20)), 5),
-        'dirname': ['sym5_inputxgrad_warmstart_seed=1'],
+        'dirname': ['sym5_saliency_warmstart_seed=1'],
         'warm_start': [True]
     }
     ks = sorted(params_to_vary.keys())
