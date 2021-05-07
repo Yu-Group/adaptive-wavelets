@@ -36,11 +36,11 @@ def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, **kwa
                                               download=False, 
                                               transform=transformer)
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, 
+    train_loader = torch.utils.data.DataLoader(torch.utils.data.Subset(train_dataset, indices=range(20000)),
                                                batch_size=batch_size, 
                                                shuffle=shuffle,
                                                pin_memory=pin_memory)
-    test_loader = torch.utils.data.DataLoader(test_dataset, 
+    test_loader = torch.utils.data.DataLoader(torch.utils.data.Subset(test_dataset, indices=range(3000)),
                                               batch_size=batch_size, 
                                               shuffle=False,
                                               pin_memory=pin_memory)
