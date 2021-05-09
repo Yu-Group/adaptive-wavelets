@@ -43,7 +43,7 @@ parser.add_argument('--lamCMF', type=float, default=1, help='weight of CMF condi
 parser.add_argument('--lamConv', type=float, default=1, help='weight of convolution constraint')
 parser.add_argument('--lamL1wave', type=float, default=0, help='weight of the l1-norm of wavelet coeffs')
 parser.add_argument('--lamL1attr', type=float, default=0, help='weight of the l1-norm of attributions')
-parser.add_argument('--target', type=int, default=6, help='target index to calculate interp score')
+parser.add_argument('--target', type=int, default=4, help='target index to calculate interp score')
 parser.add_argument('--model', type=str, default='cnn', help='interpret cnn or ffn')
 parser.add_argument('--dirname', default='dirname', help='name of directory')
 parser.add_argument('--warm_start', default=None, help='indicate whether warmstart or not')
