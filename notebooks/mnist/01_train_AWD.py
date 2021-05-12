@@ -18,7 +18,7 @@ if __name__ == '__main__':
         'const_factor': [0],
         'batch_size': [100],
         'lr': [0.001],
-        'num_epochs': [100],
+        'num_epochs': [50],
         'attr_methods': ['Saliency'],
         'lamL1wave': [0.05],
         'lamL1attr': np.round([0] + list(np.geomspace(0.01, 5, 20)), 5),
