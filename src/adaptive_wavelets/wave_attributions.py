@@ -34,52 +34,74 @@ class Attributer(nn.Module):
         return attributions
         
     def InputXGradient(self, x: tuple, target=1, additional_forward_args=None):
-        outputs = self.mt(x, additional_forward_args)[:,target]
-        if self.is_train:
-            grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+        if target != -1:
+            outputs = self.mt(x, additional_forward_args)[:,target]
+            if self.is_train:
+                grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+            else:
+                grads = torch.autograd.grad(torch.unbind(outputs), x)        
+            # input * gradient
+            attributions = tuple(xi * gi for xi, gi in zip(x, grads))
         else:
-            grads = torch.autograd.grad(torch.unbind(outputs), x)        
-        # input * gradient
-        attributions = tuple(xi * gi for xi, gi in zip(x, grads))
+            attributions = ()
+            for target in range(10):
+                outputs = self.mt(x, additional_forward_args)[:,target]
+                if self.is_train:
+                    grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+                else:
+                    grads = torch.autograd.grad(torch.unbind(outputs), x)        
+                # input * gradient         
+                attributions += tuple(xi * gi for xi, gi in zip(x, grads))               
         return attributions    
     
     def Saliency(self, x: tuple, target=1, additional_forward_args=None):
-        outputs = self.mt(x, additional_forward_args)[:,target]
-        if self.is_train:
-            grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+        if target != -1:
+            outputs = self.mt(x, additional_forward_args)[:,target]
+            if self.is_train:
+                grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+            else:
+                grads = torch.autograd.grad(torch.unbind(outputs), x) 
+            attributions = grads
         else:
-            grads = torch.autograd.grad(torch.unbind(outputs), x) 
-        return grads
+            attributions = ()
+            for target in range(10):
+                outputs = self.mt(x, additional_forward_args)[:,target]
+                if self.is_train:
+                    grads = torch.autograd.grad(torch.unbind(outputs), x, create_graph=True)        
+                else:
+                    grads = torch.autograd.grad(torch.unbind(outputs), x)  
+                attributions += grads
+        return attributions
     
     ### TO DO!! ###
     # implement batch version of IG
-    def IntegratedGradient(self, x: tuple, target=1, additional_forward_args=None, M=100):
-        n = len(x)
-        mult_grid = np.array(range(M))/(M-1) # fractions to multiply by
+#     def IntegratedGradient(self, x: tuple, target=1, additional_forward_args=None, M=100):
+#         n = len(x)
+#         mult_grid = np.array(range(M))/(M-1) # fractions to multiply by
 
-        # compute all the input vecs
-        input_vecs = []
-        baselines = []
-        for i in range(n):
-            baselines.append(torch.zeros_like(x[i])) # baseline of zeros
-            shape = list(x[i].shape[1:])
-            shape.insert(0, M)
-            inp = torch.empty(shape, dtype=torch.float32, requires_grad=True).to(self.device)    
-            for j, prop in enumerate(mult_grid):
-                inp[j] = baselines[i] + prop * (x[i] - baselines[i])
-            inp.retain_grad()
-            input_vecs.append(inp)
+#         # compute all the input vecs
+#         input_vecs = []
+#         baselines = []
+#         for i in range(n):
+#             baselines.append(torch.zeros_like(x[i])) # baseline of zeros
+#             shape = list(x[i].shape[1:])
+#             shape.insert(0, M)
+#             inp = torch.empty(shape, dtype=torch.float32, requires_grad=True).to(self.device)    
+#             for j, prop in enumerate(mult_grid):
+#                 inp[j] = baselines[i] + prop * (x[i] - baselines[i])
+#             inp.retain_grad()
+#             input_vecs.append(inp)
 
-        # run forward pass
-        output = self.mt(input_vecs, additional_forward_args)[:,1].sum()
-        output.backward(retain_graph=True)
+#         # run forward pass
+#         output = self.mt(input_vecs, additional_forward_args)[:,1].sum()
+#         output.backward(retain_graph=True)
 
-        # ig
-        scores = []
-        for i in range(n):
-            imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
-            scores.append(imps)   
-        return tuple(scores)    
+#         # ig
+#         scores = []
+#         for i in range(n):
+#             imps = input_vecs[i].grad.mean(0) * (x[i] - baselines[i]) # record all the grads
+#             scores.append(imps)   
+#         return tuple(scores)    
     
 
     

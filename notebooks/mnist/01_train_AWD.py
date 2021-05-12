@@ -21,7 +21,8 @@ if __name__ == '__main__':
         'num_epochs': [100],
         'attr_methods': ['Saliency'],
         'lamL1wave': [0.05],
-        'lamL1attr': np.round([0] + list(np.geomspace(0.1, 2, 20)), 5),
+        'lamL1attr': np.round([0] + list(np.geomspace(0.01, 5, 20)), 5),
+        'target': [-1],
         'model': ['cnn'],
         'dirname': ['db3_saliency_warmstart_mode=per_cnn_seed=1'],
         'warm_start': [True]
