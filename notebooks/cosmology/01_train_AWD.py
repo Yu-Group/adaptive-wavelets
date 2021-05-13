@@ -20,7 +20,7 @@ if __name__ == '__main__':
         'lr': [0.001],
         'num_epochs': [50],
         'attr_methods': ['Saliency'],
-        'lamL1wave': [0.02],
+        'lamL1wave': [0.001],
         'lamL1attr': np.round([0] + list(np.geomspace(0.02, 0.4, 10)), 5),
         'dirname': ['db3_saliency_warmstart_mode=per_seed=1'],
         'warm_start': [True]

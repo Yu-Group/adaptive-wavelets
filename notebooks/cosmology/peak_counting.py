@@ -132,45 +132,7 @@ class PeakCount():
             for i,val in enumerate(vals):
                 hp = np.histogram(val, bins=self.bins)[0]
                 results.append(hp)    
-            return np.vstack(results)  
-        
-        
-    def peak_list_without_binning(self, dataloader):
-        self.peak_list = {}
-        for data, params in dataloader:
-            peaks = self.find_peaks(data)
-            n_batch = data.size(0)
-            if self.peak_counting_method == 'custom':
-                for kernel in self.kernels:
-                    kernel = kernel[None,None]
-                    ims_f = F.conv2d(data, kernel)
-                    vals = self.images_at_peaks(ims_f, peaks)
-                    for i in range(n_batch):
-                        params_list = tuple([params[i,k].item() for k in range(3)])
-                        if params_list in self.peak_list:
-                            self.peak_list[params_list].append(vals[i])        
-                        else:
-                            self.peak_list[params_list] = [vals[i]]  
-            else:
-                if self.peak_counting_method == 'original':
-                    ims_f = data[...,1:-1,1:-1]
-                elif self.peak_counting_method == 'laplace_v1':
-                    ims_f = self.laplace_v1(data)
-                elif self.peak_counting_method == 'laplace_v2':
-                    ims_f = self.laplace_v2(data)
-                elif self.peak_counting_method == 'roberts_cross':
-                    ims_f = self.roberts_cross(data)  
-                vals = self.images_at_peaks(ims_f, peaks)
-                for i in range(n_batch):
-                    params_list = tuple([params[i,k].item() for k in range(3)])
-                    if params_list in self.peak_list:
-                        self.peak_list[params_list].append(vals[i])        
-                    else:
-                        self.peak_list[params_list] = [vals[i]]                    
-
-        self.peak_vals = {}
-        for k, v in self.peak_list.items():
-            self.peak_vals[k] = np.hstack(v)        
+            return np.vstack(results)        
     
 
     def laplace_v1(self, ims):
