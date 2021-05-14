@@ -166,8 +166,8 @@ def get_1dfilts(w_transform):
         h0 = w_transform.h0.squeeze().detach().cpu()
         h1 = low_to_high(w_transform.h0)
         h1 = h1.squeeze().detach().cpu()
-        h0 = F.pad(h0, pad=(2,2), mode='constant', value=0)
-        h1 = F.pad(h1, pad=(2,2), mode='constant', value=0)              
+        h0 = F.pad(h0, pad=(0,0), mode='constant', value=0)
+        h1 = F.pad(h1, pad=(0,0), mode='constant', value=0)              
         return (h0, h1)   
     else:
         raise ValueError('no such type of wavelet transform is supported')    
@@ -266,14 +266,15 @@ def get_2dfilts(w_transform):
         h0 = w_transform.h0.squeeze().detach().cpu()
         h1 = low_to_high(w_transform.h0)
         h1 = h1.squeeze().detach().cpu()
-        h0 = F.pad(h0, pad=(2,2), mode='constant', value=0)
-        h1 = F.pad(h1, pad=(2,2), mode='constant', value=0)              
+        h0 = F.pad(h0, pad=(0,0), mode='constant', value=0)
+        h1 = F.pad(h1, pad=(0,0), mode='constant', value=0)              
         
+        filt_ll = h0.unsqueeze(0)*h0.unsqueeze(1)
         filt_lh = h0.unsqueeze(0)*h1.unsqueeze(1)
         filt_hl = h1.unsqueeze(0)*h0.unsqueeze(1)
         filt_hh = h1.unsqueeze(0)*h1.unsqueeze(1)
         
-        return (h0, h1), (filt_lh, filt_hl, filt_hh)
+        return (h0, h1), (filt_ll, filt_lh, filt_hl, filt_hh)
     
     else:
         raise ValueError('no such type of wavelet transform is supported')        

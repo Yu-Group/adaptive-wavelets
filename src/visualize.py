@@ -52,7 +52,7 @@ def plot_2dreconstruct(im, recon):
     plt.show()     
     
     
-def plot_2dfilts(filts: list, scale=2, share_min_max=True, figsize=(10, 10)):
+def plot_2dfilts(filts: list, scale=2, share_min_max=True, figsize=(1,1)):
     '''Plot filters in the list
     Params
     ------
@@ -68,16 +68,30 @@ def plot_2dfilts(filts: list, scale=2, share_min_max=True, figsize=(10, 10)):
         v_min = min(filts[i].min(), v_min)
         v_max = max(filts[i].max(), v_max)
         
-    plt.figure(figsize=figsize, dpi=200)
-    for i in range(ls):
-        plt.subplot(1, ls, i + 1)
-        if share_min_max:
-            plt.imshow(rescale(filts[i], scale, mode='constant'), cmap='gray', extent=[0,2,0,2], vmin=v_min, vmax=v_max)
-        else:
-            plt.imshow(rescale(filts[i], scale, mode='constant'), cmap='gray', extent=[0,2,0,2])
-        plt.axis('off')  
+    fig = plt.figure(figsize=figsize, dpi=200)
+    gs = gridspec.GridSpec(ncols=2, nrows=2, figure=fig)
+    
+    i = 0
+    for r in range(2):
+        for c in range(2):
+            ax = plt.subplot(gs[r,c])
+            if share_min_max:
+                ax.imshow(rescale(filts[i], scale, mode='constant'), cmap='gray', vmin=v_min, vmax=v_max)
+            else:
+                ax.imshow(rescale(filts[i], scale, mode='constant'), cmap='gray')            
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.tick_params(
+                axis='both',          
+                which='both',      
+                bottom=False,      
+                top=False,
+                left=False,
+                right=False,
+                labelbottom=False) 
+            i += 1
     plt.tight_layout()
-    plt.show()  
+    plt.show()     
     
     
 def plot_1dreconstruct(data, recon):

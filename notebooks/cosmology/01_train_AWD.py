@@ -10,7 +10,7 @@ if __name__ == '__main__':
     
     params_to_vary = {
         'seed': [1],
-        'wave': ['db3'],
+        'wave': ['coif1'],
         'J': [6],
         'mode': ['periodization'],
         'init_factor': [1],
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         'attr_methods': ['Saliency'],
         'lamL1wave': [0.001],
         'lamL1attr': np.round([0] + list(np.geomspace(0.02, 0.4, 10)), 5),
-        'dirname': ['db3_saliency_warmstart_mode=per_seed=1'],
+        'dirname': ['coif1_saliency_warmstart_mode=per_seed=1'],
         'warm_start': [True]
     }
     ks = sorted(params_to_vary.keys())
