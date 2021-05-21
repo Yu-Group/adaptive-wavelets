@@ -123,35 +123,29 @@ def get_wavefun(w_transform, level=5):
 
 
 def dist(wt1, wt2):
-    """function to compute distance between two wavelet filters 
+    """function to compute distance between two wavelets 
     """
-    h = wt1.h0.squeeze().detach().cpu()
-    g = wt2.h0.squeeze().detach().cpu()
-    return dist_filters(h, g)
-
-
-def dist_filters(h, g):
-    """function to compute distance between two filters 
-    """
-    # zero-pad filters with short length
-    if len(h) < len(g):
-        h = F.pad(h, pad=(0,len(g)-len(h)), mode='constant', value=0)
-    if len(g) < len(h):
-        g = F.pad(g, pad=(0,len(h)-len(g)), mode='constant', value=0)        
+    _, psi1, _ = get_wavefun(wt1)
+    _, psi2, _ = get_wavefun(wt2)
     
+    if len(psi1) > len(psi2):
+        psi2 = np.pad(psi2, (0, len(psi1)-len(psi2)), mode='constant', constant_values=(0,))
+    if len(psi1) < len(psi2):
+        psi1 = np.pad(psi1, (0, len(psi2)-len(psi1)), mode='constant', constant_values=(0,))
+
     distance = []
     # circular shift 
-    for i in range(len(h)):
-        h_r = torch.roll(h, i)
-        d = abs(h_r - g).sum()
+    for i in range(len(psi1)):
+        psi1_r = np.roll(psi1, i)
+        d = np.linalg.norm(psi1_r - psi2)
         distance.append(d.item())
     # flip filter
-    h_f = torch.flip(h, (0,))
-    for i in range(len(h)):
-        h_r = torch.roll(h_f, i)
-        d = abs(h_r - g).sum()
-        distance.append(d.item())    
-        
+    psi1_f = psi1[::-1]
+    for i in range(len(psi1)):
+        psi1_r = np.roll(psi1_f, i)
+        d = np.linalg.norm(psi1_r - psi2)
+        distance.append(d.item())
+
     return min(distance)
 
 
