@@ -13,10 +13,17 @@ def get_tensors(data_loader):
     return (X, y)
 
 
-def max_fun(X, is_abs=False, m=1):
+def max_fun(X, sgn="abs", m=1):
     """Given an array X return maximum values across columns for every row
     """
-    Y = abs(X) if is_abs else X
+    if sgn == "abs":
+        Y = abs(X)
+    elif sgn == "neg":
+        Y = -X
+    elif sgn == "pos":
+        Y = X
+    else:
+        print('no such sign supported')
     id_s = np.argsort(Y, axis=1)[:,::-1]
     index = id_s[:,:m]
     return np.take_along_axis(X, index, axis=1)
@@ -25,7 +32,7 @@ def max_fun(X, is_abs=False, m=1):
 def max_transformer(w_transform, 
                     train_loader, 
                     test_loader,
-                    is_abs=False, 
+                    sgn="abs", 
                     m=1):
     """Compute maximum features of wavelet representations across all scales 
     """
@@ -38,7 +45,7 @@ def max_transformer(w_transform,
     data_t = w_transform(Xs)
     for j in range(J+1):
         d = data_t[j].detach().squeeze().numpy()
-        X.append(max_fun(d, is_abs=is_abs, m=m))
+        X.append(max_fun(d, sgn=sgn, m=m))
     X = np.hstack(X)
     y = y.detach().squeeze().numpy()
     
@@ -48,7 +55,7 @@ def max_transformer(w_transform,
     data_t = w_transform(Xs_test)
     for j in range(J+1):
         d = data_t[j].detach().squeeze().numpy()
-        X_test.append(max_fun(d, is_abs=is_abs, m=m))
+        X_test.append(max_fun(d, sgn=sgn, m=m))
     X_test = np.hstack(X_test)
     y_test = y_test.detach().squeeze().numpy()    
     
