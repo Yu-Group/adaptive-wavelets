@@ -185,65 +185,6 @@ class PeakCount():
             self.kernels.append(kern)
             
             
-
-class ModelPred():
-    """ Predict cosmological parameters using neural network model."""
-    
-    def __init__(self, model, target=1):
-        self.model = model
-        self.device = model.fc.weight.device
-        self.target = target
-
-    def fit(self, dataloader):
-        """Calculate the mean outputs and covariances."""
-        self.output_list = {}
-        with torch.no_grad():
-            for data, params in dataloader:
-                data = data.to(self.device)
-                n_batch = data.size(0)
-                outputs = self.model(data).detach().cpu().numpy()
-                for i in range(n_batch):
-                    params_list = tuple([params[i,k].item() for k in range(3)])
-                    if params_list in self.output_list:
-                        self.output_list[params_list].append(outputs[i])
-                    else:
-                        self.output_list[params_list] = [outputs[i]]
-                        
-        self.mean_outputs = {}  
-        for k,v in self.output_list.items():
-            self.mean_outputs[k] = np.mean(v, axis=0)
-
-            
-    def predict(self, dataloader):
-        """Predict on image with model outputs."""
-        y_preds = []
-        y_params = []
-        ks = sorted(self.mean_outputs.keys())
-        with torch.no_grad():
-            for data, params in dataloader:
-                data = data.to(self.device)
-                n_batch = data.size(0)
-                outputs = self.model(data).detach().cpu().numpy()
-
-                chis = []
-                for k in ks:
-                    d = outputs[:,self.target] - self.mean_outputs[k][self.target]
-                    chis.append(d**2)
-                chis = np.vstack(chis).T
-                idx = np.argmin(chis, axis=1)
-
-                preds = []
-                for i in idx:
-                    preds.append(ks[i])
-                preds = np.vstack(preds)  
-                y_preds.append(preds)
-                y_params.append(params.cpu().numpy())
-        y_preds = np.vstack(y_preds)
-        y_params = np.vstack(y_params)
-        return y_preds, y_params  
-    
-            
-            
 def rmse(y_params, y_preds, target=1):
     return np.linalg.norm(y_params[:,target] - y_preds[:,target])**2/y_params.shape[0]
        
