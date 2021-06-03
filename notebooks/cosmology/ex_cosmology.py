@@ -105,38 +105,6 @@ class s:
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
                  if not attr.startswith('_')}
-    
-    
-def extract_patches(h, g, centering=True):
-    """Given 1-d filters h, g, extract 3x3 LL,LH,HL,HH filters with largest variation
-    """
-    hc = h - h.mean()
-    var = []
-    for left in range(len(h)-3):
-        v = torch.sum((hc[left:left+3])**2)
-        var.append(v)
-    var = np.array(var)
-    h_small = h[np.argmax(var):np.argmax(var)+3]
-    
-    gc = g - g.mean()
-    var = []
-    for left in range(len(g)-3):
-        v = torch.sum((gc[left:left+3])**2)
-        var.append(v)
-    var = np.array(var)
-    g_small = g[np.argmax(var):np.argmax(var)+3]
-    
-    ll = h_small.unsqueeze(0)*h_small.unsqueeze(1)
-    lh = h_small.unsqueeze(0)*g_small.unsqueeze(1)
-    hl = g_small.unsqueeze(0)*h_small.unsqueeze(1)
-    hh = g_small.unsqueeze(0)*g_small.unsqueeze(1)
-    
-    if centering:
-        lh -= lh.mean()
-        hl -= hl.mean()
-        hh -= hh.mean()
-    
-    return [ll, lh, hl, hh]
 
 
 if __name__ == '__main__':

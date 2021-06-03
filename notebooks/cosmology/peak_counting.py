@@ -186,7 +186,11 @@ class PeakCount():
             
             
 def rmse(y_params, y_preds, target=1):
-    return np.linalg.norm(y_params[:,target] - y_preds[:,target])**2/y_params.shape[0]
+    if target is not None:
+        e = np.sqrt(np.linalg.norm(y_params[:,target] - y_preds[:,target])**2/y_params.shape[0])
+    else:
+        e = np.sqrt(np.linalg.norm(y_params - y_preds)**2/y_params.shape[0])
+    return e
        
     
     
