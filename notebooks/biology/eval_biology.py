@@ -104,7 +104,8 @@ def load_results(dirs, wave='db5'):
         C = len(lamL1attr_grid)
 
         # collect results
-        dic = {'psi':{},
+        dic = {'phi':{},
+               'psi':{},
                'wt': {},
                'x': {},
                'lamL1wave': {},
@@ -118,9 +119,10 @@ def load_results(dirs, wave='db5'):
                     loc = np.argwhere(loc).flatten()[0]
                     dic['index'][(r,c)] = loc
                     wt = mos[loc]
-                    _, psi, x = get_wavefun(wt)
+                    phi, psi, x = get_wavefun(wt)
 
                     dic['wt'][(r,c)] = wt
+                    dic['phi'][(r,c)] = phi
                     dic['psi'][(r,c)] = psi  
                     dic['x'][(r,c)] = x
                     dic['lamL1wave'][(r,c)] = lamL1wave_grid[r]
