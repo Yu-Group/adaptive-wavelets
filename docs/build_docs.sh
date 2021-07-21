@@ -1,6 +1,6 @@
 cd ..
-pdoc --html adaptive_wavelets --output-dir docs
-cp -r docs/adaptive_wavelets/* docs/
-rm -rf docs/adaptive_wavelets
+pdoc --html src --output-dir docs
+cp -r docs/src/* docs/
+rm -rf docs/src
 cd docs
 python3 style_docs.py

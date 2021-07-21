@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from utils import low_to_high
+from src.adaptive_wavelets.utils import low_to_high
 
 
 def get_loss_f(**kwargs_parse):

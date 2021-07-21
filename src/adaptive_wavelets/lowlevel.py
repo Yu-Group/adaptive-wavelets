@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 from torch.autograd import Function
-from utils import reflect
+from  src.adaptive_wavelets.utils import reflect
 import pywt
 
 
