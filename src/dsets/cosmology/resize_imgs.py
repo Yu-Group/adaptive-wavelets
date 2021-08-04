@@ -2,8 +2,8 @@ import numpy as np
 import os,sys
 opj = os.path.join
 from astropy.io import fits
-from torch.utils.data import Dataset, DataLoader
 data_path = './data'
+
 
 def downsample(parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10):
     '''

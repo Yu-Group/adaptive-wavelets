@@ -1,9 +1,7 @@
-import os, sys
 import numpy as np
 import torch
-import torch.nn as nn
-from torch.nn import functional as F
-from src.adaptive_wavelets.utils import low_to_high
+import torch.nn.functional as F
+from .utils import low_to_high
 
 
 def get_loss_f(**kwargs_parse):
@@ -110,7 +108,7 @@ class Loss():
         
         # L1 penalty on attributions
         self.L1attr_loss = 0
-        if self.lamL1attr > 0:
+        if self.lamL1attr > 0 and attributions is not None:
             self.L1attr_loss += _L1_attribution_loss(attributions)
 
         # total loss

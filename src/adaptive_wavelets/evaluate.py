@@ -1,14 +1,9 @@
-import numpy as np
 import torch
-import os, sys
-opj = os.path.join
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 from copy import deepcopy
-from src.adaptive_wavelets.wave_attributions import Attributer
-from src.adaptive_wavelets.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, _conv_loss, _L1_wave_loss, _L1_attribution_loss
+from .wave_attributions import Attributer
+from .losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, _conv_loss, _L1_wave_loss, _L1_attribution_loss
 
-sys.path.append('../../lib/trim')
-from trim import TrimModel
+from ..trim import TrimModel
 
     
 class Validator():

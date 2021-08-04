@@ -1,14 +1,8 @@
 import numpy as np
 import torch
-import os, sys
-opj = os.path.join
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 from copy import deepcopy
-from src.adaptive_wavelets.wave_attributions import Attributer
-
-sys.path.append('../../lib/trim')
-sys.path.append('../../../lib/trim')
-from trim import TrimModel
+from .wave_attributions import Attributer
+from ..trim import TrimModel
 
 
 class Trainer():

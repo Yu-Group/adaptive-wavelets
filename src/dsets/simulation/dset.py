@@ -5,10 +5,9 @@ import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
 import pickle as pkl
 import random
-sys.path.append('../../adaptive_wavelets')
-sys.path.append('../../models')
-from transform1d import DWT1d
-from models import Feedforward
+
+from src.adaptive_wavelets import DWT1d
+from src.models import Feedforward
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 

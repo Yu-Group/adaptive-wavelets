@@ -2,9 +2,8 @@ import os,sys
 opj = os.path.join
 import torch
 import torchvision
-import numpy as np
-sys.path.append('../../models')
-from src.models.models import CNN, FFN
+
+from src.models import CNN, FFN
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 

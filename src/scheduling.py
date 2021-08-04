@@ -1,4 +1,4 @@
-import os, sys
+import os
     
 def run_serial(ks, param_combinations, path):    
     '''run each parameter combination in serial

@@ -1,19 +1,8 @@
-import numpy as np
 import torch
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-import seaborn as sns
-import sys
 import matplotlib.pyplot as plt
-from skimage.transform import rescale
-sys.path.append('../..')
-from os.path import join as opj
 from matplotlib import gridspec
-cb = '#66ccff'
-cr = '#cc0000'
-cm = sns.diverging_palette(10, 240, n=1000, as_cmap=True)
+from skimage.transform import rescale
 
-    
     
 def cshow(im):
     plt.imshow(im, cmap='magma', vmax=0.15, vmin=-0.05)

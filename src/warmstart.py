@@ -1,13 +1,11 @@
 import numpy as np
 import torch
-import os,sys
+import os
 opj = os.path.join
 import pickle as pkl
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-sys.path.append('adaptive_wavelets')
-from transform1d import DWT1d
-from transform2d import DWT2d
+from .adaptive_wavelets import DWT1d, DWT2d
 
 
 def warm_start(p, out_dir):

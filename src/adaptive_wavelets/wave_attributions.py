@@ -1,7 +1,6 @@
 import numpy as np
 import torch
-from torch import nn
-from copy import deepcopy
+import torch.nn as nn
 
     
 class Attributer(nn.Module):

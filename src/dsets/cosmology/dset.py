@@ -1,7 +1,7 @@
 import os,sys
 opj = os.path.join
 import torch
-from torch import nn
+import torch.nn as nn
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import models
