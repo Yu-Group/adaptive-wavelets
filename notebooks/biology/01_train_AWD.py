@@ -1,9 +1,9 @@
 import numpy as np
 import os,sys
-sys.path.append('../../src')
+sys.path.append('../..')
 opj = os.path.join
 import itertools
-from scheduling import run_serial, run_parallel
+from src.scheduling import run_serial, run_parallel
 DIR_FILE = os.path.dirname(os.path.realpath(__file__)) # directory of the config file
 
 if __name__ == '__main__':

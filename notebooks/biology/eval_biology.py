@@ -1,13 +1,15 @@
 import numpy as np
 import torch
-import random
 from copy import deepcopy
 import pickle as pkl
 import pandas as pd
 import os,sys
 opj = os.path.join
-from transform1d import DWT1d
-from utils import get_1dfilts, get_wavefun
+
+sys.path.append('../../src/adaptive_wavelets')
+sys.path.append('../..')
+from src import adaptive_wavelets
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
@@ -85,7 +87,7 @@ def load_results(dirs, wave='db5'):
             if fname[-3:] == 'pkl':
                 results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
             if fname[-3:] == 'pth':
-                wt = DWT1d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                wt = adaptive_wavelets.DWT1d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
                 wt.load_state_dict(torch.load(opj(out_dir, fname)))
                 models_list.append(wt)
         results.append(pd.DataFrame(results_list))
@@ -119,7 +121,7 @@ def load_results(dirs, wave='db5'):
                     loc = np.argwhere(loc).flatten()[0]
                     dic['index'][(r,c)] = loc
                     wt = mos[loc]
-                    phi, psi, x = get_wavefun(wt)
+                    phi, psi, x = adaptive_wavelets.get_wavefun(wt)
 
                     dic['wt'][(r,c)] = wt
                     dic['phi'][(r,c)] = phi

@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import pywt
-from . import lowlevel
-from .utils import init_filter, low_to_high
+from src.adaptive_wavelets import lowlevel
+from src.adaptive_wavelets.utils import init_filter, low_to_high
 
 
 def load_wavelet(wave: str, device=None):
