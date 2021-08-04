@@ -13,7 +13,7 @@ from peak_counting import rmse
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
-def load_results(dirs, wave='db5'):
+def load_results(dirs, wave='db5', include_interp_loss=True):
     """load results for analysis
     """
     results = []
@@ -26,12 +26,21 @@ def load_results(dirs, wave='db5'):
         results_list = []
         models_list = []
         for fname in fnames:
-            if fname[-3:] == 'pkl':
-                results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
-            if fname[-3:] == 'pth':
-                wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
-                wt.load_state_dict(torch.load(opj(out_dir, fname)))
-                models_list.append(wt)
+            if include_interp_loss:
+                if fname[-3:] == 'pkl':
+                    results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
+                if fname[-3:] == 'pth':
+                    wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                    wt.load_state_dict(torch.load(opj(out_dir, fname)))
+                    models_list.append(wt)
+            else:
+                if "lamL1attr=0.0_" in fname:
+                    if fname[-3:] == 'pkl':
+                        results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
+                    if fname[-3:] == 'pth':
+                        wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                        wt.load_state_dict(torch.load(opj(out_dir, fname)))
+                        models_list.append(wt)                
         results.append(pd.DataFrame(results_list))
         models.append(models_list)
 
@@ -57,19 +66,18 @@ def load_results(dirs, wave='db5'):
 
         for r in range(R):
             for c in range(C):
-                if lamL1attr_grid[c] <= 0.1 and lamL1wave_grid[r] <= 0.05:
-                    loc = (lamL1wave == lamL1wave_grid[r]) & (lamL1attr == lamL1attr_grid[c])
-                    if loc.sum() == 1: 
-                        loc = np.argwhere(loc).flatten()[0]
-                        dic['index'][(r,c)] = loc
-                        wt = mos[loc]
-                        _, psi, x = adaptive_wavelets.get_wavefun(wt)
+                loc = (lamL1wave == lamL1wave_grid[r]) & (lamL1attr == lamL1attr_grid[c])
+                if loc.sum() == 1: 
+                    loc = np.argwhere(loc).flatten()[0]
+                    dic['index'][(r,c)] = loc
+                    wt = mos[loc]
+                    _, psi, x = adaptive_wavelets.get_wavefun(wt)
 
-                        dic['wt'][(r,c)] = wt
-                        dic['psi'][(r,c)] = psi  
-                        dic['x'][(r,c)] = x
-                        dic['lamL1wave'][(r,c)] = lamL1wave_grid[r]
-                        dic['lamL1attr'][(r,c)] = lamL1attr_grid[c]
+                    dic['wt'][(r,c)] = wt
+                    dic['psi'][(r,c)] = psi  
+                    dic['x'][(r,c)] = x
+                    dic['lamL1wave'][(r,c)] = lamL1wave_grid[r]
+                    dic['lamL1attr'][(r,c)] = lamL1attr_grid[c]
         dics.append(dic)    
         
     return dics, results, models

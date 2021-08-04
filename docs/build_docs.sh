@@ -1,6 +1,6 @@
 cd ..
-pdoc --html src --output-dir docs
-cp -r docs/src/* docs/
-rm -rf docs/src
+pdoc --html awd --output-dir docs
+cp -r docs/awd/* docs/
+rm -rf docs/awd
 cd docs
 python3 style_docs.py

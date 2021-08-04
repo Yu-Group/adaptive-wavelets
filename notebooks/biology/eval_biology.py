@@ -71,7 +71,7 @@ def max_transformer(w_transform,
     return (X, y), (X_test, y_test)  
 
 
-def load_results(dirs, wave='db5'):
+def load_results(dirs, wave='db5', include_interp_loss=True):
     """load results for analysis
     """
     results = []
@@ -84,12 +84,22 @@ def load_results(dirs, wave='db5'):
         results_list = []
         models_list = []
         for fname in fnames:
-            if fname[-3:] == 'pkl':
-                results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
-            if fname[-3:] == 'pth':
-                wt = adaptive_wavelets.DWT1d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
-                wt.load_state_dict(torch.load(opj(out_dir, fname)))
-                models_list.append(wt)
+            if include_interp_loss:
+                if fname[-3:] == 'pkl':
+                    results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
+                if fname[-3:] == 'pth':
+                    wt = adaptive_wavelets.DWT1d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                    wt.load_state_dict(torch.load(opj(out_dir, fname)))
+                    models_list.append(wt)
+            else:
+                if "lamL1attr=0.0_" in fname:
+                    if fname[-3:] == 'pkl':
+                        results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
+                    if fname[-3:] == 'pth':
+                        wt = adaptive_wavelets.DWT1d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                        wt.load_state_dict(torch.load(opj(out_dir, fname)))
+                        models_list.append(wt)                
+                
         results.append(pd.DataFrame(results_list))
         models.append(models_list)
 

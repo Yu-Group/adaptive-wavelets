@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>awd.trim.transforms_torch API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>awd.trim.transforms_torch</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from awd.trim import transforms_np
+import torch
+import numpy as np
+from numpy.fft import *
+from copy import deepcopy
+
+
+def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
+    &#39;&#39;&#39;Bandpass filter the image (assumes the image is square)
+
+    Returns
+    -------
+    im_bandpass: torch.Tensor
+        B, C, H, W
+    &#39;&#39;&#39;
+    freq_arr = fftshift(fftfreq(n=im.shape[-1]))
+    freq_arr /= np.max(np.abs(freq_arr))
+
+    im_c = torch.stack((im, torch.zeros_like(im)),dim=4) 
+    im_f = batch_fftshift2d(torch.fft(im_c, 2))
+    mask_bandpass = torch.zeros(im_f.shape)
+
+    for r in range(im_f.shape[2]):
+        for c in range(im_f.shape[3]):
+            dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
+            if dist &gt;= band_center - band_width_lower and dist &lt; band_center + band_width_upper:
+                mask_bandpass[:, :, r, c, :] = 1
+    if im.is_cuda:
+        mask_bandpass = mask_bandpass.to(&#34;cuda&#34;)
+    im_f_masked = torch.mul(im_f, mask_bandpass)
+    im_bandpass = torch.ifft(batch_ifftshift2d(im_f_masked), 2)[...,0]
+
+    return im_bandpass
+
+
+def transform_bandpass(im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
+    return im - bandpass_filter(im, band_center, band_width_lower, band_width_upper)
+
+
+def tensor_t_augment(im: torch.Tensor, t):
+    &#39;&#39;&#39;
+    Returns
+    -------
+    im: torch.Tensor
+        2*B, C, H, W
+    &#39;&#39;&#39; 
+    im_copy = deepcopy(im)
+    im_p = t(im)
+    return torch.cat((im_copy,im_p), dim=0)  
+
+
+def wavelet_filter(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
+    &#39;&#39;&#39;Filter center of highpass wavelet coeffs  
+
+    Params
+    ------
+    im  : torch.Tensor 
+    idx : detail coefficients (&#39;LH&#39;:0, &#39;HL&#39;:1, &#39;HH&#39;:2)
+    p   : prop to perturb coeffs
+    &#39;&#39;&#39;
+    im_t = t(im)
+    # mask = torch.bernoulli((1-p) * torch.ones(im.shape[0], 5, 5))
+    # im_t[1][0][:,0,idx,6:11,6:11] = im_t[1][0][:,0,idx,6:11,6:11] * mask
+    im_t[1][0][:,0,idx,6:11,6:11] = 0
+    return transform_i(im_t)
+
+
+
+&#39;&#39;&#39;This code from https://github.com/tomrunia/PyTorchSteerablePyramid
+&#39;&#39;&#39;
+def roll_n(X, axis, n):
+    f_idx = tuple(slice(None, None, None) if i != axis else slice(0, n, None) for i in range(X.dim()))
+    b_idx = tuple(slice(None, None, None) if i != axis else slice(n, None, None) for i in range(X.dim()))
+    front = X[f_idx]
+    back = X[b_idx]
+    return torch.cat([back, front], axis)
+
+
+def batch_fftshift2d(x):
+    real, imag = torch.unbind(x, -1)
+    for dim in range(1, len(real.size())):
+        n_shift = real.size(dim)//2
+        if real.size(dim) % 2 != 0:
+            n_shift += 1  # for odd-sized images
+        real = roll_n(real, axis=dim, n=n_shift)
+        imag = roll_n(imag, axis=dim, n=n_shift)
+    return torch.stack((real, imag), -1)  # last dim=2 (real&amp;imag)
+
+def batch_ifftshift2d(x):
+    real, imag = torch.unbind(x, -1)
+    for dim in range(len(real.size()) - 1, 0, -1):
+        real = roll_n(real, axis=dim, n=real.size(dim)//2)
+        imag = roll_n(imag, axis=dim, n=imag.size(dim)//2)
+    return torch.stack((real, imag), -1)  # last dim=2 (real&amp;imag)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="awd.trim.transforms_torch.bandpass_filter"><code class="name flex">
+<span>def <span class="ident">bandpass_filter</span></span>(<span>im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Bandpass filter the image (assumes the image is square)</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>im_bandpass</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>B, C, H, W</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bandpass_filter(im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
+    &#39;&#39;&#39;Bandpass filter the image (assumes the image is square)
+
+    Returns
+    -------
+    im_bandpass: torch.Tensor
+        B, C, H, W
+    &#39;&#39;&#39;
+    freq_arr = fftshift(fftfreq(n=im.shape[-1]))
+    freq_arr /= np.max(np.abs(freq_arr))
+
+    im_c = torch.stack((im, torch.zeros_like(im)),dim=4) 
+    im_f = batch_fftshift2d(torch.fft(im_c, 2))
+    mask_bandpass = torch.zeros(im_f.shape)
+
+    for r in range(im_f.shape[2]):
+        for c in range(im_f.shape[3]):
+            dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
+            if dist &gt;= band_center - band_width_lower and dist &lt; band_center + band_width_upper:
+                mask_bandpass[:, :, r, c, :] = 1
+    if im.is_cuda:
+        mask_bandpass = mask_bandpass.to(&#34;cuda&#34;)
+    im_f_masked = torch.mul(im_f, mask_bandpass)
+    im_bandpass = torch.ifft(batch_ifftshift2d(im_f_masked), 2)[...,0]
+
+    return im_bandpass</code></pre>
+</details>
+</dd>
+<dt id="awd.trim.transforms_torch.batch_fftshift2d"><code class="name flex">
+<span>def <span class="ident">batch_fftshift2d</span></span>(<span>x)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def batch_fftshift2d(x):
+    real, imag = torch.unbind(x, -1)
+    for dim in range(1, len(real.size())):
+        n_shift = real.size(dim)//2
+        if real.size(dim) % 2 != 0:
+            n_shift += 1  # for odd-sized images
+        real = roll_n(real, axis=dim, n=n_shift)
+        imag = roll_n(imag, axis=dim, n=n_shift)
+    return torch.stack((real, imag), -1)  # last dim=2 (real&amp;imag)</code></pre>
+</details>
+</dd>
+<dt id="awd.trim.transforms_torch.batch_ifftshift2d"><code class="name flex">
+<span>def <span class="ident">batch_ifftshift2d</span></span>(<span>x)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def batch_ifftshift2d(x):
+    real, imag = torch.unbind(x, -1)
+    for dim in range(len(real.size()) - 1, 0, -1):
+        real = roll_n(real, axis=dim, n=real.size(dim)//2)
+        imag = roll_n(imag, axis=dim, n=imag.size(dim)//2)
+    return torch.stack((real, imag), -1)  # last dim=2 (real&amp;imag)</code></pre>
+</details>
+</dd>
+<dt id="awd.trim.transforms_torch.roll_n"><code class="name flex">
+<span>def <span class="ident">roll_n</span></span>(<span>X, axis, n)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def roll_n(X, axis, n):
+    f_idx = tuple(slice(None, None, None) if i != axis else slice(0, n, None) for i in range(X.dim()))
+    b_idx = tuple(slice(None, None, None) if i != axis else slice(n, None, None) for i in range(X.dim()))
+    front = X[f_idx]
+    back = X[b_idx]
+    return torch.cat([back, front], axis)</code></pre>
+</details>
+</dd>
+<dt id="awd.trim.transforms_torch.tensor_t_augment"><code class="name flex">
+<span>def <span class="ident">tensor_t_augment</span></span>(<span>im: torch.Tensor, t)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>im</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>2*B, C, H, W</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tensor_t_augment(im: torch.Tensor, t):
+    &#39;&#39;&#39;
+    Returns
+    -------
+    im: torch.Tensor
+        2*B, C, H, W
+    &#39;&#39;&#39; 
+    im_copy = deepcopy(im)
+    im_p = t(im)
+    return torch.cat((im_copy,im_p), dim=0)  </code></pre>
+</details>
+</dd>
+<dt id="awd.trim.transforms_torch.transform_bandpass"><code class="name flex">
+<span>def <span class="ident">transform_bandpass</span></span>(<span>im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def transform_bandpass(im: torch.Tensor, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
+    return im - bandpass_filter(im, band_center, band_width_lower, band_width_upper)</code></pre>
+</details>
+</dd>
+<dt id="awd.trim.transforms_torch.wavelet_filter"><code class="name flex">
+<span>def <span class="ident">wavelet_filter</span></span>(<span>im: torch.Tensor, t, transform_i, idx=2, p=0.5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Filter center of highpass wavelet coeffs
+</p>
+<h2 id="params">Params</h2>
+<p>im
+: torch.Tensor
+idx : detail coefficients ('LH':0, 'HL':1, 'HH':2)
+p
+: prop to perturb coeffs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wavelet_filter(im: torch.Tensor, t, transform_i, idx=2, p=0.5):
+    &#39;&#39;&#39;Filter center of highpass wavelet coeffs  
+
+    Params
+    ------
+    im  : torch.Tensor 
+    idx : detail coefficients (&#39;LH&#39;:0, &#39;HL&#39;:1, &#39;HH&#39;:2)
+    p   : prop to perturb coeffs
+    &#39;&#39;&#39;
+    im_t = t(im)
+    # mask = torch.bernoulli((1-p) * torch.ones(im.shape[0], 5, 5))
+    # im_t[1][0][:,0,idx,6:11,6:11] = im_t[1][0][:,0,idx,6:11,6:11] * mask
+    im_t[1][0][:,0,idx,6:11,6:11] = 0
+    return transform_i(im_t)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="awd.trim" href="index.html">awd.trim</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="awd.trim.transforms_torch.bandpass_filter" href="#awd.trim.transforms_torch.bandpass_filter">bandpass_filter</a></code></li>
+<li><code><a title="awd.trim.transforms_torch.batch_fftshift2d" href="#awd.trim.transforms_torch.batch_fftshift2d">batch_fftshift2d</a></code></li>
+<li><code><a title="awd.trim.transforms_torch.batch_ifftshift2d" href="#awd.trim.transforms_torch.batch_ifftshift2d">batch_ifftshift2d</a></code></li>
+<li><code><a title="awd.trim.transforms_torch.roll_n" href="#awd.trim.transforms_torch.roll_n">roll_n</a></code></li>
+<li><code><a title="awd.trim.transforms_torch.tensor_t_augment" href="#awd.trim.transforms_torch.tensor_t_augment">tensor_t_augment</a></code></li>
+<li><code><a title="awd.trim.transforms_torch.transform_bandpass" href="#awd.trim.transforms_torch.transform_bandpass">transform_bandpass</a></code></li>
+<li><code><a title="awd.trim.transforms_torch.wavelet_filter" href="#awd.trim.transforms_torch.wavelet_filter">wavelet_filter</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
