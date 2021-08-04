@@ -3,24 +3,15 @@ import torch
 import random
 import os,sys
 opj = os.path.join
-from copy import deepcopy
 import pickle as pkl
 import argparse
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
-sys.path.append('../../src/adaptive_wavelets')
-from losses import get_loss_f
-from train import Trainer
-from evaluate import Validator
-from transform2d import DWT2d
-from wave_attributions import Attributer
-
-sys.path.append('../../src/dsets/cosmology')
-from dset import get_dataloader, load_pretrained_model
-
-sys.path.append('../../src')
-from warmstart import warm_start
+sys.path.append('../..')
+from src import adaptive_wavelets
+from src.mdata.cosmology import get_dataloader, load_pretrained_model
+from src.warmstart import warm_start
 
 
 parser = argparse.ArgumentParser(description='Cosmology Example')
@@ -51,8 +42,8 @@ class p:
     '''Parameters for cosmology data
     '''
     # data & model path
-    data_path = "../../src/dsets/cosmology/data"
-    model_path = "../../src/dsets/cosmology/data"
+    data_path = "../../data/cosmology"
+    model_path = "../../data/cosmology"
     wt_type = 'DWT2d'
     
     # parameters for generating data
@@ -130,10 +121,10 @@ if __name__ == '__main__':
     torch.manual_seed(p.seed) 
     
     if p.warm_start is None:
-        wt = DWT2d(wave=p.wave, mode=p.mode, J=p.J, 
-                   init_factor=p.init_factor, 
-                   noise_factor=p.noise_factor,
-                   const_factor=p.const_factor).to(device)
+        wt = adaptive_wavelets.DWT2d(wave=p.wave, mode=p.mode, J=p.J, 
+                                     init_factor=p.init_factor, 
+                                     noise_factor=p.noise_factor,
+                                     const_factor=p.const_factor).to(device)
         wt.train()
     else:
         wt = warm_start(p, out_dir).to(device)     
@@ -148,16 +139,17 @@ if __name__ == '__main__':
     # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
-    loss_f = get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
-    trainer = Trainer(model, wt, optimizer, loss_f, target=p.target, 
-                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)      
+    loss_f = adaptive_wavelets.get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, 
+                                          lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
+    trainer = adaptive_wavelets.Trainer(model, wt, optimizer, loss_f, target=p.target, 
+                                        use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)      
     
     # run
     trainer(train_loader, epochs=p.num_epochs)          
 
     # calculate losses
     print('calculating losses and metric...')   
-    validator = Validator(model, test_loader)
+    validator = adaptive_wavelets.Validator(model, test_loader)
     rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
     s.train_losses = trainer.train_losses
     s.rec_loss = rec_loss
