@@ -8,10 +8,9 @@ import argparse
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
-sys.path.append('../..')
-from src import adaptive_wavelets
-from src.mdata.cosmology import get_dataloader, load_pretrained_model
-from src.warmstart import warm_start
+from awd import adaptive_wavelets
+from awd.mdata.cosmology import get_dataloader, load_pretrained_model
+from awd.warmstart import warm_start
 
 
 parser = argparse.ArgumentParser(description='Cosmology Example')

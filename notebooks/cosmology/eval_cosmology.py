@@ -2,12 +2,10 @@ import numpy as np
 import torch
 import pickle as pkl
 import pandas as pd
-import os,sys
+import os, sys
 opj = os.path.join
 
-sys.path.append('../../src/adaptive_wavelets')
-sys.path.append('../..')
-from src import adaptive_wavelets
+from awd import adaptive_wavelets
 
 from peak_counting import rmse
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

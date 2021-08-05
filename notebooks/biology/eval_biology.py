@@ -6,9 +6,7 @@ import pandas as pd
 import os,sys
 opj = os.path.join
 
-sys.path.append('../../src/adaptive_wavelets')
-sys.path.append('../..')
-from src import adaptive_wavelets
+from awd import adaptive_wavelets
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

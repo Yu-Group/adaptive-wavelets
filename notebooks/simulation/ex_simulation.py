@@ -9,19 +9,16 @@ import argparse
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
-sys.path.append('../../src/adaptive_wavelets')
-from losses import get_loss_f
+
+from awd.losses import get_loss_f
 from train import Trainer
 from evaluate import Validator
 from transform1d import DWT1d
 from wave_attributions import Attributer
 
-sys.path.append('../../src/models')
-sys.path.append('../../src/dsets/simulation')
-from dset import get_dataloader, load_pretrained_model
+from awd.simulation.dset import get_dataloader, load_pretrained_model
 
-sys.path.append('../../src')
-from warmstart import warm_start
+from awd.warmstart import warm_start
 
 
 parser = argparse.ArgumentParser(description='Simulation Example')
