@@ -1,4 +1,4 @@
-<h1 align="center"> Adaptive wavelet distillation 🌊</h1>
+<h1 align="center">   <img src="https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif" width="15%"> Adaptive wavelet distillation <img src="https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif" width="15%"></h1>
 <p align="center"> Wavelets which adapt given data (and optionally a pre-trained model).
 </p>
 <p align="center">
@@ -7,9 +7,6 @@
   <img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
   <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
 </p>  
-
-
-![](docs/anim.gif)
 
 <p align="center"> <i> Adaptive wavelets yield models which are faster, more compressible, and more interpretable. </i></p>
 
