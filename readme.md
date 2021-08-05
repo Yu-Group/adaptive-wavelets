@@ -17,6 +17,31 @@ Official code for using / reproducing AWD from the paper "Adaptive wavelet disti
 
 > Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.
 
+# Quickstart
+
+- Install by cloning the repo and then from the repo directory running `python setup.py install`
+
+Then, can use the core functions (see simplest example in `notebooks/demo_simple.ipynb`)
+
+Given some data, `X` can run the following:
+
+```python
+from awd.awd.utils import get_wavefun
+from awd.awd.transform2d import DWT2d
+wt = DWT2d(wave='db5', J=4)
+wt.fit(X=X, lr=1e-1, num_epochs=10) # this function alternatively accepts a dataloader
+X_sparse = wt(X) # uses the learned adaptive wavelet
+phi, psi, x = get_wavefun(wt) # can also inspect the learned adaptive wavelet
+```
+
+To distill a pretrained model named `model`, simply pass it as an additional argument to the fit function:
+
+```python
+wt.fit(X=X, pretrained_model=model,
+       lr=1e-1, num_epochs=10,
+       lamL1attr=5) # control how much to regularize the model's attributions
+```
+
 
 # Related work
 
