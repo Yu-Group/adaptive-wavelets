@@ -1,13 +1,14 @@
+import os
+
 import numpy as np
-import os,sys
 
 opj = os.path.join
 import itertools
-from awd.scheduling import run_serial, run_parallel
-DIR_FILE = os.path.dirname(os.path.realpath(__file__)) # directory of the config file
+from awd.scheduling imports run_serial
+
+DIR_FILE = os.path.dirname(os.path.realpath(__file__))  # directory of the config file
 
 if __name__ == '__main__':
-    
     params_to_vary = {
         'seed': [1],
         'wave': ['db5'],
@@ -27,8 +28,7 @@ if __name__ == '__main__':
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
-    param_combinations = list(itertools.product(*vals)) # list of tuples    
-    
+    param_combinations = list(itertools.product(*vals))  # list of tuples
+
     # iterate
     run_serial(ks, param_combinations, path=opj(DIR_FILE, "ex_cosmology.py"))
-    

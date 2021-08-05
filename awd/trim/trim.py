@@ -1,21 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import torch
-import random
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-from scipy.ndimage import gaussian_filter
 import sys
-from tqdm import tqdm
-from functools import partial
-from copy import deepcopy
+
 sys.path.append('..')
-from .transforms_torch import bandpass_filter
 from .util import *
-from numpy.fft import *
 from torch import nn
-import pickle as pkl
-from torchvision import datasets, transforms
-from sklearn.decomposition import NMF
 
 
 class TrimModel(nn.Module):
@@ -39,7 +29,8 @@ class TrimModel(nn.Module):
         right now this setup is kind of weird - if you want to pass a residual
         pass x as a 1d vector whose last entries contain the residual [x, residual]
     '''
-    def __init__(self, model, inv_transform, norm=None, reshape=None, 
+
+    def __init__(self, model, inv_transform, norm=None, reshape=None,
                  use_residuals=False, use_logits=False):
         super(TrimModel, self).__init__()
         self.inv_transform = inv_transform
@@ -60,28 +51,29 @@ class TrimModel(nn.Module):
         '''
         # untransform the input
         x = self.inv_transform(s)
-        
+
         # take residuals into account
         if self.use_residuals:
             assert x_orig is not None, "if using residuals, must also pass untransformed original image!"
             res = x_orig - x.detach()
             x = x + res
-        
+
         # normalize
         if self.norm is not None:
             x = self.norm(x)
-            
+
         # reshape
         if self.reshape is not None:
             x = self.reshape(x)
-            
+
         # pass through the main model
         if self.use_logits:
             x = self.model.logits(x)
         else:
             x = self.model.forward(x)
         return x
-    
+
+
 def lay_from_w(D: np.ndarray):
     '''Creates a linear layer given a weight matrix
     Params
@@ -93,10 +85,12 @@ def lay_from_w(D: np.ndarray):
     lay.weight.data = torch.tensor(D.astype(np.float32)).T
     return lay
 
+
 class NormLayer(nn.Module):
     '''Normalizes images (assumes only 1 channel)
     image = (image - mean) / std
     '''
+
     def __init__(self, mu=0.1307, std=0.3081):
         super(NormLayer, self).__init__()
         self.mean = mu
@@ -105,17 +99,22 @@ class NormLayer(nn.Module):
     def forward(self, x):
         return (x - self.mean) / self.std
 
+
 def modularize(f):
     '''Turns any function into a torch module
     '''
+
     class Transform(nn.Module):
         def __init__(self, f):
             super(Transform, self).__init__()
             self.f = f
+
         def forward(self, x):
             return self.f(x)
-    return Transform(f)    
-    
+
+    return Transform(f)
+
+
 class ReshapeLayer(nn.Module):
     '''Returns a torch module which reshapes an input to a desired shape
     Params
@@ -123,17 +122,19 @@ class ReshapeLayer(nn.Module):
     shape: tuple
         shape excluding batch size
     '''
+
     def __init__(self, shape):
         super(ReshapeLayer, self).__init__()
         self.shape = shape
 
     def forward(self, x):
         return x.reshape(x.shape[0], *self.shape)
-    
-    
+
+
 class DecoderEncoder(nn.Module):
     '''Prepends decoder onto encoder
     '''
+
     def __init__(self, model, use_residuals=False):
         super(DecoderEncoder, self).__init__()
         self.encoder = model.encoder
@@ -150,12 +151,10 @@ class DecoderEncoder(nn.Module):
             (batch_size, C, seq_length) for audio
         '''
         x = self.decoder(s)
-        
+
         if self.use_residuals:
             assert x_orig is not None, "if using residuals, must also pass untransformed original image!"
             res = (x_orig - x).detach()
-            x = x + res            
+            x = x + res
         x = self.encoder(x)[0]
         return x
-    
-    

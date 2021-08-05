@@ -1,6 +1,7 @@
+import pywt
 import torch
 import torch.nn as nn
-import pywt
+
 from awd.adaptive_wavelets import lowlevel
 from awd.adaptive_wavelets.utils import init_filter, low_to_high
 
@@ -19,7 +20,7 @@ def load_wavelet(wave: str, device=None):
         raise ValueError('currently only orthogonal wavelets are supported')
     return (h0, h1)
 
-    
+
 class DWT1d(nn.Module):
     '''Class of 1d wavelet transform 
     Params
@@ -35,18 +36,19 @@ class DWT1d(nn.Module):
     mode: str
         'zero', 'symmetric', 'reflect' or 'periodization'. The padding scheme
     '''
+
     def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0):
-        super().__init__() 
+        super().__init__()
         h0, _ = load_wavelet(wave)
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
         # parameterize
         self.h0 = nn.Parameter(h0, requires_grad=True)
-        
+
         self.J = J
         self.mode = mode
-        self.wt_type = 'DWT1d'  
-        
+        self.wt_type = 'DWT1d'
+
     def forward(self, x):
         """ Forward pass of the DWT.
 
@@ -63,7 +65,7 @@ class DWT1d(nn.Module):
         highs = ()
         x0 = x
         mode = lowlevel.mode_to_int(self.mode)
-        
+
         h1 = low_to_high(self.h0)
         # Do a multilevel transform
         for j in range(self.J):
@@ -71,7 +73,7 @@ class DWT1d(nn.Module):
             highs += (x1,)
 
         return (x0,) + highs
-    
+
     def inverse(self, coeffs):
         """
         Args:
@@ -90,7 +92,7 @@ class DWT1d(nn.Module):
         highs = coeffs
         assert x0.ndim == 3, "Can only handle 3d inputs (N, C, L)"
         mode = lowlevel.mode_to_int(self.mode)
-        
+
         h1 = low_to_high(self.h0)
         # Do a multilevel inverse transform
         for x1 in highs[::-1]:
@@ -101,5 +103,4 @@ class DWT1d(nn.Module):
             if x0.shape[-1] > x1.shape[-1]:
                 x0 = x0[..., :-1]
             x0 = lowlevel.SFB1D.forward(x0, x1, self.h0, h1, mode)
-        return x0                  
-   
+        return x0

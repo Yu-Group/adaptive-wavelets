@@ -3,17 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>awd.adaptive_wavelets.lowlevel API documentation</title>
 <meta name="description" content="" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
 </head>
 <body>
 <main>
@@ -26,12 +24,13 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import torch
-import torch.nn.functional as F
-import numpy as np
-from torch.autograd import Function
-from awd.adaptive_wavelets.utils import reflect
+<pre><code class="python">import numpy as np
 import pywt
+import torch
+import torch.nn.functional as F
+from torch.autograd import Function
+
+from awd.adaptive_wavelets.utils import reflect
 
 
 def roll(x, n, dim, make_even=False):
@@ -44,13 +43,13 @@ def roll(x, n, dim, make_even=False):
         end = 0
 
     if dim == 0:
-        return torch.cat((x[-n:], x[:-n+end]), dim=0)
+        return torch.cat((x[-n:], x[:-n + end]), dim=0)
     elif dim == 1:
-        return torch.cat((x[:,-n:], x[:,:-n+end]), dim=1)
+        return torch.cat((x[:, -n:], x[:, :-n + end]), dim=1)
     elif dim == 2 or dim == -2:
-        return torch.cat((x[:,:,-n:], x[:,:,:-n+end]), dim=2)
+        return torch.cat((x[:, :, -n:], x[:, :, :-n + end]), dim=2)
     elif dim == 3 or dim == -1:
-        return torch.cat((x[:,:,:,-n:], x[:,:,:,:-n+end]), dim=3)
+        return torch.cat((x[:, :, :, -n:], x[:, :, :, :-n + end]), dim=3)
 
 
 def mypad(x, pad, mode=&#39;constant&#39;, value=0):
@@ -68,36 +67,36 @@ def mypad(x, pad, mode=&#39;constant&#39;, value=0):
         if pad[0] == 0 and pad[1] == 0:
             m1, m2 = pad[2], pad[3]
             l = x.shape[-2]
-            xe = reflect(np.arange(-m1, l+m2, dtype=&#39;int32&#39;), -0.5, l-0.5)
-            return x[:,:,xe]
+            xe = reflect(np.arange(-m1, l + m2, dtype=&#39;int32&#39;), -0.5, l - 0.5)
+            return x[:, :, xe]
         # horizontal only
         elif pad[2] == 0 and pad[3] == 0:
             m1, m2 = pad[0], pad[1]
             l = x.shape[-1]
-            xe = reflect(np.arange(-m1, l+m2, dtype=&#39;int32&#39;), -0.5, l-0.5)
-            return x[:,:,:,xe]
+            xe = reflect(np.arange(-m1, l + m2, dtype=&#39;int32&#39;), -0.5, l - 0.5)
+            return x[:, :, :, xe]
         # Both
         else:
             m1, m2 = pad[0], pad[1]
             l1 = x.shape[-1]
-            xe_row = reflect(np.arange(-m1, l1+m2, dtype=&#39;int32&#39;), -0.5, l1-0.5)
+            xe_row = reflect(np.arange(-m1, l1 + m2, dtype=&#39;int32&#39;), -0.5, l1 - 0.5)
             m1, m2 = pad[2], pad[3]
             l2 = x.shape[-2]
-            xe_col = reflect(np.arange(-m1, l2+m2, dtype=&#39;int32&#39;), -0.5, l2-0.5)
+            xe_col = reflect(np.arange(-m1, l2 + m2, dtype=&#39;int32&#39;), -0.5, l2 - 0.5)
             i = np.outer(xe_col, np.ones(xe_row.shape[0]))
             j = np.outer(np.ones(xe_col.shape[0]), xe_row)
-            return x[:,:,i,j]
+            return x[:, :, i, j]
     elif mode == &#39;periodic&#39;:
         # Vertical only
         if pad[0] == 0 and pad[1] == 0:
             xe = np.arange(x.shape[-2])
             xe = np.pad(xe, (pad[2], pad[3]), mode=&#39;wrap&#39;)
-            return x[:,:,xe]
+            return x[:, :, xe]
         # Horizontal only
         elif pad[2] == 0 and pad[3] == 0:
             xe = np.arange(x.shape[-1])
             xe = np.pad(xe, (pad[0], pad[1]), mode=&#39;wrap&#39;)
-            return x[:,:,:,xe]
+            return x[:, :, :, xe]
         # Both
         else:
             xe_col = np.arange(x.shape[-2])
@@ -106,7 +105,7 @@ def mypad(x, pad, mode=&#39;constant&#39;, value=0):
             xe_row = np.pad(xe_row, (pad[0], pad[1]), mode=&#39;wrap&#39;)
             i = np.outer(xe_col, np.ones(xe_row.shape[0]))
             j = np.outer(np.ones(xe_col.shape[0]), xe_row)
-            return x[:,:,i,j]
+            return x[:, :, i, j]
 
     elif mode == &#39;constant&#39; or mode == &#39;reflect&#39; or mode == &#39;replicate&#39;:
         return F.pad(x, pad, mode, value)
@@ -150,7 +149,7 @@ def afb1d(x, h0, h1, mode=&#39;zero&#39;, dim=-1):
                           dtype=torch.float, device=x.device)
     L = h0.numel()
     L2 = L // 2
-    shape = [1,1,1,1]
+    shape = [1, 1, 1, 1]
     shape[d] = L
     # If h aren&#39;t in the right shape, make them so
     if h0.shape != tuple(shape):
@@ -162,20 +161,20 @@ def afb1d(x, h0, h1, mode=&#39;zero&#39;, dim=-1):
     if mode == &#39;per&#39; or mode == &#39;periodization&#39;:
         if x.shape[dim] % 2 == 1:
             if d == 2:
-                x = torch.cat((x, x[:,:,-1:]), dim=2)
+                x = torch.cat((x, x[:, :, -1:]), dim=2)
             else:
-                x = torch.cat((x, x[:,:,:,-1:]), dim=3)
+                x = torch.cat((x, x[:, :, :, -1:]), dim=3)
             N += 1
         x = roll(x, -L2, dim=d)
-        pad = (L-1, 0) if d == 2 else (0, L-1)
+        pad = (L - 1, 0) if d == 2 else (0, L - 1)
         lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
-        N2 = N//2
+        N2 = N // 2
         if d == 2:
-            lohi[:,:,:L2] = lohi[:,:,:L2] + lohi[:,:,N2:N2+L2]
-            lohi = lohi[:,:,:N2]
+            lohi[:, :, :L2] = lohi[:, :, :L2] + lohi[:, :, N2:N2 + L2]
+            lohi = lohi[:, :, :N2]
         else:
-            lohi[:,:,:,:L2] = lohi[:,:,:,:L2] + lohi[:,:,:,N2:N2+L2]
-            lohi = lohi[:,:,:,:N2]
+            lohi[:, :, :, :L2] = lohi[:, :, :, :L2] + lohi[:, :, :, N2:N2 + L2]
+            lohi = lohi[:, :, :, :N2]
     else:
         # Calculate the pad size
         outsize = pywt.dwt_coeff_len(N, L, mode=mode)
@@ -187,11 +186,11 @@ def afb1d(x, h0, h1, mode=&#39;zero&#39;, dim=-1):
             if p % 2 == 1:
                 pad = (0, 0, 0, 1) if d == 2 else (0, 1, 0, 0)
                 x = F.pad(x, pad)
-            pad = (p//2, 0) if d == 2 else (0, p//2)
+            pad = (p // 2, 0) if d == 2 else (0, p // 2)
             # Calculate the high and lowpass
             lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
         elif mode == &#39;symmetric&#39; or mode == &#39;reflect&#39; or mode == &#39;periodic&#39;:
-            pad = (0, 0, p//2, (p+1)//2) if d == 2 else (p//2, (p+1)//2, 0, 0)
+            pad = (0, 0, p // 2, (p + 1) // 2) if d == 2 else (p // 2, (p + 1) // 2, 0, 0)
             x = mypad(x, pad=pad, mode=mode)
             lohi = F.conv2d(x, h, stride=s, groups=C)
         else:
@@ -214,32 +213,32 @@ def sfb1d(lo, hi, g0, g1, mode=&#39;zero&#39;, dim=-1):
         g1 = torch.tensor(np.copy(np.array(g1).ravel()),
                           dtype=torch.float, device=lo.device)
     L = g0.numel()
-    shape = [1,1,1,1]
+    shape = [1, 1, 1, 1]
     shape[d] = L
-    N = 2*lo.shape[d]
+    N = 2 * lo.shape[d]
     # If g aren&#39;t in the right shape, make them so
     if g0.shape != tuple(shape):
         g0 = g0.reshape(*shape)
     if g1.shape != tuple(shape):
         g1 = g1.reshape(*shape)
 
-    s = (2, 1) if d == 2 else (1,2)
-    g0 = torch.cat([g0]*C,dim=0)
-    g1 = torch.cat([g1]*C,dim=0)
+    s = (2, 1) if d == 2 else (1, 2)
+    g0 = torch.cat([g0] * C, dim=0)
+    g1 = torch.cat([g1] * C, dim=0)
     if mode == &#39;per&#39; or mode == &#39;periodization&#39;:
         y = F.conv_transpose2d(lo, g0, stride=s, groups=C) + \
             F.conv_transpose2d(hi, g1, stride=s, groups=C)
         if d == 2:
-            y[:,:,:L-2] = y[:,:,:L-2] + y[:,:,N:N+L-2]
-            y = y[:,:,:N]
+            y[:, :, :L - 2] = y[:, :, :L - 2] + y[:, :, N:N + L - 2]
+            y = y[:, :, :N]
         else:
-            y[:,:,:,:L-2] = y[:,:,:,:L-2] + y[:,:,:,N:N+L-2]
-            y = y[:,:,:,:N]
-        y = roll(y, 1-L//2, dim=dim)
+            y[:, :, :, :L - 2] = y[:, :, :, :L - 2] + y[:, :, :, N:N + L - 2]
+            y = y[:, :, :, :N]
+        y = roll(y, 1 - L // 2, dim=dim)
     else:
         if mode == &#39;zero&#39; or mode == &#39;symmetric&#39; or mode == &#39;reflect&#39; or \
                 mode == &#39;periodic&#39;:
-            pad = (L-2, 0) if d == 2 else (0, L-2)
+            pad = (L - 2, 0) if d == 2 else (0, L - 2)
             y = F.conv_transpose2d(lo, g0, stride=s, padding=pad, groups=C) + \
                 F.conv_transpose2d(hi, g1, stride=s, padding=pad, groups=C)
         else:
@@ -309,6 +308,7 @@ class AFB2D(Function):
     Returns:
         y: Tensor of shape (N, C*4, H, W)
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(x, h0_row, h1_row, h0_col, h1_col, mode):
         mode = int_to_mode(mode)
@@ -316,11 +316,11 @@ class AFB2D(Function):
         y = afb1d(lohi, h0_col, h1_col, mode=mode, dim=2)
         s = y.shape
         y = y.reshape(s[0], -1, 4, s[-2], s[-1])
-        low = y[:,:,0].contiguous()
-        highs = y[:,:,1:].contiguous()
+        low = y[:, :, 0].contiguous()
+        highs = y[:, :, 1:].contiguous()
         return low, highs
-    
-    
+
+
 class AFB1D(Function):
     &#34;&#34;&#34; Does a single level 1d wavelet decomposition of an input.
 
@@ -341,6 +341,7 @@ class AFB1D(Function):
         x0: Tensor of shape (N, C, L&#39;) - lowpass
         x1: Tensor of shape (N, C, L&#39;) - highpass
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(x, h0, h1, mode):
         mode = int_to_mode(mode)
@@ -353,7 +354,7 @@ class AFB1D(Function):
         lohi = afb1d(x, h0, h1, mode=mode, dim=3)
         x0 = lohi[:, ::2, 0].contiguous()
         x1 = lohi[:, 1::2, 0].contiguous()
-        return x0, x1 
+        return x0, x1
 
 
 class SFB2D(Function):
@@ -379,6 +380,7 @@ class SFB2D(Function):
     Returns:
         y: Tensor of shape (N, C*4, H, W)
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(low, highs, g0_row, g1_row, g0_col, g1_col, mode):
         mode = int_to_mode(mode)
@@ -388,8 +390,8 @@ class SFB2D(Function):
         hi = sfb1d(hl, hh, g0_col, g1_col, mode=mode, dim=2)
         y = sfb1d(lo, hi, g0_row, g1_row, mode=mode, dim=3)
         return y
-    
-    
+
+
 class SFB1D(Function):
     &#34;&#34;&#34; Does a single level 1d wavelet decomposition of an input.
 
@@ -410,6 +412,7 @@ class SFB1D(Function):
     Returns:
         y: Tensor of shape (N, C*2, L&#39;)
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(low, high, g0, g1, mode):
         mode = int_to_mode(mode)
@@ -419,7 +422,7 @@ class SFB1D(Function):
         g0 = g0[:, :, None, :]
         g1 = g1[:, :, None, :]
 
-        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]    
+        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]
 
 
 def prep_filt_sfb2d(g0_col, g1_col, g0_row=None, g1_row=None, device=None):
@@ -541,24 +544,30 @@ def prep_filt_afb1d(h0, h1, device=None):
 <span>def <span class="ident">afb1d</span></span>(<span>x, h0, h1, mode='zero', dim=-1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>1D analysis filter bank (along one dimension only) of an image</p>
+<section class="desc"><p>1D analysis filter bank (along one dimension only) of an image</p>
 <h2 id="inputs">Inputs</h2>
-<p>x (tensor): 4D input with the last two dimensions the spatial input
-h0 (tensor): 4D input for the lowpass filter. Should have shape (1, 1,
-h, 1) or (1, 1, 1, w)
-h1 (tensor): 4D input for the highpass filter. Should have shape (1, 1,
-h, 1) or (1, 1, 1, w)
-mode (str): padding method
-dim (int) - dimension of filtering. d=2 is for a vertical filter (called
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>tensor</code></dt>
+<dd>4D input with the last two dimensions the spatial input</dd>
+<dt><strong><code>h0</code></strong> :&ensp;<code>tensor</code></dt>
+<dd>4D input for the lowpass filter. Should have shape (1, 1,
+h, 1) or (1, 1, 1, w)</dd>
+<dt><strong><code>h1</code></strong> :&ensp;<code>tensor</code></dt>
+<dd>4D input for the highpass filter. Should have shape (1, 1,
+h, 1) or (1, 1, 1, w)</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>str</code></dt>
+<dd>padding method</dd>
+</dl>
+<p>dim (int) - dimension of filtering. d=2 is for a vertical filter (called
 column filtering but filters across the rows). d=3 is for a
 horizontal filter, (called row filtering but filters across the
 columns).</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>lohi</code></dt>
+<dt><strong><code>lohi</code></strong></dt>
 <dd>lowpass and highpass subbands concatenated along the channel
 dimension</dd>
-</dl></div>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -597,7 +606,7 @@ dimension</dd>
                           dtype=torch.float, device=x.device)
     L = h0.numel()
     L2 = L // 2
-    shape = [1,1,1,1]
+    shape = [1, 1, 1, 1]
     shape[d] = L
     # If h aren&#39;t in the right shape, make them so
     if h0.shape != tuple(shape):
@@ -609,20 +618,20 @@ dimension</dd>
     if mode == &#39;per&#39; or mode == &#39;periodization&#39;:
         if x.shape[dim] % 2 == 1:
             if d == 2:
-                x = torch.cat((x, x[:,:,-1:]), dim=2)
+                x = torch.cat((x, x[:, :, -1:]), dim=2)
             else:
-                x = torch.cat((x, x[:,:,:,-1:]), dim=3)
+                x = torch.cat((x, x[:, :, :, -1:]), dim=3)
             N += 1
         x = roll(x, -L2, dim=d)
-        pad = (L-1, 0) if d == 2 else (0, L-1)
+        pad = (L - 1, 0) if d == 2 else (0, L - 1)
         lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
-        N2 = N//2
+        N2 = N // 2
         if d == 2:
-            lohi[:,:,:L2] = lohi[:,:,:L2] + lohi[:,:,N2:N2+L2]
-            lohi = lohi[:,:,:N2]
+            lohi[:, :, :L2] = lohi[:, :, :L2] + lohi[:, :, N2:N2 + L2]
+            lohi = lohi[:, :, :N2]
         else:
-            lohi[:,:,:,:L2] = lohi[:,:,:,:L2] + lohi[:,:,:,N2:N2+L2]
-            lohi = lohi[:,:,:,:N2]
+            lohi[:, :, :, :L2] = lohi[:, :, :, :L2] + lohi[:, :, :, N2:N2 + L2]
+            lohi = lohi[:, :, :, :N2]
     else:
         # Calculate the pad size
         outsize = pywt.dwt_coeff_len(N, L, mode=mode)
@@ -634,11 +643,11 @@ dimension</dd>
             if p % 2 == 1:
                 pad = (0, 0, 0, 1) if d == 2 else (0, 1, 0, 0)
                 x = F.pad(x, pad)
-            pad = (p//2, 0) if d == 2 else (0, p//2)
+            pad = (p // 2, 0) if d == 2 else (0, p // 2)
             # Calculate the high and lowpass
             lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
         elif mode == &#39;symmetric&#39; or mode == &#39;reflect&#39; or mode == &#39;periodic&#39;:
-            pad = (0, 0, p//2, (p+1)//2) if d == 2 else (p//2, (p+1)//2, 0, 0)
+            pad = (0, 0, p // 2, (p + 1) // 2) if d == 2 else (p // 2, (p + 1) // 2, 0, 0)
             x = mypad(x, pad=pad, mode=mode)
             lohi = F.conv2d(x, h, stride=s, groups=C)
         else:
@@ -651,7 +660,7 @@ dimension</dd>
 <span>def <span class="ident">int_to_mode</span></span>(<span>mode)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -679,7 +688,7 @@ dimension</dd>
 <span>def <span class="ident">mode_to_int</span></span>(<span>mode)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -707,13 +716,18 @@ dimension</dd>
 <span>def <span class="ident">mypad</span></span>(<span>x, pad, mode='constant', value=0)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Function to do numpy like padding on tensors. Only works for 2-D
+<section class="desc"><p>Function to do numpy like padding on tensors. Only works for 2-D
 padding.</p>
 <h2 id="inputs">Inputs</h2>
-<p>x (tensor): tensor to pad
-pad (tuple): tuple of (left, right, top, bottom) pad sizes
-mode (str): 'symmetric', 'wrap', 'constant, 'reflect', 'replicate', or
-'zero'. The padding technique.</p></div>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>tensor</code></dt>
+<dd>tensor to pad</dd>
+<dt><strong><code>pad</code></strong> :&ensp;<code>tuple</code></dt>
+<dd>tuple of (left, right, top, bottom) pad sizes</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>str</code></dt>
+<dd>'symmetric', 'wrap', 'constant, 'reflect', 'replicate', or
+'zero'. The padding technique.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -733,36 +747,36 @@ mode (str): 'symmetric', 'wrap', 'constant, 'reflect', 'replicate', or
         if pad[0] == 0 and pad[1] == 0:
             m1, m2 = pad[2], pad[3]
             l = x.shape[-2]
-            xe = reflect(np.arange(-m1, l+m2, dtype=&#39;int32&#39;), -0.5, l-0.5)
-            return x[:,:,xe]
+            xe = reflect(np.arange(-m1, l + m2, dtype=&#39;int32&#39;), -0.5, l - 0.5)
+            return x[:, :, xe]
         # horizontal only
         elif pad[2] == 0 and pad[3] == 0:
             m1, m2 = pad[0], pad[1]
             l = x.shape[-1]
-            xe = reflect(np.arange(-m1, l+m2, dtype=&#39;int32&#39;), -0.5, l-0.5)
-            return x[:,:,:,xe]
+            xe = reflect(np.arange(-m1, l + m2, dtype=&#39;int32&#39;), -0.5, l - 0.5)
+            return x[:, :, :, xe]
         # Both
         else:
             m1, m2 = pad[0], pad[1]
             l1 = x.shape[-1]
-            xe_row = reflect(np.arange(-m1, l1+m2, dtype=&#39;int32&#39;), -0.5, l1-0.5)
+            xe_row = reflect(np.arange(-m1, l1 + m2, dtype=&#39;int32&#39;), -0.5, l1 - 0.5)
             m1, m2 = pad[2], pad[3]
             l2 = x.shape[-2]
-            xe_col = reflect(np.arange(-m1, l2+m2, dtype=&#39;int32&#39;), -0.5, l2-0.5)
+            xe_col = reflect(np.arange(-m1, l2 + m2, dtype=&#39;int32&#39;), -0.5, l2 - 0.5)
             i = np.outer(xe_col, np.ones(xe_row.shape[0]))
             j = np.outer(np.ones(xe_col.shape[0]), xe_row)
-            return x[:,:,i,j]
+            return x[:, :, i, j]
     elif mode == &#39;periodic&#39;:
         # Vertical only
         if pad[0] == 0 and pad[1] == 0:
             xe = np.arange(x.shape[-2])
             xe = np.pad(xe, (pad[2], pad[3]), mode=&#39;wrap&#39;)
-            return x[:,:,xe]
+            return x[:, :, xe]
         # Horizontal only
         elif pad[2] == 0 and pad[3] == 0:
             xe = np.arange(x.shape[-1])
             xe = np.pad(xe, (pad[0], pad[1]), mode=&#39;wrap&#39;)
-            return x[:,:,:,xe]
+            return x[:, :, :, xe]
         # Both
         else:
             xe_col = np.arange(x.shape[-2])
@@ -771,7 +785,7 @@ mode (str): 'symmetric', 'wrap', 'constant, 'reflect', 'replicate', or
             xe_row = np.pad(xe_row, (pad[0], pad[1]), mode=&#39;wrap&#39;)
             i = np.outer(xe_col, np.ones(xe_row.shape[0]))
             j = np.outer(np.ones(xe_col.shape[0]), xe_row)
-            return x[:,:,i,j]
+            return x[:, :, i, j]
 
     elif mode == &#39;constant&#39; or mode == &#39;reflect&#39; or mode == &#39;replicate&#39;:
         return F.pad(x, pad, mode, value)
@@ -785,16 +799,19 @@ mode (str): 'symmetric', 'wrap', 'constant, 'reflect', 'replicate', or
 <span>def <span class="ident">prep_filt_afb1d</span></span>(<span>h0, h1, device=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Prepares the filters to be of the right form for the afb2d function.
+<section class="desc"><p>Prepares the filters to be of the right form for the afb2d function.
 In
 particular, makes the tensors the right shape. It takes mirror images of
 them as as afb2d uses conv2d which acts like normal correlation.</p>
 <h2 id="inputs">Inputs</h2>
-<p>h0 (array-like): low pass column filter bank
-h1 (array-like): high pass column filter bank
-device: which device to put the tensors on to</p>
+<dl>
+<dt>h0 (array-like): low pass column filter bank</dt>
+<dt>h1 (array-like): high pass column filter bank</dt>
+<dt><strong><code>device</code></strong></dt>
+<dd>which device to put the tensors on to</dd>
+</dl>
 <h2 id="returns">Returns</h2>
-<p>(h0, h1)</p></div>
+<p>(h0, h1)</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -825,20 +842,23 @@ device: which device to put the tensors on to</p>
 <span>def <span class="ident">prep_filt_afb2d</span></span>(<span>h0_col, h1_col, h0_row=None, h1_row=None, device=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Prepares the filters to be of the right form for the afb2d function.
+<section class="desc"><p>Prepares the filters to be of the right form for the afb2d function.
 In
 particular, makes the tensors the right shape. It takes mirror images of
 them as as afb2d uses conv2d which acts like normal correlation.</p>
 <h2 id="inputs">Inputs</h2>
-<p>h0_col (array-like): low pass column filter bank
-h1_col (array-like): high pass column filter bank
-h0_row (array-like): low pass row filter bank. If none, will assume the
-same as column filter
-h1_row (array-like): high pass row filter bank. If none, will assume the
-same as column filter
-device: which device to put the tensors on to</p>
+<dl>
+<dt>h0_col (array-like): low pass column filter bank</dt>
+<dt>h1_col (array-like): high pass column filter bank</dt>
+<dt>h0_row (array-like): low pass row filter bank. If none, will assume the</dt>
+<dt>same as column filter</dt>
+<dt>h1_row (array-like): high pass row filter bank. If none, will assume the</dt>
+<dt>same as column filter</dt>
+<dt><strong><code>device</code></strong></dt>
+<dd>which device to put the tensors on to</dd>
+</dl>
 <h2 id="returns">Returns</h2>
-<p>(h0_col, h1_col, h0_row, h1_row)</p></div>
+<p>(h0_col, h1_col, h0_row, h1_row)</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -878,15 +898,18 @@ device: which device to put the tensors on to</p>
 <span>def <span class="ident">prep_filt_sfb1d</span></span>(<span>g0, g1, device=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Prepares the filters to be of the right form for the sfb1d function. In
+<section class="desc"><p>Prepares the filters to be of the right form for the sfb1d function. In
 particular, makes the tensors the right shape. It does not mirror image them
 as as sfb2d uses conv2d_transpose which acts like normal convolution.</p>
 <h2 id="inputs">Inputs</h2>
-<p>g0 (array-like): low pass filter bank
-g1 (array-like): high pass filter bank
-device: which device to put the tensors on to</p>
+<dl>
+<dt>g0 (array-like): low pass filter bank</dt>
+<dt>g1 (array-like): high pass filter bank</dt>
+<dt><strong><code>device</code></strong></dt>
+<dd>which device to put the tensors on to</dd>
+</dl>
 <h2 id="returns">Returns</h2>
-<p>(g0, g1)</p></div>
+<p>(g0, g1)</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -918,20 +941,23 @@ device: which device to put the tensors on to</p>
 <span>def <span class="ident">prep_filt_sfb2d</span></span>(<span>g0_col, g1_col, g0_row=None, g1_row=None, device=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Prepares the filters to be of the right form for the sfb2d function.
+<section class="desc"><p>Prepares the filters to be of the right form for the sfb2d function.
 In
 particular, makes the tensors the right shape. It does not mirror image them
 as as sfb2d uses conv2d_transpose which acts like normal convolution.</p>
 <h2 id="inputs">Inputs</h2>
-<p>g0_col (array-like): low pass column filter bank
-g1_col (array-like): high pass column filter bank
-g0_row (array-like): low pass row filter bank. If none, will assume the
-same as column filter
-g1_row (array-like): high pass row filter bank. If none, will assume the
-same as column filter
-device: which device to put the tensors on to</p>
+<dl>
+<dt>g0_col (array-like): low pass column filter bank</dt>
+<dt>g1_col (array-like): high pass column filter bank</dt>
+<dt>g0_row (array-like): low pass row filter bank. If none, will assume the</dt>
+<dt>same as column filter</dt>
+<dt>g1_row (array-like): high pass row filter bank. If none, will assume the</dt>
+<dt>same as column filter</dt>
+<dt><strong><code>device</code></strong></dt>
+<dd>which device to put the tensors on to</dd>
+</dl>
 <h2 id="returns">Returns</h2>
-<p>(g0_col, g1_col, g0_row, g1_row)</p></div>
+<p>(g0_col, g1_col, g0_row, g1_row)</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -972,7 +998,7 @@ device: which device to put the tensors on to</p>
 <span>def <span class="ident">roll</span></span>(<span>x, n, dim, make_even=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -987,20 +1013,20 @@ device: which device to put the tensors on to</p>
         end = 0
 
     if dim == 0:
-        return torch.cat((x[-n:], x[:-n+end]), dim=0)
+        return torch.cat((x[-n:], x[:-n + end]), dim=0)
     elif dim == 1:
-        return torch.cat((x[:,-n:], x[:,:-n+end]), dim=1)
+        return torch.cat((x[:, -n:], x[:, :-n + end]), dim=1)
     elif dim == 2 or dim == -2:
-        return torch.cat((x[:,:,-n:], x[:,:,:-n+end]), dim=2)
+        return torch.cat((x[:, :, -n:], x[:, :, :-n + end]), dim=2)
     elif dim == 3 or dim == -1:
-        return torch.cat((x[:,:,:,-n:], x[:,:,:,:-n+end]), dim=3)</code></pre>
+        return torch.cat((x[:, :, :, -n:], x[:, :, :, :-n + end]), dim=3)</code></pre>
 </details>
 </dd>
 <dt id="awd.adaptive_wavelets.lowlevel.sfb1d"><code class="name flex">
 <span>def <span class="ident">sfb1d</span></span>(<span>lo, hi, g0, g1, mode='zero', dim=-1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>1D synthesis filter bank of an image tensor</p></div>
+<section class="desc"><p>1D synthesis filter bank of an image tensor</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1019,32 +1045,32 @@ device: which device to put the tensors on to</p>
         g1 = torch.tensor(np.copy(np.array(g1).ravel()),
                           dtype=torch.float, device=lo.device)
     L = g0.numel()
-    shape = [1,1,1,1]
+    shape = [1, 1, 1, 1]
     shape[d] = L
-    N = 2*lo.shape[d]
+    N = 2 * lo.shape[d]
     # If g aren&#39;t in the right shape, make them so
     if g0.shape != tuple(shape):
         g0 = g0.reshape(*shape)
     if g1.shape != tuple(shape):
         g1 = g1.reshape(*shape)
 
-    s = (2, 1) if d == 2 else (1,2)
-    g0 = torch.cat([g0]*C,dim=0)
-    g1 = torch.cat([g1]*C,dim=0)
+    s = (2, 1) if d == 2 else (1, 2)
+    g0 = torch.cat([g0] * C, dim=0)
+    g1 = torch.cat([g1] * C, dim=0)
     if mode == &#39;per&#39; or mode == &#39;periodization&#39;:
         y = F.conv_transpose2d(lo, g0, stride=s, groups=C) + \
             F.conv_transpose2d(hi, g1, stride=s, groups=C)
         if d == 2:
-            y[:,:,:L-2] = y[:,:,:L-2] + y[:,:,N:N+L-2]
-            y = y[:,:,:N]
+            y[:, :, :L - 2] = y[:, :, :L - 2] + y[:, :, N:N + L - 2]
+            y = y[:, :, :N]
         else:
-            y[:,:,:,:L-2] = y[:,:,:,:L-2] + y[:,:,:,N:N+L-2]
-            y = y[:,:,:,:N]
-        y = roll(y, 1-L//2, dim=dim)
+            y[:, :, :, :L - 2] = y[:, :, :, :L - 2] + y[:, :, :, N:N + L - 2]
+            y = y[:, :, :, :N]
+        y = roll(y, 1 - L // 2, dim=dim)
     else:
         if mode == &#39;zero&#39; or mode == &#39;symmetric&#39; or mode == &#39;reflect&#39; or \
                 mode == &#39;periodic&#39;:
-            pad = (L-2, 0) if d == 2 else (0, L-2)
+            pad = (L - 2, 0) if d == 2 else (0, L - 2)
             y = F.conv_transpose2d(lo, g0, stride=s, padding=pad, groups=C) + \
                 F.conv_transpose2d(hi, g1, stride=s, padding=pad, groups=C)
         else:
@@ -1063,24 +1089,30 @@ device: which device to put the tensors on to</p>
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Does a single level 1d wavelet decomposition of an input.</p>
+<section class="desc"><p>Does a single level 1d wavelet decomposition of an input.</p>
 <p>Needs to have the tensors in the right form. Because this function defines
 its own backward pass, saves on memory by not having to save the input
 tensors.</p>
 <h2 id="inputs">Inputs</h2>
-<p>x (torch.Tensor): Input to decompose
-h0: lowpass
-h1: highpass
-mode (int): use mode_to_int to get the int code here</p>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Input to decompose</dd>
+<dt><strong><code>h0</code></strong></dt>
+<dd>lowpass</dd>
+<dt><strong><code>h1</code></strong></dt>
+<dd>highpass</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>int</code></dt>
+<dd>use mode_to_int to get the int code here</dd>
+</dl>
 <p>We encode the mode as an integer rather than a string as gradcheck causes an
 error when a string is provided.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>x0</code></dt>
+<dt><strong><code>x0</code></strong></dt>
 <dd>Tensor of shape (N, C, L') - lowpass</dd>
-<dt><code>x1</code></dt>
+<dt><strong><code>x1</code></strong></dt>
 <dd>Tensor of shape (N, C, L') - highpass</dd>
-</dl></div>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1105,6 +1137,7 @@ error when a string is provided.</p>
         x0: Tensor of shape (N, C, L&#39;) - lowpass
         x1: Tensor of shape (N, C, L&#39;) - highpass
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(x, h0, h1, mode):
         mode = int_to_mode(mode)
@@ -1117,7 +1150,7 @@ error when a string is provided.</p>
         lohi = afb1d(x, h0, h1, mode=mode, dim=3)
         x0 = lohi[:, ::2, 0].contiguous()
         x1 = lohi[:, 1::2, 0].contiguous()
-        return x0, x1 </code></pre>
+        return x0, x1</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1132,12 +1165,12 @@ error when a string is provided.</p>
 <span>def <span class="ident">forward</span></span>(<span>x, h0, h1, mode)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Performs the operation.</p>
+<section class="desc"><p>Performs the operation.</p>
 <p>This function is to be overridden by all subclasses.</p>
 <p>It must accept a context ctx as the first argument, followed by any
 number of arguments (tensors or other types).</p>
-<p>The context can be used to store arbitrary data that can be then
-retrieved during the backward pass.</p></div>
+<p>The context can be used to store tensors that can be then retrieved
+during the backward pass.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1154,7 +1187,7 @@ def forward(x, h0, h1, mode):
     lohi = afb1d(x, h0, h1, mode=mode, dim=3)
     x0 = lohi[:, ::2, 0].contiguous()
     x1 = lohi[:, 1::2, 0].contiguous()
-    return x0, x1 </code></pre>
+    return x0, x1</code></pre>
 </details>
 </dd>
 </dl>
@@ -1164,26 +1197,34 @@ def forward(x, h0, h1, mode):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Does a single level 2d wavelet decomposition of an input. Does separate
+<section class="desc"><p>Does a single level 2d wavelet decomposition of an input. Does separate
 row and column filtering by two calls to
 :py:func:<code>pytorch_wavelets.dwt.lowlevel.afb1d</code></p>
 <p>Needs to have the tensors in the right form. Because this function defines
 its own backward pass, saves on memory by not having to save the input
 tensors.</p>
 <h2 id="inputs">Inputs</h2>
-<p>x (torch.Tensor): Input to decompose
-h0_row: row lowpass
-h1_row: row highpass
-h0_col: col lowpass
-h1_col: col highpass
-mode (int): use mode_to_int to get the int code here</p>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Input to decompose</dd>
+<dt><strong><code>h0_row</code></strong></dt>
+<dd>row lowpass</dd>
+<dt><strong><code>h1_row</code></strong></dt>
+<dd>row highpass</dd>
+<dt><strong><code>h0_col</code></strong></dt>
+<dd>col lowpass</dd>
+<dt><strong><code>h1_col</code></strong></dt>
+<dd>col highpass</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>int</code></dt>
+<dd>use mode_to_int to get the int code here</dd>
+</dl>
 <p>We encode the mode as an integer rather than a string as gradcheck causes an
 error when a string is provided.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>y</code></dt>
+<dt><strong><code>y</code></strong></dt>
 <dd>Tensor of shape (N, C*4, H, W)</dd>
-</dl></div>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1211,6 +1252,7 @@ error when a string is provided.</p>
     Returns:
         y: Tensor of shape (N, C*4, H, W)
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(x, h0_row, h1_row, h0_col, h1_col, mode):
         mode = int_to_mode(mode)
@@ -1218,8 +1260,8 @@ error when a string is provided.</p>
         y = afb1d(lohi, h0_col, h1_col, mode=mode, dim=2)
         s = y.shape
         y = y.reshape(s[0], -1, 4, s[-2], s[-1])
-        low = y[:,:,0].contiguous()
-        highs = y[:,:,1:].contiguous()
+        low = y[:, :, 0].contiguous()
+        highs = y[:, :, 1:].contiguous()
         return low, highs</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1235,12 +1277,12 @@ error when a string is provided.</p>
 <span>def <span class="ident">forward</span></span>(<span>x, h0_row, h1_row, h0_col, h1_col, mode)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Performs the operation.</p>
+<section class="desc"><p>Performs the operation.</p>
 <p>This function is to be overridden by all subclasses.</p>
 <p>It must accept a context ctx as the first argument, followed by any
 number of arguments (tensors or other types).</p>
-<p>The context can be used to store arbitrary data that can be then
-retrieved during the backward pass.</p></div>
+<p>The context can be used to store tensors that can be then retrieved
+during the backward pass.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1252,8 +1294,8 @@ def forward(x, h0_row, h1_row, h0_col, h1_col, mode):
     y = afb1d(lohi, h0_col, h1_col, mode=mode, dim=2)
     s = y.shape
     y = y.reshape(s[0], -1, 4, s[-2], s[-1])
-    low = y[:,:,0].contiguous()
-    highs = y[:,:,1:].contiguous()
+    low = y[:, :, 0].contiguous()
+    highs = y[:, :, 1:].contiguous()
     return low, highs</code></pre>
 </details>
 </dd>
@@ -1264,23 +1306,30 @@ def forward(x, h0_row, h1_row, h0_col, h1_col, mode):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Does a single level 1d wavelet decomposition of an input.</p>
+<section class="desc"><p>Does a single level 1d wavelet decomposition of an input.</p>
 <p>Needs to have the tensors in the right form. Because this function defines
 its own backward pass, saves on memory by not having to save the input
 tensors.</p>
 <h2 id="inputs">Inputs</h2>
-<p>low (torch.Tensor): Lowpass to reconstruct of shape (N, C, L)
-high (torch.Tensor): Highpass to reconstruct of shape (N, C, L)
-g0: lowpass
-g1: highpass
-mode (int): use mode_to_int to get the int code here</p>
+<dl>
+<dt><strong><code>low</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Lowpass to reconstruct of shape (N, C, L)</dd>
+<dt><strong><code>high</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Highpass to reconstruct of shape (N, C, L)</dd>
+<dt><strong><code>g0</code></strong></dt>
+<dd>lowpass</dd>
+<dt><strong><code>g1</code></strong></dt>
+<dd>highpass</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>int</code></dt>
+<dd>use mode_to_int to get the int code here</dd>
+</dl>
 <p>We encode the mode as an integer rather than a string as gradcheck causes an
 error when a string is provided.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>y</code></dt>
+<dt><strong><code>y</code></strong></dt>
 <dd>Tensor of shape (N, C*2, L')</dd>
-</dl></div>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1305,6 +1354,7 @@ error when a string is provided.</p>
     Returns:
         y: Tensor of shape (N, C*2, L&#39;)
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(low, high, g0, g1, mode):
         mode = int_to_mode(mode)
@@ -1314,7 +1364,7 @@ error when a string is provided.</p>
         g0 = g0[:, :, None, :]
         g1 = g1[:, :, None, :]
 
-        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]    </code></pre>
+        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1329,12 +1379,12 @@ error when a string is provided.</p>
 <span>def <span class="ident">forward</span></span>(<span>low, high, g0, g1, mode)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Performs the operation.</p>
+<section class="desc"><p>Performs the operation.</p>
 <p>This function is to be overridden by all subclasses.</p>
 <p>It must accept a context ctx as the first argument, followed by any
 number of arguments (tensors or other types).</p>
-<p>The context can be used to store arbitrary data that can be then
-retrieved during the backward pass.</p></div>
+<p>The context can be used to store tensors that can be then retrieved
+during the backward pass.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1348,7 +1398,7 @@ def forward(low, high, g0, g1, mode):
     g0 = g0[:, :, None, :]
     g1 = g1[:, :, None, :]
 
-    return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]    </code></pre>
+    return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]</code></pre>
 </details>
 </dd>
 </dl>
@@ -1358,26 +1408,34 @@ def forward(low, high, g0, g1, mode):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Does a single level 2d wavelet decomposition of an input. Does separate
+<section class="desc"><p>Does a single level 2d wavelet decomposition of an input. Does separate
 row and column filtering by two calls to
 :py:func:<code>pytorch_wavelets.dwt.lowlevel.afb1d</code></p>
 <p>Needs to have the tensors in the right form. Because this function defines
 its own backward pass, saves on memory by not having to save the input
 tensors.</p>
 <h2 id="inputs">Inputs</h2>
-<p>x (torch.Tensor): Input to decompose
-h0_row: row lowpass
-h1_row: row highpass
-h0_col: col lowpass
-h1_col: col highpass
-mode (int): use mode_to_int to get the int code here</p>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>Input to decompose</dd>
+<dt><strong><code>h0_row</code></strong></dt>
+<dd>row lowpass</dd>
+<dt><strong><code>h1_row</code></strong></dt>
+<dd>row highpass</dd>
+<dt><strong><code>h0_col</code></strong></dt>
+<dd>col lowpass</dd>
+<dt><strong><code>h1_col</code></strong></dt>
+<dd>col highpass</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>int</code></dt>
+<dd>use mode_to_int to get the int code here</dd>
+</dl>
 <p>We encode the mode as an integer rather than a string as gradcheck causes an
 error when a string is provided.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>y</code></dt>
+<dt><strong><code>y</code></strong></dt>
 <dd>Tensor of shape (N, C*4, H, W)</dd>
-</dl></div>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1405,6 +1463,7 @@ error when a string is provided.</p>
     Returns:
         y: Tensor of shape (N, C*4, H, W)
     &#34;&#34;&#34;
+
     @staticmethod
     def forward(low, highs, g0_row, g1_row, g0_col, g1_col, mode):
         mode = int_to_mode(mode)
@@ -1428,12 +1487,12 @@ error when a string is provided.</p>
 <span>def <span class="ident">forward</span></span>(<span>low, highs, g0_row, g1_row, g0_col, g1_col, mode)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Performs the operation.</p>
+<section class="desc"><p>Performs the operation.</p>
 <p>This function is to be overridden by all subclasses.</p>
 <p>It must accept a context ctx as the first argument, followed by any
 number of arguments (tensors or other types).</p>
-<p>The context can be used to store arbitrary data that can be then
-retrieved during the backward pass.</p></div>
+<p>The context can be used to store tensors that can be then retrieved
+during the backward pass.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1511,7 +1570,9 @@ def forward(low, highs, g0_row, g1_row, g0_col, g1_col, mode):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
 </body>
 </html>

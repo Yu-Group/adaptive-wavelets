@@ -1,21 +1,23 @@
+import os
+import random
+import sys
+
 import numpy as np
 import torch
-import random
-import os,sys
+
 opj = os.path.join
 import pickle as pkl
 import argparse
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 sys.path.append('../../data/biology')
-from preprocessing import neural_net_sklearn
 
 # adaptive-wavelets modules
 sys.path.append('../..')
-from src import adaptive_wavelets
-from src.mdata.biology import get_dataloader, load_pretrained_model
-from src.warmstart import warm_start
-
+from awd import adaptive_wavelets
+from awd.mdata.biology import get_dataloader, load_pretrained_model
+from awd.warmstart import warm_start
 
 parser = argparse.ArgumentParser(description='Biology Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
@@ -25,7 +27,8 @@ parser.add_argument('--mode', type=str, default='zero', help='mode of wavelet bo
 parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
+parser.add_argument('--batch_size', type=int, default=100, metavar='N',
+                    help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
@@ -47,20 +50,20 @@ class p:
     # data & model path
     data_path = "../../data/biology"
     model_path = "../../data/biology"
-    wt_type = 'DWT1d'    
-    
+    wt_type = 'DWT1d'
+
     # parameters for generating data
     seed = 1
     is_continuous = False
-    
+
     # parameters for initialization
     wave = 'db5'
     J = 4
     mode = 'zero'
     init_factor = 1
-    noise_factor = 0.1    
+    noise_factor = 0.1
     const_factor = 0
-    
+
     # parameters for training
     batch_size = 100
     lr = 0.001
@@ -68,92 +71,95 @@ class p:
     attr_methods = 'Saliency'
     lamlSum = 1
     lamhSum = 1
-    lamL2norm = 1 
+    lamL2norm = 1
     lamCMF = 1
     lamConv = 1
     lamL1wave = 0.1
-    lamL1attr = 1     
+    lamL1attr = 1
     target = 0
-    
+
     # run with warmstart
-    warm_start = None       
-    
+    warm_start = None
+
     # SAVE MODEL
-    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/biology/results" 
+    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/biology/results"
     dirname = "dirname"
     pid = ''.join(["%s" % random.randint(0, 9) for num in range(0, 10)])
 
     def _str(self):
         vals = vars(p)
-        return 'wave=' + str(vals['wave']) + '_lamL1wave=' + str(vals['lamL1wave']) + '_lamL1attr=' + str(vals['lamL1attr']) \
-                + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
-    
+        return 'wave=' + str(vals['wave']) + '_lamL1wave=' + str(vals['lamL1wave']) + '_lamL1attr=' + str(
+            vals['lamL1attr']) \
+               + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
+
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
-                 if not attr.startswith('_')}
-    
-    
+                if not attr.startswith('_')}
+
+
 class s:
     '''Parameters to save
     '''
+
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
-                 if not attr.startswith('_')} 
+                if not attr.startswith('_')}
 
-    
-if __name__ == '__main__':    
+
+if __name__ == '__main__':
     args = parser.parse_args()
     for arg in vars(args):
         setattr(p, arg, getattr(args, arg))
-    
+
     # create dir
     out_dir = opj(p.out_dir, p.dirname)
-    os.makedirs(out_dir, exist_ok=True)    
-    
+    os.makedirs(out_dir, exist_ok=True)
+
     # load data and model
-    train_loader, test_loader = get_dataloader(p.data_path, 
+    train_loader, test_loader = get_dataloader(p.data_path,
                                                batch_size=p.batch_size,
-                                               is_continuous=p.is_continuous)   
-    
-    model = load_pretrained_model(p.model_path, device=device)    
-    
+                                               is_continuous=p.is_continuous)
+
+    model = load_pretrained_model(p.model_path, device=device)
+
     # prepare model
     random.seed(p.seed)
     np.random.seed(p.seed)
-    torch.manual_seed(p.seed)   
+    torch.manual_seed(p.seed)
 
     if p.warm_start is None:
-        wt = adaptive_wavelets.DWT1d(wave=p.wave, mode=p.mode, J=p.J, 
-                                     init_factor=p.init_factor, 
+        wt = adaptive_wavelets.DWT1d(wave=p.wave, mode=p.mode, J=p.J,
+                                     init_factor=p.init_factor,
                                      noise_factor=p.noise_factor,
                                      const_factor=p.const_factor).to(device)
         wt.train()
     else:
-        wt = warm_start(p, out_dir).to(device)        
-        wt.train()     
-        
-    # check if we have multiple GPUs
+        wt = warm_start(p, out_dir).to(device)
+        wt.train()
+
+        # check if we have multiple GPUs
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = torch.nn.DataParallel(model)        
-        wt = torch.nn.DataParallel(wt)        
-    
-    # train
+        model = torch.nn.DataParallel(model)
+        wt = torch.nn.DataParallel(wt)
+
+        # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
-    loss_f = adaptive_wavelets.get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, 
+    loss_f = adaptive_wavelets.get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF,
                                           lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
-    trainer = adaptive_wavelets.Trainer(model, wt, optimizer, loss_f, target=p.target, 
-                                        use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)      
-    
+    trainer = adaptive_wavelets.Trainer(model, wt, optimizer, loss_f, target=p.target,
+                                        use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)
+
     # run
-    trainer(train_loader, epochs=p.num_epochs)    
-    
+    trainer(train_loader, epochs=p.num_epochs)
+
     # calculate losses
-    print('calculating losses and metric...')   
-    model.train() # cudnn RNN backward can only be called in training mode
+    print('calculating losses and metric...')
+    model.train()  # cudnn RNN backward can only be called in training mode
     validator = adaptive_wavelets.Validator(model, test_loader)
-    rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
+    rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(
+        wt, target=p.target)
     s.train_losses = trainer.train_losses
     s.rec_loss = rec_loss
     s.lsum_loss = lsum_loss
@@ -164,12 +170,12 @@ if __name__ == '__main__':
     s.L1wave_loss = L1wave_loss
     s.L1saliency_loss = L1saliency_loss
     s.L1inputxgrad_loss = L1inputxgrad_loss
-    s.net = wt    
-    
+    s.net = wt
+
     # save
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))  
+    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))
     if torch.cuda.device_count() > 1:
-        torch.save(wt.module.state_dict(), opj(out_dir, p._str(p) + '.pth'))   
+        torch.save(wt.module.state_dict(), opj(out_dir, p._str(p) + '.pth'))
     else:
-        torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))  
+        torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))

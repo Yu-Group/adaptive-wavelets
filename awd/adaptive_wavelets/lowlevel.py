@@ -1,9 +1,10 @@
+import numpy as np
+import pywt
 import torch
 import torch.nn.functional as F
-import numpy as np
 from torch.autograd import Function
+
 from awd.adaptive_wavelets.utils import reflect
-import pywt
 
 
 def roll(x, n, dim, make_even=False):
@@ -16,13 +17,13 @@ def roll(x, n, dim, make_even=False):
         end = 0
 
     if dim == 0:
-        return torch.cat((x[-n:], x[:-n+end]), dim=0)
+        return torch.cat((x[-n:], x[:-n + end]), dim=0)
     elif dim == 1:
-        return torch.cat((x[:,-n:], x[:,:-n+end]), dim=1)
+        return torch.cat((x[:, -n:], x[:, :-n + end]), dim=1)
     elif dim == 2 or dim == -2:
-        return torch.cat((x[:,:,-n:], x[:,:,:-n+end]), dim=2)
+        return torch.cat((x[:, :, -n:], x[:, :, :-n + end]), dim=2)
     elif dim == 3 or dim == -1:
-        return torch.cat((x[:,:,:,-n:], x[:,:,:,:-n+end]), dim=3)
+        return torch.cat((x[:, :, :, -n:], x[:, :, :, :-n + end]), dim=3)
 
 
 def mypad(x, pad, mode='constant', value=0):
@@ -40,36 +41,36 @@ def mypad(x, pad, mode='constant', value=0):
         if pad[0] == 0 and pad[1] == 0:
             m1, m2 = pad[2], pad[3]
             l = x.shape[-2]
-            xe = reflect(np.arange(-m1, l+m2, dtype='int32'), -0.5, l-0.5)
-            return x[:,:,xe]
+            xe = reflect(np.arange(-m1, l + m2, dtype='int32'), -0.5, l - 0.5)
+            return x[:, :, xe]
         # horizontal only
         elif pad[2] == 0 and pad[3] == 0:
             m1, m2 = pad[0], pad[1]
             l = x.shape[-1]
-            xe = reflect(np.arange(-m1, l+m2, dtype='int32'), -0.5, l-0.5)
-            return x[:,:,:,xe]
+            xe = reflect(np.arange(-m1, l + m2, dtype='int32'), -0.5, l - 0.5)
+            return x[:, :, :, xe]
         # Both
         else:
             m1, m2 = pad[0], pad[1]
             l1 = x.shape[-1]
-            xe_row = reflect(np.arange(-m1, l1+m2, dtype='int32'), -0.5, l1-0.5)
+            xe_row = reflect(np.arange(-m1, l1 + m2, dtype='int32'), -0.5, l1 - 0.5)
             m1, m2 = pad[2], pad[3]
             l2 = x.shape[-2]
-            xe_col = reflect(np.arange(-m1, l2+m2, dtype='int32'), -0.5, l2-0.5)
+            xe_col = reflect(np.arange(-m1, l2 + m2, dtype='int32'), -0.5, l2 - 0.5)
             i = np.outer(xe_col, np.ones(xe_row.shape[0]))
             j = np.outer(np.ones(xe_col.shape[0]), xe_row)
-            return x[:,:,i,j]
+            return x[:, :, i, j]
     elif mode == 'periodic':
         # Vertical only
         if pad[0] == 0 and pad[1] == 0:
             xe = np.arange(x.shape[-2])
             xe = np.pad(xe, (pad[2], pad[3]), mode='wrap')
-            return x[:,:,xe]
+            return x[:, :, xe]
         # Horizontal only
         elif pad[2] == 0 and pad[3] == 0:
             xe = np.arange(x.shape[-1])
             xe = np.pad(xe, (pad[0], pad[1]), mode='wrap')
-            return x[:,:,:,xe]
+            return x[:, :, :, xe]
         # Both
         else:
             xe_col = np.arange(x.shape[-2])
@@ -78,7 +79,7 @@ def mypad(x, pad, mode='constant', value=0):
             xe_row = np.pad(xe_row, (pad[0], pad[1]), mode='wrap')
             i = np.outer(xe_col, np.ones(xe_row.shape[0]))
             j = np.outer(np.ones(xe_col.shape[0]), xe_row)
-            return x[:,:,i,j]
+            return x[:, :, i, j]
 
     elif mode == 'constant' or mode == 'reflect' or mode == 'replicate':
         return F.pad(x, pad, mode, value)
@@ -122,7 +123,7 @@ def afb1d(x, h0, h1, mode='zero', dim=-1):
                           dtype=torch.float, device=x.device)
     L = h0.numel()
     L2 = L // 2
-    shape = [1,1,1,1]
+    shape = [1, 1, 1, 1]
     shape[d] = L
     # If h aren't in the right shape, make them so
     if h0.shape != tuple(shape):
@@ -134,20 +135,20 @@ def afb1d(x, h0, h1, mode='zero', dim=-1):
     if mode == 'per' or mode == 'periodization':
         if x.shape[dim] % 2 == 1:
             if d == 2:
-                x = torch.cat((x, x[:,:,-1:]), dim=2)
+                x = torch.cat((x, x[:, :, -1:]), dim=2)
             else:
-                x = torch.cat((x, x[:,:,:,-1:]), dim=3)
+                x = torch.cat((x, x[:, :, :, -1:]), dim=3)
             N += 1
         x = roll(x, -L2, dim=d)
-        pad = (L-1, 0) if d == 2 else (0, L-1)
+        pad = (L - 1, 0) if d == 2 else (0, L - 1)
         lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
-        N2 = N//2
+        N2 = N // 2
         if d == 2:
-            lohi[:,:,:L2] = lohi[:,:,:L2] + lohi[:,:,N2:N2+L2]
-            lohi = lohi[:,:,:N2]
+            lohi[:, :, :L2] = lohi[:, :, :L2] + lohi[:, :, N2:N2 + L2]
+            lohi = lohi[:, :, :N2]
         else:
-            lohi[:,:,:,:L2] = lohi[:,:,:,:L2] + lohi[:,:,:,N2:N2+L2]
-            lohi = lohi[:,:,:,:N2]
+            lohi[:, :, :, :L2] = lohi[:, :, :, :L2] + lohi[:, :, :, N2:N2 + L2]
+            lohi = lohi[:, :, :, :N2]
     else:
         # Calculate the pad size
         outsize = pywt.dwt_coeff_len(N, L, mode=mode)
@@ -159,11 +160,11 @@ def afb1d(x, h0, h1, mode='zero', dim=-1):
             if p % 2 == 1:
                 pad = (0, 0, 0, 1) if d == 2 else (0, 1, 0, 0)
                 x = F.pad(x, pad)
-            pad = (p//2, 0) if d == 2 else (0, p//2)
+            pad = (p // 2, 0) if d == 2 else (0, p // 2)
             # Calculate the high and lowpass
             lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
         elif mode == 'symmetric' or mode == 'reflect' or mode == 'periodic':
-            pad = (0, 0, p//2, (p+1)//2) if d == 2 else (p//2, (p+1)//2, 0, 0)
+            pad = (0, 0, p // 2, (p + 1) // 2) if d == 2 else (p // 2, (p + 1) // 2, 0, 0)
             x = mypad(x, pad=pad, mode=mode)
             lohi = F.conv2d(x, h, stride=s, groups=C)
         else:
@@ -186,32 +187,32 @@ def sfb1d(lo, hi, g0, g1, mode='zero', dim=-1):
         g1 = torch.tensor(np.copy(np.array(g1).ravel()),
                           dtype=torch.float, device=lo.device)
     L = g0.numel()
-    shape = [1,1,1,1]
+    shape = [1, 1, 1, 1]
     shape[d] = L
-    N = 2*lo.shape[d]
+    N = 2 * lo.shape[d]
     # If g aren't in the right shape, make them so
     if g0.shape != tuple(shape):
         g0 = g0.reshape(*shape)
     if g1.shape != tuple(shape):
         g1 = g1.reshape(*shape)
 
-    s = (2, 1) if d == 2 else (1,2)
-    g0 = torch.cat([g0]*C,dim=0)
-    g1 = torch.cat([g1]*C,dim=0)
+    s = (2, 1) if d == 2 else (1, 2)
+    g0 = torch.cat([g0] * C, dim=0)
+    g1 = torch.cat([g1] * C, dim=0)
     if mode == 'per' or mode == 'periodization':
         y = F.conv_transpose2d(lo, g0, stride=s, groups=C) + \
             F.conv_transpose2d(hi, g1, stride=s, groups=C)
         if d == 2:
-            y[:,:,:L-2] = y[:,:,:L-2] + y[:,:,N:N+L-2]
-            y = y[:,:,:N]
+            y[:, :, :L - 2] = y[:, :, :L - 2] + y[:, :, N:N + L - 2]
+            y = y[:, :, :N]
         else:
-            y[:,:,:,:L-2] = y[:,:,:,:L-2] + y[:,:,:,N:N+L-2]
-            y = y[:,:,:,:N]
-        y = roll(y, 1-L//2, dim=dim)
+            y[:, :, :, :L - 2] = y[:, :, :, :L - 2] + y[:, :, :, N:N + L - 2]
+            y = y[:, :, :, :N]
+        y = roll(y, 1 - L // 2, dim=dim)
     else:
         if mode == 'zero' or mode == 'symmetric' or mode == 'reflect' or \
                 mode == 'periodic':
-            pad = (L-2, 0) if d == 2 else (0, L-2)
+            pad = (L - 2, 0) if d == 2 else (0, L - 2)
             y = F.conv_transpose2d(lo, g0, stride=s, padding=pad, groups=C) + \
                 F.conv_transpose2d(hi, g1, stride=s, padding=pad, groups=C)
         else:
@@ -281,6 +282,7 @@ class AFB2D(Function):
     Returns:
         y: Tensor of shape (N, C*4, H, W)
     """
+
     @staticmethod
     def forward(x, h0_row, h1_row, h0_col, h1_col, mode):
         mode = int_to_mode(mode)
@@ -288,11 +290,11 @@ class AFB2D(Function):
         y = afb1d(lohi, h0_col, h1_col, mode=mode, dim=2)
         s = y.shape
         y = y.reshape(s[0], -1, 4, s[-2], s[-1])
-        low = y[:,:,0].contiguous()
-        highs = y[:,:,1:].contiguous()
+        low = y[:, :, 0].contiguous()
+        highs = y[:, :, 1:].contiguous()
         return low, highs
-    
-    
+
+
 class AFB1D(Function):
     """ Does a single level 1d wavelet decomposition of an input.
 
@@ -313,6 +315,7 @@ class AFB1D(Function):
         x0: Tensor of shape (N, C, L') - lowpass
         x1: Tensor of shape (N, C, L') - highpass
     """
+
     @staticmethod
     def forward(x, h0, h1, mode):
         mode = int_to_mode(mode)
@@ -325,7 +328,7 @@ class AFB1D(Function):
         lohi = afb1d(x, h0, h1, mode=mode, dim=3)
         x0 = lohi[:, ::2, 0].contiguous()
         x1 = lohi[:, 1::2, 0].contiguous()
-        return x0, x1 
+        return x0, x1
 
 
 class SFB2D(Function):
@@ -351,6 +354,7 @@ class SFB2D(Function):
     Returns:
         y: Tensor of shape (N, C*4, H, W)
     """
+
     @staticmethod
     def forward(low, highs, g0_row, g1_row, g0_col, g1_col, mode):
         mode = int_to_mode(mode)
@@ -360,8 +364,8 @@ class SFB2D(Function):
         hi = sfb1d(hl, hh, g0_col, g1_col, mode=mode, dim=2)
         y = sfb1d(lo, hi, g0_row, g1_row, mode=mode, dim=3)
         return y
-    
-    
+
+
 class SFB1D(Function):
     """ Does a single level 1d wavelet decomposition of an input.
 
@@ -382,6 +386,7 @@ class SFB1D(Function):
     Returns:
         y: Tensor of shape (N, C*2, L')
     """
+
     @staticmethod
     def forward(low, high, g0, g1, mode):
         mode = int_to_mode(mode)
@@ -391,7 +396,7 @@ class SFB1D(Function):
         g0 = g0[:, :, None, :]
         g1 = g1[:, :, None, :]
 
-        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]    
+        return sfb1d(low, high, g0, g1, mode=mode, dim=3)[:, :, 0]
 
 
 def prep_filt_sfb2d(g0_col, g1_col, g0_row=None, g1_row=None, device=None):
@@ -500,4 +505,3 @@ def prep_filt_afb1d(h0, h1, device=None):
     h0 = torch.tensor(h0, device=device, dtype=t).reshape((1, 1, -1))
     h1 = torch.tensor(h1, device=device, dtype=t).reshape((1, 1, -1))
     return h0, h1
-

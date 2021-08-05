@@ -1,6 +1,7 @@
+import pywt
 import torch
 import torch.nn as nn
-import pywt
+
 from awd.adaptive_wavelets import lowlevel
 from awd.adaptive_wavelets.utils import init_filter, low_to_high
 
@@ -17,9 +18,9 @@ def load_wavelet(wave: str, device=None):
     g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
     if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
         raise ValueError('currently only orthogonal wavelets are supported')
-    return (h0, h1)    
-    
-    
+    return (h0, h1)
+
+
 class DWT2d(nn.Module):
     '''Class of 2d wavelet transform 
     Params
@@ -35,17 +36,18 @@ class DWT2d(nn.Module):
     mode: str
         'zero', 'symmetric', 'reflect' or 'periodization'. The padding scheme
     '''
+
     def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0):
-        super().__init__() 
+        super().__init__()
         h0, _ = load_wavelet(wave)
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
         # parameterize
-        self.h0 = nn.Parameter(h0, requires_grad=True)        
-        
+        self.h0 = nn.Parameter(h0, requires_grad=True)
+
         self.J = J
         self.mode = mode
-        self.wt_type = 'DWT2d'        
+        self.wt_type = 'DWT2d'
 
     def forward(self, x):
         """ Forward pass of the DWT.
@@ -65,16 +67,16 @@ class DWT2d(nn.Module):
         Note:
             :math:`H_{in}', W_{in}', H_{in}'', W_{in}''` denote the correctly
             downsampled shapes of the DWT pyramid.
-        """        
+        """
         yh = ()
         ll = x
         mode = lowlevel.mode_to_int(self.mode)
-        
+
         h1 = low_to_high(self.h0)
         h0_col = self.h0.reshape((1, 1, -1, 1))
         h1_col = h1.reshape((1, 1, -1, 1))
         h0_row = self.h0.reshape((1, 1, 1, -1))
-        h1_row = h1.reshape((1, 1, 1, -1))          
+        h1_row = h1.reshape((1, 1, 1, -1))
 
         # Do a multilevel transform
         for j in range(self.J):
@@ -82,9 +84,9 @@ class DWT2d(nn.Module):
             ll, high = lowlevel.AFB2D.forward(
                 ll, h0_col, h1_col, h0_row, h1_row, mode)
             yh += (high,)
-            
+
         return (ll,) + yh
-    
+
     def inverse(self, coeffs):
         """
         Args:
@@ -115,7 +117,7 @@ class DWT2d(nn.Module):
         g0_col = self.h0.reshape((1, 1, -1, 1))
         g1_col = h1.reshape((1, 1, -1, 1))
         g0_row = self.h0.reshape((1, 1, 1, -1))
-        g1_row = h1.reshape((1, 1, 1, -1))            
+        g1_row = h1.reshape((1, 1, 1, -1))
 
         # Do a multilevel inverse transform
         for h in yh[::-1]:
@@ -125,10 +127,9 @@ class DWT2d(nn.Module):
 
             # 'Unpad' added dimensions
             if ll.shape[-2] > h.shape[-2]:
-                ll = ll[...,:-1,:]
+                ll = ll[..., :-1, :]
             if ll.shape[-1] > h.shape[-1]:
-                ll = ll[...,:-1]
+                ll = ll[..., :-1]
             ll = lowlevel.SFB2D.forward(
                 ll, h, g0_col, g1_col, g0_row, g1_row, mode)
-        return ll        
-    
+        return ll

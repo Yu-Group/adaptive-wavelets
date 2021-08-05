@@ -1,28 +1,24 @@
+import os
+import random
+
 import numpy as np
 import torch
-import random
-import os,sys
+
 opj = os.path.join
-from copy import deepcopy
 import pickle as pkl
 import argparse
+
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
-sys.path.append('../../src/adaptive_wavelets')
-from losses import get_loss_f
-from train import Trainer
-from evaluate import Validator
-from transform2d import DWT2d
-from wave_attributions import Attributer
+from awd.adaptive_wavelets.losses import get_loss_f
+from awd.adaptive_wavelets.train import Trainer
+from awd.adaptive_wavelets.evaluate import Validator
+from awd.adaptive_wavelets.transform2d import DWT2d
 
-sys.path.append('../../src/models')
-sys.path.append('../../src/dsets/mnist')
-from dset import get_dataloader, load_pretrained_model
+from awd.mdata.mnist import get_dataloader, load_pretrained_model
 
-sys.path.append('../../src')
-from warmstart import warm_start
-
+from awd.warmstart import warm_start
 
 parser = argparse.ArgumentParser(description='Mnist Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
@@ -32,7 +28,8 @@ parser.add_argument('--mode', type=str, default='zero', help='mode of wavelet bo
 parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
+parser.add_argument('--batch_size', type=int, default=100, metavar='N',
+                    help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
@@ -56,11 +53,11 @@ class p:
     data_path = "../../src/dsets/mnist/data"
     model_path = "../../src/dsets/mnist/data"
     wt_type = 'DWT2d'
-    
+
     # parameters for generating data
     seed = 1
-    img_size = (1, 28, 28)    
-    
+    img_size = (1, 28, 28)
+
     # parameters for wavelet initialization
     wave = 'db5'
     J = 4
@@ -68,7 +65,7 @@ class p:
     init_factor = 1
     noise_factor = 0.1
     const_factor = 0
-    
+
     # parameters for training
     batch_size = 100
     lr = 0.001
@@ -76,94 +73,98 @@ class p:
     attr_methods = 'Saliency'
     lamlSum = 1
     lamhSum = 1
-    lamL2norm = 1 
+    lamL2norm = 1
     lamCMF = 1
     lamConv = 1
     lamL1wave = 0.1
-    lamL1attr = 1     
+    lamL1attr = 1
     target = 6
     model = 'cnn'
-    
+
     # run with warmstart
-    warm_start = None    
-    
+    warm_start = None
+
     # SAVE MODEL
-    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/mnist/results" 
+    out_dir = "/home/ubuntu/adaptive-wavelets/notebooks/mnist/results"
     dirname = "dirname"
     pid = ''.join(["%s" % random.randint(0, 9) for num in range(0, 10)])
 
     def _str(self):
         vals = vars(p)
-        return 'wave=' + str(vals['wave']) + '_lamL1wave=' + str(vals['lamL1wave']) + '_lamL1attr=' + str(vals['lamL1attr']) \
-                + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
-    
+        return 'wave=' + str(vals['wave']) + '_lamL1wave=' + str(vals['lamL1wave']) + '_lamL1attr=' + str(
+            vals['lamL1attr']) \
+               + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
+
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
-                 if not attr.startswith('_')}
-    
-    
+                if not attr.startswith('_')}
+
+
 class s:
     '''Parameters to save
     '''
+
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
-                 if not attr.startswith('_')}
-    
-    
-if __name__ == '__main__':    
+                if not attr.startswith('_')}
+
+
+if __name__ == '__main__':
     args = parser.parse_args()
     for arg in vars(args):
         setattr(p, arg, getattr(args, arg))
-    
+
     # create dir
     out_dir = opj(p.out_dir, p.dirname)
     os.makedirs(out_dir, exist_ok=True)
-    
+
     # load data and model
     train_loader, test_loader = get_dataloader(p.data_path,
                                                batch_size=p.batch_size)
 
-    pretrained_models = load_pretrained_model(p.model_path)  
+    pretrained_models = load_pretrained_model(p.model_path)
     if p.model == 'cnn':
         model = pretrained_models[0]
     else:
         model = pretrained_models[1]
-    
+
     # prepare model
     random.seed(p.seed)
     np.random.seed(p.seed)
-    torch.manual_seed(p.seed)   
-    
+    torch.manual_seed(p.seed)
+
     if p.warm_start is None:
-        wt = DWT2d(wave=p.wave, mode=p.mode, J=p.J, 
-                   init_factor=p.init_factor, 
+        wt = DWT2d(wave=p.wave, mode=p.mode, J=p.J,
+                   init_factor=p.init_factor,
                    noise_factor=p.noise_factor,
                    const_factor=p.const_factor).to(device)
         wt.train()
     else:
-        wt = warm_start(p, out_dir).to(device)     
+        wt = warm_start(p, out_dir).to(device)
         wt.train()
-        
+
     # check if we have multiple GPUs
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = torch.nn.DataParallel(model)        
+        model = torch.nn.DataParallel(model)
         wt = torch.nn.DataParallel(wt)
-    
+
     # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
-    loss_f = get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
-    trainer = Trainer(model, wt, optimizer, loss_f, target=p.target, 
-                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)      
-    
+    loss_f = get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF, lamConv=p.lamConv,
+                        lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
+    trainer = Trainer(model, wt, optimizer, loss_f, target=p.target,
+                      use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)
+
     # run
-    trainer(train_loader, epochs=p.num_epochs)    
-    
+    trainer(train_loader, epochs=p.num_epochs)
+
     # calculate losses
-    print('calculating losses and metric...')   
+    print('calculating losses and metric...')
     validator = Validator(model, test_loader)
-    rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(wt, target=p.target)
+    rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(
+        wt, target=p.target)
     s.train_losses = trainer.train_losses
     s.rec_loss = rec_loss
     s.lsum_loss = lsum_loss
@@ -174,14 +175,12 @@ if __name__ == '__main__':
     s.L1wave_loss = L1wave_loss
     s.L1saliency_loss = L1saliency_loss
     s.L1inputxgrad_loss = L1inputxgrad_loss
-    s.net = wt    
-    
+    s.net = wt
+
     # save
     results = {**p._dict(p), **s._dict(s)}
-    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))  
+    pkl.dump(results, open(opj(out_dir, p._str(p) + '.pkl'), 'wb'))
     if torch.cuda.device_count() > 1:
-        torch.save(wt.module.state_dict(), opj(out_dir, p._str(p) + '.pth'))   
+        torch.save(wt.module.state_dict(), opj(out_dir, p._str(p) + '.pth'))
     else:
-        torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))     
-    
-  
+        torch.save(wt.state_dict(), opj(out_dir, p._str(p) + '.pth'))

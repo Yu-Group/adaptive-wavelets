@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 import numpy as np
 import torch
-from copy import deepcopy
+
 from awd.adaptive_wavelets.wave_attributions import Attributer
 from awd.trim import TrimModel
 
@@ -24,6 +26,7 @@ class Trainer():
     use_residuals : boolean, optional
         Use residuals to compute TRIM score.
     """
+
     def __init__(self, model, w_transform, optimizer, loss_f,
                  target=1,
                  device=torch.device("cuda"),
@@ -35,10 +38,10 @@ class Trainer():
         self.model = model.to(self.device)
         self.w_transform = w_transform.to(self.device)
         self.is_parallel = 'data_parallel' in str(type(w_transform))
-        self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse # use multiple GPUs or not
+        self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse  # use multiple GPUs or not
         self.optimizer = optimizer
         self.loss_f = loss_f
-        self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals) 
+        self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals)
         self.attributer = Attributer(self.mt, attr_methods=attr_methods, device=self.device)
         self.target = target
         self.n_print = n_print
@@ -62,16 +65,17 @@ class Trainer():
                 mean_epoch_loss = self._train_epoch(train_loader, epoch)
                 mean_epoch_test_loss = self._test_epoch(test_loader)
                 if epoch % self.n_print == 0:
-                    print('\n====> Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})'.format(epoch, mean_epoch_loss, 
-                                                                                                      mean_epoch_test_loss))
+                    print('\n====> Epoch: {} Average train loss: {:.4f} (Test set loss: {:.4f})'.format(epoch,
+                                                                                                        mean_epoch_loss,
+                                                                                                        mean_epoch_test_loss))
                 self.train_losses[epoch] = mean_epoch_loss
                 self.test_losses[epoch] = mean_epoch_test_loss
-                
+
             else:
                 mean_epoch_loss = self._train_epoch(train_loader, epoch)
                 if epoch % self.n_print == 0:
                     print('\n====> Epoch: {} Average train loss: {:.4f}'.format(epoch, mean_epoch_loss))
-                self.train_losses[epoch] = mean_epoch_loss    
+                self.train_losses[epoch] = mean_epoch_loss
 
     def _train_epoch(self, data_loader, epoch):
         """
@@ -92,11 +96,11 @@ class Trainer():
         epoch_loss = 0.
         for batch_idx, (data, _) in enumerate(data_loader):
             iter_loss = self._train_iteration(data)
-            epoch_loss += iter_loss   
+            epoch_loss += iter_loss
             if epoch % self.n_print == 0:
                 print('\rTrain Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(data_loader.dataset),
-                           100. * batch_idx / len(data_loader), iter_loss), end='')              
+                           100. * batch_idx / len(data_loader), iter_loss), end='')
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
         self.w_transform.eval()
@@ -121,20 +125,21 @@ class Trainer():
         recon_data = self.wt_inverse(data_t)
         # TRIM score
         with torch.backends.cudnn.flags(enabled=False):
-            attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data)) if self.loss_f.lamL1attr > 0 else None
+            attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(
+                data)) if self.loss_f.lamL1attr > 0 else None
         # loss
         if self.is_parallel:
-            loss = self.loss_f(self.w_transform.module, data, recon_data, data_t, attributions) 
+            loss = self.loss_f(self.w_transform.module, data, recon_data, data_t, attributions)
         else:
-            loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions) 
+            loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)
 
-        # backward
+            # backward
         loss.backward()
         # update step
         self.optimizer.step()
-            
-        return loss.item()  
-    
+
+        return loss.item()
+
     def _test_epoch(self, data_loader):
         """
         Tests the model for one epoch.
@@ -157,12 +162,12 @@ class Trainer():
             data_t = self.w_transform(data)
             recon_data = self.wt_inverse(data_t)
             attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(data))
-            loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)                  
+            loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)
             iter_loss = loss.item()
-            epoch_loss += iter_loss   
+            epoch_loss += iter_loss
             print('\rTest: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(batch_idx * len(data), len(data_loader.dataset),
-                       100. * batch_idx / len(data_loader), iter_loss), end='')               
+                                                                   100. * batch_idx / len(data_loader), iter_loss), end
+                  ='')
 
         mean_epoch_loss = epoch_loss / (batch_idx + 1)
-        return mean_epoch_loss 
-    
+        return mean_epoch_loss

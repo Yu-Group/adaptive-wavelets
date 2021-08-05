@@ -1,13 +1,14 @@
-import numpy as np
-import torch
-import random
-from copy import deepcopy
+import os
 import pickle as pkl
+
+import numpy as np
 import pandas as pd
-import os,sys
+import torch
+
 opj = os.path.join
-from transform1d import DWT1d
-from utils import get_1dfilts, get_wavefun, dist
+from awd.adaptive_wavelets.transform1d import DWT1d
+from awd.adaptive_wavelets.utils import get_wavefun, dist
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
@@ -44,13 +45,13 @@ def load_results(dirs, waves, path):
         lamL1attr_grid = np.unique(lamL1attr)
         R = len(lamL1wave_grid)
         C = len(lamL1attr_grid)
-        
+
         # original wavelet
         wt_o = DWT1d(wave='db5', mode='zero', J=4).to(device)
-        phi_o, psi_o, x_o = get_wavefun(wt_o)        
+        phi_o, psi_o, x_o = get_wavefun(wt_o)
 
         # collect results
-        dic = {'psi':{},
+        dic = {'psi': {},
                'wt': {},
                'x': {},
                'dist': {},
@@ -61,19 +62,19 @@ def load_results(dirs, waves, path):
         for r in range(R):
             for c in range(C):
                 loc = (lamL1wave == lamL1wave_grid[r]) & (lamL1attr == lamL1attr_grid[c])
-                if loc.sum() == 1: 
+                if loc.sum() == 1:
                     loc = np.argwhere(loc).flatten()[0]
-                    dic['index'][(r,c)] = loc
+                    dic['index'][(r, c)] = loc
                     wt = mos[loc]
                     _, psi, x = get_wavefun(wt)
                     d = dist(wt, wt_o)
 
-                    dic['wt'][(r,c)] = wt
-                    dic['psi'][(r,c)] = psi  
-                    dic['x'][(r,c)] = x
-                    dic['dist'][(r,c)] = d
-                    dic['lamL1wave'][(r,c)] = lamL1wave_grid[r]
-                    dic['lamL1attr'][(r,c)] = lamL1attr_grid[c]
-        dics.append(dic)    
-        
+                    dic['wt'][(r, c)] = wt
+                    dic['psi'][(r, c)] = psi
+                    dic['x'][(r, c)] = x
+                    dic['dist'][(r, c)] = d
+                    dic['lamL1wave'][(r, c)] = lamL1wave_grid[r]
+                    dic['lamL1attr'][(r, c)] = lamL1attr_grid[c]
+        dics.append(dic)
+
     return dics, results, models

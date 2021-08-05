@@ -1,13 +1,16 @@
-import numpy as np
-import torch
+import os
 import pickle as pkl
+
+import numpy as np
 import pandas as pd
-import os, sys
+import torch
+
 opj = os.path.join
 
 from awd import adaptive_wavelets
 
 from peak_counting import rmse
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
@@ -28,7 +31,8 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
                 if fname[-3:] == 'pkl':
                     results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
                 if fname[-3:] == 'pth':
-                    wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                    wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(
+                        device)
                     wt.load_state_dict(torch.load(opj(out_dir, fname)))
                     models_list.append(wt)
             else:
@@ -36,9 +40,10 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
                     if fname[-3:] == 'pkl':
                         results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
                     if fname[-3:] == 'pth':
-                        wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(device)
+                        wt = adaptive_wavelets.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(
+                            device)
                         wt.load_state_dict(torch.load(opj(out_dir, fname)))
-                        models_list.append(wt)                
+                        models_list.append(wt)
         results.append(pd.DataFrame(results_list))
         models.append(models_list)
 
@@ -55,7 +60,7 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
         C = len(lamL1attr_grid)
 
         # collect results
-        dic = {'psi':{},
+        dic = {'psi': {},
                'wt': {},
                'x': {},
                'lamL1wave': {},
@@ -65,19 +70,19 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
         for r in range(R):
             for c in range(C):
                 loc = (lamL1wave == lamL1wave_grid[r]) & (lamL1attr == lamL1attr_grid[c])
-                if loc.sum() == 1: 
+                if loc.sum() == 1:
                     loc = np.argwhere(loc).flatten()[0]
-                    dic['index'][(r,c)] = loc
+                    dic['index'][(r, c)] = loc
                     wt = mos[loc]
                     _, psi, x = adaptive_wavelets.get_wavefun(wt)
 
-                    dic['wt'][(r,c)] = wt
-                    dic['psi'][(r,c)] = psi  
-                    dic['x'][(r,c)] = x
-                    dic['lamL1wave'][(r,c)] = lamL1wave_grid[r]
-                    dic['lamL1attr'][(r,c)] = lamL1attr_grid[c]
-        dics.append(dic)    
-        
+                    dic['wt'][(r, c)] = wt
+                    dic['psi'][(r, c)] = psi
+                    dic['x'][(r, c)] = x
+                    dic['lamL1wave'][(r, c)] = lamL1wave_grid[r]
+                    dic['lamL1attr'][(r, c)] = lamL1attr_grid[c]
+        dics.append(dic)
+
     return dics, results, models
 
 
@@ -88,7 +93,7 @@ def rmse_bootstrap(y, y_pred, target=1, m=10000):
     for i in range(m):
         idx = np.arange(len(y))
         sel = np.random.choice(idx, len(idx), replace=True)
-        e.append(rmse(y[sel],y_pred[sel], target))
+        e.append(rmse(y[sel], y_pred[sel], target))
     return rmse(y, y_pred, target), np.std(e)
 
 
@@ -97,28 +102,28 @@ def extract_patches(h, g, centering=True):
     """
     hc = h - h.mean()
     var = []
-    for left in range(len(h)-3):
-        v = torch.sum((hc[left:left+3])**2)
+    for left in range(len(h) - 3):
+        v = torch.sum((hc[left:left + 3]) ** 2)
         var.append(v)
     var = np.array(var)
-    h_small = h[np.argmax(var):np.argmax(var)+3]
-    
+    h_small = h[np.argmax(var):np.argmax(var) + 3]
+
     gc = g - g.mean()
     var = []
-    for left in range(len(g)-3):
-        v = torch.sum((gc[left:left+3])**2)
+    for left in range(len(g) - 3):
+        v = torch.sum((gc[left:left + 3]) ** 2)
         var.append(v)
     var = np.array(var)
-    g_small = g[np.argmax(var):np.argmax(var)+3]
-    
-    ll = h_small.unsqueeze(0)*h_small.unsqueeze(1)
-    lh = h_small.unsqueeze(0)*g_small.unsqueeze(1)
-    hl = g_small.unsqueeze(0)*h_small.unsqueeze(1)
-    hh = g_small.unsqueeze(0)*g_small.unsqueeze(1)
-    
+    g_small = g[np.argmax(var):np.argmax(var) + 3]
+
+    ll = h_small.unsqueeze(0) * h_small.unsqueeze(1)
+    lh = h_small.unsqueeze(0) * g_small.unsqueeze(1)
+    hl = g_small.unsqueeze(0) * h_small.unsqueeze(1)
+    hh = g_small.unsqueeze(0) * g_small.unsqueeze(1)
+
     if centering:
         lh -= lh.mean()
         hl -= hl.mean()
         hh -= hh.mean()
-    
+
     return [ll, lh, hl, hh]
