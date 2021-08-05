@@ -88,7 +88,7 @@ class Loss():
         if self.lamhSum > 0:
             self.hsum_loss += _hsum_loss(w_transform)
 
-            # l2norm of lowpass filter
+        # l2norm of lowpass filter
         self.L2norm_loss = 0
         if self.lamL2norm > 0:
             self.L2norm_loss += _L2norm_loss(w_transform)
@@ -184,7 +184,10 @@ def _CMF_loss(w_transform):
     h0 = w_transform.h0
     n = h0.size(2)
     assert n % 2 == 0, "length of lowpass filter should be even"
-    h_f = torch.fft(torch.stack((h0, torch.zeros_like(h0)), dim=3), 1)
+    try:
+        h_f = torch.fft.fft(torch.stack((h0, torch.zeros_like(h0)), dim=3), 1)
+    except:
+        h_f = torch.fft(torch.stack((h0, torch.zeros_like(h0)), dim=3), 1)
     mod = (h_f ** 2).sum(axis=3)
     cmf_identity = mod[0, 0, :n // 2] + mod[0, 0, n // 2:]
     loss = .5 * torch.sum((cmf_identity - 2) ** 2)

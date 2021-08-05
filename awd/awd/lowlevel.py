@@ -6,6 +6,18 @@ from torch.autograd import Function
 
 from awd.awd.utils import reflect
 
+def load_wavelet(wave: str, device=None):
+    '''load wavelet from pywt (currently only allow orthogonal wavelets)
+    '''
+    wave = pywt.Wavelet(wave)
+    h0, h1 = wave.dec_lo, wave.dec_hi
+    g0, g1 = wave.rec_lo, wave.rec_hi
+    # Prepare the filters
+    h0, h1 = prep_filt_afb1d(h0, h1, device)
+    g0, g1 = prep_filt_sfb1d(g0, g1, device)
+    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
+        raise ValueError('currently only orthogonal wavelets are supported')
+    return h0, h1
 
 def roll(x, n, dim, make_even=False):
     if n < 0:

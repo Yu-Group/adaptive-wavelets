@@ -1,9 +1,13 @@
 import pywt
 import torch
 import torch.nn as nn
+import torch.optim
+import numpy as np
 
 from awd.awd import lowlevel
 from awd.awd.utils import init_filter, low_to_high
+from awd.awd.losses import get_loss_f
+from awd.awd.train import Trainer
 
 
 class DWT2d(nn.Module):
@@ -24,9 +28,11 @@ class DWT2d(nn.Module):
 
     def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0):
         super().__init__()
-        h0, _ = load_wavelet(wave)
+        h0, _ = lowlevel.load_wavelet(wave)
+        
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
+        
         # parameterize
         self.h0 = nn.Parameter(h0, requires_grad=True)
 
@@ -118,18 +124,81 @@ class DWT2d(nn.Module):
             ll = lowlevel.SFB2D.forward(
                 ll, h, g0_col, g1_col, g0_row, g1_row, mode)
         return ll
+    
+    def fit(self,
+            X=None,
+            train_loader=None,
+            model=None, 
+            lr: float=0.001,
+            num_epochs: int=20,
+            seed: int=42,
+            attr_methods = 'Saliency',
+            target = 6,  
+            lamlSum: float=1.,
+            lamhSum: float=1.,
+            lamL2norm: float=1.,
+            lamCMF: float=1.,
+            lamConv: float=1.,
+            lamL1wave: float=1.,
+            lamL1attr: float=1.,):
+        """
+        Params
+        ------
+        X: numpy array or torch.Tensor
+        train_loader: data_loader
+            each element should return tuple of (x, _)
+        lamlSum : float
+            Hyperparameter for penalizing sum of lowpass filter
+        lamhSum : float
+            Hyperparameter for penalizing sum of highpass filter            
+        lamL2norm : float
+            Hyperparameter to enforce unit norm of lowpass filter
+        lamCMF : float 
+            Hyperparameter to enforce conjugate mirror filter   
+        lamConv : float
+            Hyperparameter to enforce convolution constraint
+        lamL1wave : float
+            Hyperparameter for penalizing L1 norm of wavelet coeffs
+        lamL1attr : float
+            Hyperparameter for penalizing L1 norm of attributions
+        """
+        torch.manual_seed(seed)
+        if X is None and train_loader is None:
+            raise ValueError('Either X or train_loader must be passed!')
+        elif train_loader is None:
+            if 'ndarray' in str(type(X)):
+                device = 'cuda' if self.paramaters()[0].is_cuda else 'cpu'
+                X = torch.Tensor(X).to(device)
+            
+            # convert to float
+            X = X.float()
+            X = X.unsqueeze(1)
+            
+            # need to pad as if it had y (to match default pytorch dataloaders)
+            X = [(X[i], np.nan) for i in range(X.shape[0])]
+            train_loader = torch.utils.data.DataLoader(X, 
+                                                      shuffle=True,
+                                                      batch_size=len(X))
+#             print(iter(train_loader).next())
+        params = list(self.parameters())
+        optimizer = torch.optim.Adam(params, lr=lr)
+        loss_f = get_loss_f(lamlSum=lamlSum, lamhSum=lamhSum,
+                            lamL2norm=lamL2norm, lamCMF=lamCMF, lamConv=lamConv,
+                            lamL1wave=lamL1wave, lamL1attr=lamL1attr)
+        trainer = Trainer(model,
+                          self,
+                          optimizer,
+                          loss_f,
+                          use_residuals=True,
+                          target=target,
+                          attr_methods=attr_methods,
+                          n_print=1)
+        
+        # actually train
+        self.train()
+        trainer(train_loader, epochs=num_epochs)
+        self.train_losses = trainer.train_losses
+        self.eval()
 
 
-def load_wavelet(wave: str, device=None):
-    '''
-    load 2-d wavelet from pywt currently only allow orthogonal wavelets
-    '''
-    wave = pywt.Wavelet(wave)
-    h0, h1 = wave.dec_lo, wave.dec_hi
-    g0, g1 = wave.rec_lo, wave.rec_hi
-    # Prepare the filters
-    h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
-    g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
-    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
-        raise ValueError('currently only orthogonal wavelets are supported')
-    return h0, h1
+

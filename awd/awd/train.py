@@ -13,7 +13,7 @@ class Trainer():
 
     Parameters
     ----------
-    model: torch.model
+    model: optional, torch.model
     
     optimizer: torch.optim.Optimizer
     
@@ -27,7 +27,11 @@ class Trainer():
         Use residuals to compute TRIM score.
     """
 
-    def __init__(self, model, w_transform, optimizer, loss_f,
+    def __init__(self,
+                 model=None,
+                 w_transform=None,
+                 optimizer=None,
+                 loss_f=None,
                  target=1,
                  device=torch.device("cuda"),
                  use_residuals=True,
@@ -35,14 +39,19 @@ class Trainer():
                  n_print=1):
 
         self.device = device
-        self.model = model.to(self.device)
+        if model is not None:
+            self.model = model.to(self.device)
+            self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals)
+            self.attributer = Attributer(self.mt, attr_methods=attr_methods, device=self.device)
+        else:
+            self.model = None
+            self.mt = None
+            self.attributer = None
         self.w_transform = w_transform.to(self.device)
         self.is_parallel = 'data_parallel' in str(type(w_transform))
         self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse  # use multiple GPUs or not
         self.optimizer = optimizer
         self.loss_f = loss_f
-        self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals)
-        self.attributer = Attributer(self.mt, attr_methods=attr_methods, device=self.device)
         self.target = target
         self.n_print = n_print
 
@@ -75,7 +84,10 @@ class Trainer():
                 mean_epoch_loss = self._train_epoch(train_loader, epoch)
                 if epoch % self.n_print == 0:
                     print('\n====> Epoch: {} Average train loss: {:.4f}'.format(epoch, mean_epoch_loss))
-                self.train_losses[epoch] = mean_epoch_loss
+                try:
+                    self.train_losses[epoch] = mean_epoch_loss
+                except:
+                    self.train_losses[epoch] = mean_epoch_loss.real
 
     def _train_epoch(self, data_loader, epoch):
         """
@@ -119,22 +131,32 @@ class Trainer():
         data = data.to(self.device)
         # zero grad
         self.optimizer.zero_grad()
+        
         # transform
         data_t = self.w_transform(data)
+        
         # reconstruction
         recon_data = self.wt_inverse(data_t)
+        
         # TRIM score
-        with torch.backends.cudnn.flags(enabled=False):
-            attributions = self.attributer(data_t, target=self.target, additional_forward_args=deepcopy(
-                data)) if self.loss_f.lamL1attr > 0 else None
+        if self.attributer is not None:
+            with torch.backends.cudnn.flags(enabled=False):
+                attributions = self.attributer(
+                    data_t, target=self.target,
+                    additional_forward_args=deepcopy(
+                    data)) if self.loss_f.lamL1attr > 0 else None
+        else:
+            attributions = None
+        
         # loss
         if self.is_parallel:
             loss = self.loss_f(self.w_transform.module, data, recon_data, data_t, attributions)
         else:
             loss = self.loss_f(self.w_transform, data, recon_data, data_t, attributions)
 
-            # backward
+        # backward
         loss.backward()
+        
         # update step
         self.optimizer.step()
 
