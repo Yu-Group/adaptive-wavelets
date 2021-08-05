@@ -23,3 +23,4 @@ experiments/fake_news/very_large_data
 .idea
 **logs*
 **egg*
+notebooks/biology/results/animate_fig
