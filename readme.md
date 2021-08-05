@@ -50,3 +50,14 @@ wt.fit(X=X, pretrained_model=model,
 - CDEP (ICML 2020 [pdf](https://arxiv.org/abs/1909.13584), [github](https://github.com/laura-rieger/deep-explanation-penalization)) - penalizes CD / ACD scores during training to make models generalize better
 - DAC (arXiv 2019 [pdf](https://arxiv.org/abs/1905.07631), [github](https://github.com/csinva/disentangled-attribution-curves)) - finds disentangled interpretations for random forests
 - PDR framework (PNAS 2019 [pdf](https://arxiv.org/abs/1901.04592)) - an overarching framewwork for guiding and framing interpretable machine learning
+
+
+If this package is useful for you, please cite the following!
+
+```r
+@article{ha2021adaptive,
+  title={Adaptive wavelet distillation from neural networks through interpretations},
+  author={Ha, Wooseok and Singh, Chandan and Lanusse, Francois and Song, Eli and Dang, Song and He, Kangmin and Upadhyayula, Srigokul and Yu, Bin},
+  journal={arXiv preprint arXiv:2107.09145},
+  year={2021}
+}
