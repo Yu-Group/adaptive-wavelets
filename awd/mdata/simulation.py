@@ -7,7 +7,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import pickle as pkl
 import random
 
-from awd.adaptive_wavelets import DWT1d
+from awd.awd import DWT1d
 from awd.models.models import Feedforward
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

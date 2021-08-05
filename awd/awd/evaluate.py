@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import torch
 
-from awd.adaptive_wavelets.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
+from awd.awd.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
     _conv_loss, _L1_wave_loss, _L1_attribution_loss
-from awd.adaptive_wavelets.wave_attributions import Attributer
+from awd.awd.wave_attributions import Attributer
 from awd.trim import TrimModel
 
 

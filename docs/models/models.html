@@ -76,7 +76,35 @@ class FFN(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
-        return x</code></pre>
+        return x
+
+
+class LSTMNet(nn.Module):
+    def __init__(self, D_in, H, p):
+        &#34;&#34;&#34;
+        Parameters:
+        ==========================================================
+            D_in: int
+                dimension of input track (ignored, can be variable)
+
+            H: int
+                hidden layer size
+
+            p: int
+                number of additional covariates (such as lifetime, msd, etc..., to be concatenated to the hidden layer)
+        &#34;&#34;&#34;
+
+        super(LSTMNet, self).__init__()
+        self.lstm = nn.LSTM(input_size=1, hidden_size=H, num_layers=1, batch_first=True)
+        self.fc = nn.Linear(H + p, 1)
+
+    def forward(self, x1, x2=None):
+        x1 = x1.unsqueeze(2)  # add input_size dimension (this is usually for the size of embedding vector)
+        outputs, (h1, c1) = self.lstm(x1)  # get hidden vec
+        h1 = h1.squeeze(0)  # remove dimension corresponding to multiple layers / directions
+        if x2 is not None:
+            h1 = torch.cat((h1, x2), 1)
+        return self.fc(h1)</code></pre>
 </details>
 </section>
 <section>
@@ -328,6 +356,108 @@ registered hooks while the latter silently ignores them.</p>
 </dd>
 </dl>
 </dd>
+<dt id="awd.models.models.LSTMNet"><code class="flex name class">
+<span>class <span class="ident">LSTMNet</span></span>
+<span>(</span><span>D_in, H, p)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super(Model, self).__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<h1 id="parameters">Parameters:</h1>
+<pre><code>D_in: int
+    dimension of input track (ignored, can be variable)
+
+H: int
+    hidden layer size
+
+p: int
+    number of additional covariates (such as lifetime, msd, etc..., to be concatenated to the hidden layer)
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LSTMNet(nn.Module):
+    def __init__(self, D_in, H, p):
+        &#34;&#34;&#34;
+        Parameters:
+        ==========================================================
+            D_in: int
+                dimension of input track (ignored, can be variable)
+
+            H: int
+                hidden layer size
+
+            p: int
+                number of additional covariates (such as lifetime, msd, etc..., to be concatenated to the hidden layer)
+        &#34;&#34;&#34;
+
+        super(LSTMNet, self).__init__()
+        self.lstm = nn.LSTM(input_size=1, hidden_size=H, num_layers=1, batch_first=True)
+        self.fc = nn.Linear(H + p, 1)
+
+    def forward(self, x1, x2=None):
+        x1 = x1.unsqueeze(2)  # add input_size dimension (this is usually for the size of embedding vector)
+        outputs, (h1, c1) = self.lstm(x1)  # get hidden vec
+        h1 = h1.squeeze(0)  # remove dimension corresponding to multiple layers / directions
+        if x2 is not None:
+            h1 = torch.cat((h1, x2), 1)
+        return self.fc(h1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="awd.models.models.LSTMNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x1, x2=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x1, x2=None):
+    x1 = x1.unsqueeze(2)  # add input_size dimension (this is usually for the size of embedding vector)
+    outputs, (h1, c1) = self.lstm(x1)  # get hidden vec
+    h1 = h1.squeeze(0)  # remove dimension corresponding to multiple layers / directions
+    if x2 is not None:
+        h1 = torch.cat((h1, x2), 1)
+    return self.fc(h1)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -360,6 +490,12 @@ registered hooks while the latter silently ignores them.</p>
 <h4><code><a title="awd.models.models.Feedforward" href="#awd.models.models.Feedforward">Feedforward</a></code></h4>
 <ul class="">
 <li><code><a title="awd.models.models.Feedforward.forward" href="#awd.models.models.Feedforward.forward">forward</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="awd.models.models.LSTMNet" href="#awd.models.models.LSTMNet">LSTMNet</a></code></h4>
+<ul class="">
+<li><code><a title="awd.models.models.LSTMNet.forward" href="#awd.models.models.LSTMNet.forward">forward</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch.autograd import Function
 
-from awd.adaptive_wavelets.utils import reflect
+from awd.awd.utils import reflect
 
 
 def roll(x, n, dim, make_even=False):

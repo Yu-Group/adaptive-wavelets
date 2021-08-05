@@ -2,23 +2,8 @@ import pywt
 import torch
 import torch.nn as nn
 
-from awd.adaptive_wavelets import lowlevel
-from awd.adaptive_wavelets.utils import init_filter, low_to_high
-
-
-def load_wavelet(wave: str, device=None):
-    '''
-    load 1-d wavelet from pywt currently only allow orthogonal wavelets
-    '''
-    wave = pywt.Wavelet(wave)
-    h0, h1 = wave.dec_lo, wave.dec_hi
-    g0, g1 = wave.rec_lo, wave.rec_hi
-    # Prepare the filters
-    h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
-    g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
-    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
-        raise ValueError('currently only orthogonal wavelets are supported')
-    return (h0, h1)
+from awd.awd import lowlevel
+from awd.awd.utils import init_filter, low_to_high
 
 
 class DWT1d(nn.Module):
@@ -104,3 +89,18 @@ class DWT1d(nn.Module):
                 x0 = x0[..., :-1]
             x0 = lowlevel.SFB1D.forward(x0, x1, self.h0, h1, mode)
         return x0
+
+
+def load_wavelet(wave: str, device=None):
+    '''
+    load 1-d wavelet from pywt currently only allow orthogonal wavelets
+    '''
+    wave = pywt.Wavelet(wave)
+    h0, h1 = wave.dec_lo, wave.dec_hi
+    g0, g1 = wave.rec_lo, wave.rec_hi
+    # Prepare the filters
+    h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
+    g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
+    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
+        raise ValueError('currently only orthogonal wavelets are supported')
+    return (h0, h1)

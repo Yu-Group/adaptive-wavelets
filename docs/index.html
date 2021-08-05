@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd API documentation</title>
-<meta name="description" content="&lt;h1 align=&#34;center&#34;&gt;
-&lt;img src=&#34;https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif&#34; width=&#34;15%&#34;&gt; Adaptive wavelet distillation &lt;img …" />
+<title>awd.awd API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,70 +17,66 @@
 <main>
 <article id="content">
 <header>
-
+<h1 class="title">Module <code>awd.awd</code></h1>
 </header>
 <section id="section-intro">
-<h1 align="center">
-<img src="https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif" width="15%"> Adaptive wavelet distillation <img src="https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif" width="15%"></h1>
-<p align="center"> Wavelets which adapt given data (and optionally a pre-trained model).
-</p>
-<p align="center">
-<img src="https://img.shields.io/badge/license-mit-blue.svg">
-<img src="https://img.shields.io/badge/python-3.6--3.8-blue">
-<img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
-<img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
-</p>
-<p align="center"> <i> Adaptive wavelets yield models which are faster, more compressible, and more interpretable. </i></p>
-<p><img alt="" src="docs/awd.jpg"></p>
-<p>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">arXiv</a>).</p>
-<blockquote>
-<p>Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.</p>
-</blockquote>
-<h1 id="related-work">Related work</h1>
-<ul>
-<li>TRIM (ICLR 2020 workshop <a href="https://arxiv.org/abs/2003.01926">pdf</a>, <a href="https://github.com/csinva/transformation-importance">github</a>) - using simple reparameterizations, allows for calculating disentangled importances to transformations of the input (e.g. assigning importances to different frequencies)</li>
-<li>ACD (ICLR 2019 <a href="https://openreview.net/pdf?id=SkEqro0ctQ">pdf</a>, <a href="https://github.com/csinva/hierarchical-dnn-interpretations">github</a>) - extends CD to CNNs / arbitrary DNNs, and aggregates explanations into a hierarchy</li>
-<li>CDEP (ICML 2020 <a href="https://arxiv.org/abs/1909.13584">pdf</a>, <a href="https://github.com/laura-rieger/deep-explanation-penalization">github</a>) - penalizes CD / ACD scores during training to make models generalize better</li>
-<li>DAC (arXiv 2019 <a href="https://arxiv.org/abs/1905.07631">pdf</a>, <a href="https://github.com/csinva/disentangled-attribution-curves">github</a>) - finds disentangled interpretations for random forests</li>
-<li>PDR framework (PNAS 2019 <a href="https://arxiv.org/abs/1901.04592">pdf</a>) - an overarching framewwork for guiding and framing interpretable machine learning</li>
-</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-.. include:: ../readme.md
-&#34;&#34;&#34;</code></pre>
+<pre><code class="python">from .losses import get_loss_f
+from .train import Trainer
+from .evaluate import Validator
+from .transform1d import DWT1d
+from .transform2d import DWT2d
+from .wave_attributions import Attributer
+from .utils import get_wavefun, get_1dfilts, get_2dfilts</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="awd.adaptive_wavelets" href="adaptive_wavelets/index.html">awd.adaptive_wavelets</a></code></dt>
+<dt><code class="name"><a title="awd.awd.evaluate" href="evaluate.html">awd.awd.evaluate</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.mdata" href="mdata/index.html">awd.mdata</a></code></dt>
+<dt><code class="name"><a title="awd.awd.losses" href="losses.html">awd.awd.losses</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.models" href="models/index.html">awd.models</a></code></dt>
+<dt><code class="name"><a title="awd.awd.lowlevel" href="lowlevel.html">awd.awd.lowlevel</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.scheduling" href="scheduling.html">awd.scheduling</a></code></dt>
+<dt><code class="name"><a title="awd.awd.scheduling" href="scheduling.html">awd.awd.scheduling</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.trim" href="trim/index.html">awd.trim</a></code></dt>
+<dt><code class="name"><a title="awd.awd.train" href="train.html">awd.awd.train</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.visualize" href="visualize.html">awd.visualize</a></code></dt>
+<dt><code class="name"><a title="awd.awd.transform1d" href="transform1d.html">awd.awd.transform1d</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.warmstart" href="warmstart.html">awd.warmstart</a></code></dt>
+<dt><code class="name"><a title="awd.awd.transform2d" href="transform2d.html">awd.awd.transform2d</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.awd.utils" href="utils.html">awd.awd.utils</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.awd.visualize" href="visualize.html">awd.awd.visualize</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.awd.warmstart" href="warmstart.html">awd.awd.warmstart</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.awd.wave_attributions" href="wave_attributions.html">awd.awd.wave_attributions</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
@@ -97,20 +92,27 @@
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#related-work">Related work</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="awd" href="../index.html">awd</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="awd.adaptive_wavelets" href="adaptive_wavelets/index.html">awd.adaptive_wavelets</a></code></li>
-<li><code><a title="awd.mdata" href="mdata/index.html">awd.mdata</a></code></li>
-<li><code><a title="awd.models" href="models/index.html">awd.models</a></code></li>
-<li><code><a title="awd.scheduling" href="scheduling.html">awd.scheduling</a></code></li>
-<li><code><a title="awd.trim" href="trim/index.html">awd.trim</a></code></li>
-<li><code><a title="awd.visualize" href="visualize.html">awd.visualize</a></code></li>
-<li><code><a title="awd.warmstart" href="warmstart.html">awd.warmstart</a></code></li>
+<li><code><a title="awd.awd.evaluate" href="evaluate.html">awd.awd.evaluate</a></code></li>
+<li><code><a title="awd.awd.losses" href="losses.html">awd.awd.losses</a></code></li>
+<li><code><a title="awd.awd.lowlevel" href="lowlevel.html">awd.awd.lowlevel</a></code></li>
+<li><code><a title="awd.awd.scheduling" href="scheduling.html">awd.awd.scheduling</a></code></li>
+<li><code><a title="awd.awd.train" href="train.html">awd.awd.train</a></code></li>
+<li><code><a title="awd.awd.transform1d" href="transform1d.html">awd.awd.transform1d</a></code></li>
+<li><code><a title="awd.awd.transform2d" href="transform2d.html">awd.awd.transform2d</a></code></li>
+<li><code><a title="awd.awd.utils" href="utils.html">awd.awd.utils</a></code></li>
+<li><code><a title="awd.awd.visualize" href="visualize.html">awd.awd.visualize</a></code></li>
+<li><code><a title="awd.awd.warmstart" href="warmstart.html">awd.awd.warmstart</a></code></li>
+<li><code><a title="awd.awd.wave_attributions" href="wave_attributions.html">awd.awd.wave_attributions</a></code></li>
 </ul>
 </li>
 </ul>

@@ -51,3 +51,31 @@ class FFN(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+
+class LSTMNet(nn.Module):
+    def __init__(self, D_in, H, p):
+        """
+        Parameters:
+        ==========================================================
+            D_in: int
+                dimension of input track (ignored, can be variable)
+
+            H: int
+                hidden layer size
+
+            p: int
+                number of additional covariates (such as lifetime, msd, etc..., to be concatenated to the hidden layer)
+        """
+
+        super(LSTMNet, self).__init__()
+        self.lstm = nn.LSTM(input_size=1, hidden_size=H, num_layers=1, batch_first=True)
+        self.fc = nn.Linear(H + p, 1)
+
+    def forward(self, x1, x2=None):
+        x1 = x1.unsqueeze(2)  # add input_size dimension (this is usually for the size of embedding vector)
+        outputs, (h1, c1) = self.lstm(x1)  # get hidden vec
+        h1 = h1.squeeze(0)  # remove dimension corresponding to multiple layers / directions
+        if x2 is not None:
+            h1 = torch.cat((h1, x2), 1)
+        return self.fc(h1)
