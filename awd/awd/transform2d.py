@@ -128,7 +128,7 @@ class DWT2d(nn.Module):
     def fit(self,
             X=None,
             train_loader=None,
-            model=None, 
+            pretrained_model=None, 
             lr: float=0.001,
             num_epochs: int=20,
             seed: int=42,
@@ -147,6 +147,8 @@ class DWT2d(nn.Module):
         X: numpy array or torch.Tensor
         train_loader: data_loader
             each element should return tuple of (x, _)
+        pretrained_model: nn.Module, optional
+            pretrained model to distill
         lamlSum : float
             Hyperparameter for penalizing sum of lowpass filter
         lamhSum : float
@@ -185,7 +187,7 @@ class DWT2d(nn.Module):
         loss_f = get_loss_f(lamlSum=lamlSum, lamhSum=lamhSum,
                             lamL2norm=lamL2norm, lamCMF=lamCMF, lamConv=lamConv,
                             lamL1wave=lamL1wave, lamL1attr=lamL1attr)
-        trainer = Trainer(model,
+        trainer = Trainer(pretrained_model,
                           self,
                           optimizer,
                           loss_f,

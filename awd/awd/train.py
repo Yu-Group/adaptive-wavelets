@@ -39,6 +39,8 @@ class Trainer():
                  n_print=1):
 
         self.device = device
+        self.is_parallel = 'data_parallel' in str(type(w_transform))
+        self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse  # use multiple GPUs or not
         if model is not None:
             self.model = model.to(self.device)
             self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals)
@@ -48,8 +50,6 @@ class Trainer():
             self.mt = None
             self.attributer = None
         self.w_transform = w_transform.to(self.device)
-        self.is_parallel = 'data_parallel' in str(type(w_transform))
-        self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse  # use multiple GPUs or not
         self.optimizer = optimizer
         self.loss_f = loss_f
         self.target = target
