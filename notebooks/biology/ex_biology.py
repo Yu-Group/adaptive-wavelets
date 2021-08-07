@@ -1,6 +1,5 @@
 import os
 import random
-import sys
 
 import numpy as np
 import torch
@@ -9,12 +8,9 @@ opj = os.path.join
 import pickle as pkl
 import argparse
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-sys.path.append('../../data/biology')
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
-sys.path.append('../..')
 from awd import awd
 from awd.mdata.biology import get_dataloader, load_pretrained_model
 from awd.awd.warmstart import warm_start
@@ -54,7 +50,7 @@ class p:
 
     # parameters for generating data
     seed = 1
-    is_continuous = False
+    is_continuous = True
 
     # parameters for initialization
     wave = 'db5'
@@ -88,9 +84,8 @@ class p:
 
     def _str(self):
         vals = vars(p)
-        return 'wave=' + str(vals['wave']) + '_lamL1wave=' + str(vals['lamL1wave']) + '_lamL1attr=' + str(
-            vals['lamL1attr']) \
-               + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
+        return 'wave=' + str(vals['wave']) + '_lamL1wave=' + str(vals['lamL1wave']) + '_lamL1attr=' + str(vals['lamL1attr']) \
+               + '_noisefactor=' + str(vals['noise_factor']) + '_seed=' + str(vals['seed']) + '_pid=' + vals['pid']
 
     def _dict(self):
         return {attr: val for (attr, val) in vars(self).items()
@@ -137,13 +132,13 @@ if __name__ == '__main__':
         wt = warm_start(p, out_dir).to(device)
         wt.train()
 
-        # check if we have multiple GPUs
+    # check if we have multiple GPUs
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         model = torch.nn.DataParallel(model)
         wt = torch.nn.DataParallel(wt)
 
-        # train
+    # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
     loss_f = awd.get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF,
@@ -170,7 +165,6 @@ if __name__ == '__main__':
     s.L1wave_loss = L1wave_loss
     s.L1saliency_loss = L1saliency_loss
     s.L1inputxgrad_loss = L1inputxgrad_loss
-    s.net = wt
 
     # save
     results = {**p._dict(p), **s._dict(s)}
