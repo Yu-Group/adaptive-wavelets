@@ -20,7 +20,7 @@ class Loss():
     """Class of calculating loss functions
     """
 
-    def __init__(self, lamlSum=1., lamhSum=1., lamL2norm=1., lamCMF=1., lamConv=1., lamL1wave=1., lamL1attr=1.):
+    def __init__(self, lamlSum=1., lamhSum=1., lamL2norm=1., lamCMF=1., lamConv=1., lamL1wave=1., lamL1attr=1., lamHighfreq=0.0):
         """
         Parameters
         ----------
@@ -52,6 +52,7 @@ class Loss():
         self.lamConv = lamConv
         self.lamL1wave = lamL1wave
         self.lamL1attr = lamL1attr
+        self.lamHighfreq = lamHighfreq
 
     def __call__(self, w_transform, data, recon_data, data_t, attributions=None):
         """
@@ -112,10 +113,16 @@ class Loss():
         self.L1attr_loss = 0
         if self.lamL1attr > 0 and attributions is not None:
             self.L1attr_loss += _L1_attribution_loss(attributions)
+            
+        # Penalty on high frequency of h0  
+        self.highfreq_loss = 0
+        if self.lamHighfreq > 0:
+            self.highfreq_loss += _penalty_high_freq(w_transform)
 
         # total loss
-        loss = self.rec_loss + self.lamlSum * self.lsum_loss + self.lamhSum * self.hsum_loss + self.lamL2norm * self.L2norm_loss + \
-               + self.lamCMF * self.CMF_loss + self.lamConv * self.conv_loss + self.lamL1wave * self.L1wave_loss + self.lamL1attr * self.L1attr_loss
+        loss = self.rec_loss + self.lamlSum * self.lsum_loss + self.lamhSum * self.hsum_loss + self.lamL2norm * self.L2norm_loss  \
+               + self.lamCMF * self.CMF_loss + self.lamConv * self.conv_loss + self.lamL1wave * self.L1wave_loss + self.lamL1attr * self.L1attr_loss \
+               + self.lamHighfreq * self.highfreq_loss
 
         return loss
 
@@ -230,6 +237,19 @@ def _L1_attribution_loss(attributions):
     loss = loss / batch_size
 
     return loss
+
+
+def _penalty_high_freq(w_transform):
+    # pen high frequency of h0
+    n = w_transform.h0.size(2)
+    h_f = torch.fft(torch.stack((w_transform.h0, torch.zeros_like(w_transform.h0)), dim=3), 1)
+    mod = (h_f**2).sum(axis=3)
+    left = int(np.floor(n/4)+1)
+    right = int(np.ceil(3*n/4)-1)
+    h0_hf = mod[0,0,left:right+1]
+    loss = 0.5*torch.norm(h0_hf)**2        
+
+    return loss    
 
 
 def tuple_L1Loss(x):
