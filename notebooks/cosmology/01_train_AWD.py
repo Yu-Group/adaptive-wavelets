@@ -4,7 +4,8 @@ import numpy as np
 
 opj = os.path.join
 import itertools
-from awd.awd.scheduling imports run_serial
+
+run_serial
 
 DIR_FILE = os.path.dirname(os.path.realpath(__file__))  # directory of the config file
 

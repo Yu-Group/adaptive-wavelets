@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.adaptive_wavelets.utils API documentation</title>
+<title>awd.utils API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.adaptive_wavelets.utils</code></h1>
+<h1 class="title">Module <code>awd.utils</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -303,7 +303,7 @@ def get_2dfilts(w_transform):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="awd.adaptive_wavelets.utils.dist"><code class="name flex">
+<dt id="awd.utils.dist"><code class="name flex">
 <span>def <span class="ident">dist</span></span>(<span>wt1, wt2)</span>
 </code></dt>
 <dd>
@@ -339,7 +339,7 @@ def get_2dfilts(w_transform):
     return min(distance)</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.get_1dfilts"><code class="name flex">
+<dt id="awd.utils.get_1dfilts"><code class="name flex">
 <span>def <span class="ident">get_1dfilts</span></span>(<span>w_transform)</span>
 </code></dt>
 <dd>
@@ -372,7 +372,7 @@ Params</p>
         raise ValueError(&#39;no such type of wavelet transform is supported&#39;)</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.get_2dfilts"><code class="name flex">
+<dt id="awd.utils.get_2dfilts"><code class="name flex">
 <span>def <span class="ident">get_2dfilts</span></span>(<span>w_transform)</span>
 </code></dt>
 <dd>
@@ -494,7 +494,7 @@ Params</p>
         raise ValueError(&#39;no such type of wavelet transform is supported&#39;)</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.get_wavefun"><code class="name flex">
+<dt id="awd.utils.get_wavefun"><code class="name flex">
 <span>def <span class="ident">get_wavefun</span></span>(<span>w_transform, level=5)</span>
 </code></dt>
 <dd>
@@ -530,7 +530,7 @@ Params</p>
     return phi, psi, x</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.init_filter"><code class="name flex">
+<dt id="awd.utils.init_filter"><code class="name flex">
 <span>def <span class="ident">init_filter</span></span>(<span>x, init_factor, noise_factor, const_factor)</span>
 </code></dt>
 <dd>
@@ -570,7 +570,7 @@ Params</p>
     return x</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.low_to_high"><code class="name flex">
+<dt id="awd.utils.low_to_high"><code class="name flex">
 <span>def <span class="ident">low_to_high</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -588,7 +588,7 @@ Params</p>
     return y</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.pad_within"><code class="name flex">
+<dt id="awd.utils.pad_within"><code class="name flex">
 <span>def <span class="ident">pad_within</span></span>(<span>x, stride=2, start_row=0, start_col=0)</span>
 </code></dt>
 <dd>
@@ -612,7 +612,7 @@ Params</p>
     return F.conv_transpose2d(x, w.expand(x.size(1), 1, stride, stride), stride=stride, groups=x.size(1)).squeeze()</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.reflect"><code class="name flex">
+<dt id="awd.utils.reflect"><code class="name flex">
 <span>def <span class="ident">reflect</span></span>(<span>x, minx, maxx)</span>
 </code></dt>
 <dd>
@@ -653,7 +653,7 @@ If <em>x</em> contains integers and <em>minx</em> and <em>maxx</em> are (integer
     return np.array(out, dtype=x.dtype)</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.tensor_to_tuple"><code class="name flex">
+<dt id="awd.utils.tensor_to_tuple"><code class="name flex">
 <span>def <span class="ident">tensor_to_tuple</span></span>(<span>y, d, list_of_size)</span>
 </code></dt>
 <dd>
@@ -672,7 +672,7 @@ If <em>x</em> contains integers and <em>minx</em> and <em>maxx</em> are (integer
     return tuple(x)</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.tuple_dim"><code class="name flex">
+<dt id="awd.utils.tuple_dim"><code class="name flex">
 <span>def <span class="ident">tuple_dim</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -689,7 +689,7 @@ If <em>x</em> contains integers and <em>minx</em> and <em>maxx</em> are (integer
     return tot_dim</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.utils.tuple_to_tensor"><code class="name flex">
+<dt id="awd.utils.tuple_to_tensor"><code class="name flex">
 <span>def <span class="ident">tuple_to_tensor</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -723,22 +723,22 @@ If <em>x</em> contains integers and <em>minx</em> and <em>maxx</em> are (integer
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.adaptive_wavelets" href="index.html">awd.adaptive_wavelets</a></code></li>
+<li><code><a title="awd" href="index.html">awd</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="awd.adaptive_wavelets.utils.dist" href="#awd.adaptive_wavelets.utils.dist">dist</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.get_1dfilts" href="#awd.adaptive_wavelets.utils.get_1dfilts">get_1dfilts</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.get_2dfilts" href="#awd.adaptive_wavelets.utils.get_2dfilts">get_2dfilts</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.get_wavefun" href="#awd.adaptive_wavelets.utils.get_wavefun">get_wavefun</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.init_filter" href="#awd.adaptive_wavelets.utils.init_filter">init_filter</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.low_to_high" href="#awd.adaptive_wavelets.utils.low_to_high">low_to_high</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.pad_within" href="#awd.adaptive_wavelets.utils.pad_within">pad_within</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.reflect" href="#awd.adaptive_wavelets.utils.reflect">reflect</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.tensor_to_tuple" href="#awd.adaptive_wavelets.utils.tensor_to_tuple">tensor_to_tuple</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.tuple_dim" href="#awd.adaptive_wavelets.utils.tuple_dim">tuple_dim</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.utils.tuple_to_tensor" href="#awd.adaptive_wavelets.utils.tuple_to_tensor">tuple_to_tensor</a></code></li>
+<li><code><a title="awd.utils.dist" href="#awd.utils.dist">dist</a></code></li>
+<li><code><a title="awd.utils.get_1dfilts" href="#awd.utils.get_1dfilts">get_1dfilts</a></code></li>
+<li><code><a title="awd.utils.get_2dfilts" href="#awd.utils.get_2dfilts">get_2dfilts</a></code></li>
+<li><code><a title="awd.utils.get_wavefun" href="#awd.utils.get_wavefun">get_wavefun</a></code></li>
+<li><code><a title="awd.utils.init_filter" href="#awd.utils.init_filter">init_filter</a></code></li>
+<li><code><a title="awd.utils.low_to_high" href="#awd.utils.low_to_high">low_to_high</a></code></li>
+<li><code><a title="awd.utils.pad_within" href="#awd.utils.pad_within">pad_within</a></code></li>
+<li><code><a title="awd.utils.reflect" href="#awd.utils.reflect">reflect</a></code></li>
+<li><code><a title="awd.utils.tensor_to_tuple" href="#awd.utils.tensor_to_tuple">tensor_to_tuple</a></code></li>
+<li><code><a title="awd.utils.tuple_dim" href="#awd.utils.tuple_dim">tuple_dim</a></code></li>
+<li><code><a title="awd.utils.tuple_to_tensor" href="#awd.utils.tuple_to_tensor">tuple_to_tensor</a></code></li>
 </ul>
 </li>
 </ul>

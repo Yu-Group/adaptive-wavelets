@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.adaptive_wavelets.transform2d API documentation</title>
+<title>awd.transform1d API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,38 +17,21 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.adaptive_wavelets.transform2d</code></h1>
+<h1 class="title">Module <code>awd.transform1d</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import pywt
-import torch
+<pre><code class="python">import torch
 import torch.nn as nn
+from awd import lowlevel
+from awd.utils import init_filter, low_to_high
+from awd.transform import AbstractWT
 
-from awd.adaptive_wavelets import lowlevel
-from awd.adaptive_wavelets.utils import init_filter, low_to_high
-
-
-def load_wavelet(wave: str, device=None):
-    &#39;&#39;&#39;
-    load 1-d wavelet from pywt currently only allow orthogonal wavelets
-    &#39;&#39;&#39;
-    wave = pywt.Wavelet(wave)
-    h0, h1 = wave.dec_lo, wave.dec_hi
-    g0, g1 = wave.rec_lo, wave.rec_hi
-    # Prepare the filters
-    h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
-    g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
-    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
-        raise ValueError(&#39;currently only orthogonal wavelets are supported&#39;)
-    return (h0, h1)
-
-
-class DWT2d(nn.Module):
-    &#39;&#39;&#39;Class of 2d wavelet transform 
+class DWT1d(AbstractWT):
+    &#39;&#39;&#39;Class of 1d wavelet transform 
     Params
     ------
     J: int
@@ -65,7 +48,7 @@ class DWT2d(nn.Module):
 
     def __init__(self, wave=&#39;db3&#39;, mode=&#39;zero&#39;, J=5, init_factor=1, noise_factor=0, const_factor=0):
         super().__init__()
-        h0, _ = load_wavelet(wave)
+        h0, _ = lowlevel.load_wavelet(wave)
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
         # parameterize
@@ -73,92 +56,63 @@ class DWT2d(nn.Module):
 
         self.J = J
         self.mode = mode
-        self.wt_type = &#39;DWT2d&#39;
+        self.wt_type = &#39;DWT1d&#39;
 
     def forward(self, x):
         &#34;&#34;&#34; Forward pass of the DWT.
 
         Args:
-            x (tensor): Input of shape :math:`(N, C_{in}, H_{in}, W_{in})`
+            x (tensor): Input of shape :math:`(N, C_{in}, L_{in})`
 
         Returns:
             (yl, yh)
                 tuple of lowpass (yl) and bandpass (yh) coefficients.
                 yh is a list of length J with the first entry
-                being the finest scale coefficients. yl has shape
-                :math:`(N, C_{in}, H_{in}&#39;, W_{in}&#39;)` and yh has shape
-                :math:`list(N, C_{in}, 3, H_{in}&#39;&#39;, W_{in}&#39;&#39;)`. The new
-                dimension in yh iterates over the LH, HL and HH coefficients.
-
-        Note:
-            :math:`H_{in}&#39;, W_{in}&#39;, H_{in}&#39;&#39;, W_{in}&#39;&#39;` denote the correctly
-            downsampled shapes of the DWT pyramid.
+                being the finest scale coefficients.
         &#34;&#34;&#34;
-        yh = ()
-        ll = x
+        assert x.ndim == 3, &#34;Can only handle 3d inputs (N, C, L)&#34;
+        highs = ()
+        x0 = x
         mode = lowlevel.mode_to_int(self.mode)
 
         h1 = low_to_high(self.h0)
-        h0_col = self.h0.reshape((1, 1, -1, 1))
-        h1_col = h1.reshape((1, 1, -1, 1))
-        h0_row = self.h0.reshape((1, 1, 1, -1))
-        h1_row = h1.reshape((1, 1, 1, -1))
-
         # Do a multilevel transform
         for j in range(self.J):
-            # Do 1 level of the transform
-            ll, high = lowlevel.AFB2D.forward(
-                ll, h0_col, h1_col, h0_row, h1_row, mode)
-            yh += (high,)
+            x0, x1 = lowlevel.AFB1D.forward(x0, self.h0, h1, mode)
+            highs += (x1,)
 
-        return (ll,) + yh
+        return (x0,) + highs
 
     def inverse(self, coeffs):
         &#34;&#34;&#34;
         Args:
-            coeffs (yl, yh): tuple of lowpass and bandpass coefficients, where:
-              yl is a lowpass tensor of shape :math:`(N, C_{in}, H_{in}&#39;,
-              W_{in}&#39;)` and yh is a list of bandpass tensors of shape
-              :math:`list(N, C_{in}, 3, H_{in}&#39;&#39;, W_{in}&#39;&#39;)`. I.e. should match
-              the format returned by DWTForward
+            coeffs (yl, yh): tuple of lowpass and bandpass coefficients, should
+              match the format returned by DWT1DForward.
 
         Returns:
-            Reconstructed input of shape :math:`(N, C_{in}, H_{in}, W_{in})`
-
-        Note:
-            :math:`H_{in}&#39;, W_{in}&#39;, H_{in}&#39;&#39;, W_{in}&#39;&#39;` denote the correctly
-            downsampled shapes of the DWT pyramid.
+            Reconstructed input of shape :math:`(N, C_{in}, L_{in})`
 
         Note:
             Can have None for any of the highpass scales and will treat the
             values as zeros (not in an efficient way though).
         &#34;&#34;&#34;
         coeffs = list(coeffs)
-        yl = coeffs.pop(0)
-        yh = coeffs
-        ll = yl
+        x0 = coeffs.pop(0)
+        highs = coeffs
+        assert x0.ndim == 3, &#34;Can only handle 3d inputs (N, C, L)&#34;
         mode = lowlevel.mode_to_int(self.mode)
 
         h1 = low_to_high(self.h0)
-        g0_col = self.h0.reshape((1, 1, -1, 1))
-        g1_col = h1.reshape((1, 1, -1, 1))
-        g0_row = self.h0.reshape((1, 1, 1, -1))
-        g1_row = h1.reshape((1, 1, 1, -1))
-
         # Do a multilevel inverse transform
-        for h in yh[::-1]:
-            if h is None:
-                h = torch.zeros(ll.shape[0], ll.shape[1], 3, ll.shape[-2],
-                                ll.shape[-1], device=ll.device)
+        for x1 in highs[::-1]:
+            if x1 is None:
+                x1 = torch.zeros_like(x0)
 
-            # &#39;Unpad&#39; added dimensions
-            if ll.shape[-2] &gt; h.shape[-2]:
-                ll = ll[..., :-1, :]
-            if ll.shape[-1] &gt; h.shape[-1]:
-                ll = ll[..., :-1]
-            ll = lowlevel.SFB2D.forward(
-                ll, h, g0_col, g1_col, g0_row, g1_row, mode)
-        return ll</code></pre>
+            # &#39;Unpad&#39; added signal
+            if x0.shape[-1] &gt; x1.shape[-1]:
+                x0 = x0[..., :-1]
+            x0 = lowlevel.SFB1D.forward(x0, x1, self.h0, h1, mode)
+        return x0</code></pre>
 </details>
 </section>
 <section>
@@ -166,43 +120,16 @@ class DWT2d(nn.Module):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="awd.adaptive_wavelets.transform2d.load_wavelet"><code class="name flex">
-<span>def <span class="ident">load_wavelet</span></span>(<span>wave, device=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>load 1-d wavelet from pywt currently only allow orthogonal wavelets</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_wavelet(wave: str, device=None):
-    &#39;&#39;&#39;
-    load 1-d wavelet from pywt currently only allow orthogonal wavelets
-    &#39;&#39;&#39;
-    wave = pywt.Wavelet(wave)
-    h0, h1 = wave.dec_lo, wave.dec_hi
-    g0, g1 = wave.rec_lo, wave.rec_hi
-    # Prepare the filters
-    h0, h1 = lowlevel.prep_filt_afb1d(h0, h1, device)
-    g0, g1 = lowlevel.prep_filt_sfb1d(g0, g1, device)
-    if not torch.allclose(h0, g0) or not torch.allclose(h1, g1):
-        raise ValueError(&#39;currently only orthogonal wavelets are supported&#39;)
-    return (h0, h1)</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="awd.adaptive_wavelets.transform2d.DWT2d"><code class="flex name class">
-<span>class <span class="ident">DWT2d</span></span>
+<dt id="awd.transform1d.DWT1d"><code class="flex name class">
+<span>class <span class="ident">DWT1d</span></span>
 <span>(</span><span>wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Class of 2d wavelet transform
+<section class="desc"><p>Class of 1d wavelet transform
 Params</p>
 <hr>
 <dl>
@@ -222,8 +149,8 @@ can be:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class DWT2d(nn.Module):
-    &#39;&#39;&#39;Class of 2d wavelet transform 
+<pre><code class="python">class DWT1d(AbstractWT):
+    &#39;&#39;&#39;Class of 1d wavelet transform 
     Params
     ------
     J: int
@@ -240,7 +167,7 @@ can be:
 
     def __init__(self, wave=&#39;db3&#39;, mode=&#39;zero&#39;, J=5, init_factor=1, noise_factor=0, const_factor=0):
         super().__init__()
-        h0, _ = load_wavelet(wave)
+        h0, _ = lowlevel.load_wavelet(wave)
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
         # parameterize
@@ -248,100 +175,72 @@ can be:
 
         self.J = J
         self.mode = mode
-        self.wt_type = &#39;DWT2d&#39;
+        self.wt_type = &#39;DWT1d&#39;
 
     def forward(self, x):
         &#34;&#34;&#34; Forward pass of the DWT.
 
         Args:
-            x (tensor): Input of shape :math:`(N, C_{in}, H_{in}, W_{in})`
+            x (tensor): Input of shape :math:`(N, C_{in}, L_{in})`
 
         Returns:
             (yl, yh)
                 tuple of lowpass (yl) and bandpass (yh) coefficients.
                 yh is a list of length J with the first entry
-                being the finest scale coefficients. yl has shape
-                :math:`(N, C_{in}, H_{in}&#39;, W_{in}&#39;)` and yh has shape
-                :math:`list(N, C_{in}, 3, H_{in}&#39;&#39;, W_{in}&#39;&#39;)`. The new
-                dimension in yh iterates over the LH, HL and HH coefficients.
-
-        Note:
-            :math:`H_{in}&#39;, W_{in}&#39;, H_{in}&#39;&#39;, W_{in}&#39;&#39;` denote the correctly
-            downsampled shapes of the DWT pyramid.
+                being the finest scale coefficients.
         &#34;&#34;&#34;
-        yh = ()
-        ll = x
+        assert x.ndim == 3, &#34;Can only handle 3d inputs (N, C, L)&#34;
+        highs = ()
+        x0 = x
         mode = lowlevel.mode_to_int(self.mode)
 
         h1 = low_to_high(self.h0)
-        h0_col = self.h0.reshape((1, 1, -1, 1))
-        h1_col = h1.reshape((1, 1, -1, 1))
-        h0_row = self.h0.reshape((1, 1, 1, -1))
-        h1_row = h1.reshape((1, 1, 1, -1))
-
         # Do a multilevel transform
         for j in range(self.J):
-            # Do 1 level of the transform
-            ll, high = lowlevel.AFB2D.forward(
-                ll, h0_col, h1_col, h0_row, h1_row, mode)
-            yh += (high,)
+            x0, x1 = lowlevel.AFB1D.forward(x0, self.h0, h1, mode)
+            highs += (x1,)
 
-        return (ll,) + yh
+        return (x0,) + highs
 
     def inverse(self, coeffs):
         &#34;&#34;&#34;
         Args:
-            coeffs (yl, yh): tuple of lowpass and bandpass coefficients, where:
-              yl is a lowpass tensor of shape :math:`(N, C_{in}, H_{in}&#39;,
-              W_{in}&#39;)` and yh is a list of bandpass tensors of shape
-              :math:`list(N, C_{in}, 3, H_{in}&#39;&#39;, W_{in}&#39;&#39;)`. I.e. should match
-              the format returned by DWTForward
+            coeffs (yl, yh): tuple of lowpass and bandpass coefficients, should
+              match the format returned by DWT1DForward.
 
         Returns:
-            Reconstructed input of shape :math:`(N, C_{in}, H_{in}, W_{in})`
-
-        Note:
-            :math:`H_{in}&#39;, W_{in}&#39;, H_{in}&#39;&#39;, W_{in}&#39;&#39;` denote the correctly
-            downsampled shapes of the DWT pyramid.
+            Reconstructed input of shape :math:`(N, C_{in}, L_{in})`
 
         Note:
             Can have None for any of the highpass scales and will treat the
             values as zeros (not in an efficient way though).
         &#34;&#34;&#34;
         coeffs = list(coeffs)
-        yl = coeffs.pop(0)
-        yh = coeffs
-        ll = yl
+        x0 = coeffs.pop(0)
+        highs = coeffs
+        assert x0.ndim == 3, &#34;Can only handle 3d inputs (N, C, L)&#34;
         mode = lowlevel.mode_to_int(self.mode)
 
         h1 = low_to_high(self.h0)
-        g0_col = self.h0.reshape((1, 1, -1, 1))
-        g1_col = h1.reshape((1, 1, -1, 1))
-        g0_row = self.h0.reshape((1, 1, 1, -1))
-        g1_row = h1.reshape((1, 1, 1, -1))
-
         # Do a multilevel inverse transform
-        for h in yh[::-1]:
-            if h is None:
-                h = torch.zeros(ll.shape[0], ll.shape[1], 3, ll.shape[-2],
-                                ll.shape[-1], device=ll.device)
+        for x1 in highs[::-1]:
+            if x1 is None:
+                x1 = torch.zeros_like(x0)
 
-            # &#39;Unpad&#39; added dimensions
-            if ll.shape[-2] &gt; h.shape[-2]:
-                ll = ll[..., :-1, :]
-            if ll.shape[-1] &gt; h.shape[-1]:
-                ll = ll[..., :-1]
-            ll = lowlevel.SFB2D.forward(
-                ll, h, g0_col, g1_col, g0_row, g1_row, mode)
-        return ll</code></pre>
+            # &#39;Unpad&#39; added signal
+            if x0.shape[-1] &gt; x1.shape[-1]:
+                x0 = x0[..., :-1]
+            x0 = lowlevel.SFB1D.forward(x0, x1, self.h0, h1, mode)
+        return x0</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="awd.transform.AbstractWT" href="transform.html#awd.transform.AbstractWT">AbstractWT</a></li>
 <li>torch.nn.modules.module.Module</li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.adaptive_wavelets.transform2d.DWT2d.forward"><code class="name flex">
+<dt id="awd.transform1d.DWT1d.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -349,19 +248,13 @@ can be:
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>x</code></strong> :&ensp;<code>tensor</code></dt>
-<dd>Input of shape :math:<code>(N, C_{in}, H_{in}, W_{in})</code></dd>
+<dd>Input of shape :math:<code>(N, C_{in}, L_{in})</code></dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>(yl, yh)
 tuple of lowpass (yl) and bandpass (yh) coefficients.
 yh is a list of length J with the first entry
-being the finest scale coefficients. yl has shape
-:math:<code>(N, C_{in}, H_{in}', W_{in}')</code> and yh has shape
-:math:<code>list(N, C_{in}, 3, H_{in}'', W_{in}'')</code>. The new
-dimension in yh iterates over the LH, HL and HH coefficients.</p>
-<h2 id="note">Note</h2>
-<p>:math:<code>H_{in}', W_{in}', H_{in}'', W_{in}''</code> denote the correctly
-downsampled shapes of the DWT pyramid.</p></section>
+being the finest scale coefficients.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -370,60 +263,41 @@ downsampled shapes of the DWT pyramid.</p></section>
     &#34;&#34;&#34; Forward pass of the DWT.
 
     Args:
-        x (tensor): Input of shape :math:`(N, C_{in}, H_{in}, W_{in})`
+        x (tensor): Input of shape :math:`(N, C_{in}, L_{in})`
 
     Returns:
         (yl, yh)
             tuple of lowpass (yl) and bandpass (yh) coefficients.
             yh is a list of length J with the first entry
-            being the finest scale coefficients. yl has shape
-            :math:`(N, C_{in}, H_{in}&#39;, W_{in}&#39;)` and yh has shape
-            :math:`list(N, C_{in}, 3, H_{in}&#39;&#39;, W_{in}&#39;&#39;)`. The new
-            dimension in yh iterates over the LH, HL and HH coefficients.
-
-    Note:
-        :math:`H_{in}&#39;, W_{in}&#39;, H_{in}&#39;&#39;, W_{in}&#39;&#39;` denote the correctly
-        downsampled shapes of the DWT pyramid.
+            being the finest scale coefficients.
     &#34;&#34;&#34;
-    yh = ()
-    ll = x
+    assert x.ndim == 3, &#34;Can only handle 3d inputs (N, C, L)&#34;
+    highs = ()
+    x0 = x
     mode = lowlevel.mode_to_int(self.mode)
 
     h1 = low_to_high(self.h0)
-    h0_col = self.h0.reshape((1, 1, -1, 1))
-    h1_col = h1.reshape((1, 1, -1, 1))
-    h0_row = self.h0.reshape((1, 1, 1, -1))
-    h1_row = h1.reshape((1, 1, 1, -1))
-
     # Do a multilevel transform
     for j in range(self.J):
-        # Do 1 level of the transform
-        ll, high = lowlevel.AFB2D.forward(
-            ll, h0_col, h1_col, h0_row, h1_row, mode)
-        yh += (high,)
+        x0, x1 = lowlevel.AFB1D.forward(x0, self.h0, h1, mode)
+        highs += (x1,)
 
-    return (ll,) + yh</code></pre>
+    return (x0,) + highs</code></pre>
 </details>
 </dd>
-<dt id="awd.adaptive_wavelets.transform2d.DWT2d.inverse"><code class="name flex">
+<dt id="awd.transform1d.DWT1d.inverse"><code class="name flex">
 <span>def <span class="ident">inverse</span></span>(<span>self, coeffs)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>coeffs</code></strong> :&ensp;<code>yl</code>, <code>yh</code></dt>
-<dd>tuple of lowpass and bandpass coefficients, where:
-yl is a lowpass tensor of shape :math:<code>(N, C_{in}, H_{in}',
-W_{in}')</code> and yh is a list of bandpass tensors of shape
-:math:<code>list(N, C_{in}, 3, H_{in}'', W_{in}'')</code>. I.e. should match
-the format returned by DWTForward</dd>
+<dd>tuple of lowpass and bandpass coefficients, should
+match the format returned by DWT1DForward.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>Reconstructed input of shape :math:<code>(N, C_{in}, H_{in}, W_{in})</code></p>
+<p>Reconstructed input of shape :math:<code>(N, C_{in}, L_{in})</code></p>
 <h2 id="note">Note</h2>
-<p>:math:<code>H_{in}', W_{in}', H_{in}'', W_{in}''</code> denote the correctly
-downsampled shapes of the DWT pyramid.</p>
-<h2 id="note_1">Note</h2>
 <p>Can have None for any of the highpass scales and will treat the
 values as zeros (not in an efficient way though).</p></section>
 <details class="source">
@@ -433,52 +307,44 @@ values as zeros (not in an efficient way though).</p></section>
 <pre><code class="python">def inverse(self, coeffs):
     &#34;&#34;&#34;
     Args:
-        coeffs (yl, yh): tuple of lowpass and bandpass coefficients, where:
-          yl is a lowpass tensor of shape :math:`(N, C_{in}, H_{in}&#39;,
-          W_{in}&#39;)` and yh is a list of bandpass tensors of shape
-          :math:`list(N, C_{in}, 3, H_{in}&#39;&#39;, W_{in}&#39;&#39;)`. I.e. should match
-          the format returned by DWTForward
+        coeffs (yl, yh): tuple of lowpass and bandpass coefficients, should
+          match the format returned by DWT1DForward.
 
     Returns:
-        Reconstructed input of shape :math:`(N, C_{in}, H_{in}, W_{in})`
-
-    Note:
-        :math:`H_{in}&#39;, W_{in}&#39;, H_{in}&#39;&#39;, W_{in}&#39;&#39;` denote the correctly
-        downsampled shapes of the DWT pyramid.
+        Reconstructed input of shape :math:`(N, C_{in}, L_{in})`
 
     Note:
         Can have None for any of the highpass scales and will treat the
         values as zeros (not in an efficient way though).
     &#34;&#34;&#34;
     coeffs = list(coeffs)
-    yl = coeffs.pop(0)
-    yh = coeffs
-    ll = yl
+    x0 = coeffs.pop(0)
+    highs = coeffs
+    assert x0.ndim == 3, &#34;Can only handle 3d inputs (N, C, L)&#34;
     mode = lowlevel.mode_to_int(self.mode)
 
     h1 = low_to_high(self.h0)
-    g0_col = self.h0.reshape((1, 1, -1, 1))
-    g1_col = h1.reshape((1, 1, -1, 1))
-    g0_row = self.h0.reshape((1, 1, 1, -1))
-    g1_row = h1.reshape((1, 1, 1, -1))
-
     # Do a multilevel inverse transform
-    for h in yh[::-1]:
-        if h is None:
-            h = torch.zeros(ll.shape[0], ll.shape[1], 3, ll.shape[-2],
-                            ll.shape[-1], device=ll.device)
+    for x1 in highs[::-1]:
+        if x1 is None:
+            x1 = torch.zeros_like(x0)
 
-        # &#39;Unpad&#39; added dimensions
-        if ll.shape[-2] &gt; h.shape[-2]:
-            ll = ll[..., :-1, :]
-        if ll.shape[-1] &gt; h.shape[-1]:
-            ll = ll[..., :-1]
-        ll = lowlevel.SFB2D.forward(
-            ll, h, g0_col, g1_col, g0_row, g1_row, mode)
-    return ll</code></pre>
+        # &#39;Unpad&#39; added signal
+        if x0.shape[-1] &gt; x1.shape[-1]:
+            x0 = x0[..., :-1]
+        x0 = lowlevel.SFB1D.forward(x0, x1, self.h0, h1, mode)
+    return x0</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="awd.transform.AbstractWT" href="transform.html#awd.transform.AbstractWT">AbstractWT</a></b></code>:
+<ul class="hlist">
+<li><code><a title="awd.transform.AbstractWT.fit" href="transform.html#awd.transform.AbstractWT.fit">fit</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -491,21 +357,16 @@ values as zeros (not in an efficient way though).</p></section>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.adaptive_wavelets" href="index.html">awd.adaptive_wavelets</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="awd.adaptive_wavelets.transform2d.load_wavelet" href="#awd.adaptive_wavelets.transform2d.load_wavelet">load_wavelet</a></code></li>
+<li><code><a title="awd" href="index.html">awd</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="awd.adaptive_wavelets.transform2d.DWT2d" href="#awd.adaptive_wavelets.transform2d.DWT2d">DWT2d</a></code></h4>
+<h4><code><a title="awd.transform1d.DWT1d" href="#awd.transform1d.DWT1d">DWT1d</a></code></h4>
 <ul class="">
-<li><code><a title="awd.adaptive_wavelets.transform2d.DWT2d.forward" href="#awd.adaptive_wavelets.transform2d.DWT2d.forward">forward</a></code></li>
-<li><code><a title="awd.adaptive_wavelets.transform2d.DWT2d.inverse" href="#awd.adaptive_wavelets.transform2d.DWT2d.inverse">inverse</a></code></li>
+<li><code><a title="awd.transform1d.DWT1d.forward" href="#awd.transform1d.DWT1d.forward">forward</a></code></li>
+<li><code><a title="awd.transform1d.DWT1d.inverse" href="#awd.transform1d.DWT1d.inverse">inverse</a></code></li>
 </ul>
 </li>
 </ul>
