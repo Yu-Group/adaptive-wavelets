@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from awd.awd.utils import low_to_high
+from awd.utils import low_to_high
 
 
 def get_loss_f(**kwargs_parse):

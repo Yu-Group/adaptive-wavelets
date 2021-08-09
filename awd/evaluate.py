@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import torch
 
-from awd.awd.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
+from awd.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
     _conv_loss, _L1_wave_loss, _L1_attribution_loss
-from awd.awd.wave_attributions import Attributer
+from awd.wave_attributions import Attributer
 from awd.trim import TrimModel
 
 

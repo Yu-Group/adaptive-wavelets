@@ -21,17 +21,18 @@ Official code for using / reproducing AWD from the paper "Adaptive wavelet disti
 
 - Install by cloning the repo and then from the repo directory running `python setup.py install`
 
-Then, can use the core functions (see simplest example in `notebooks/demo_simple_2d.ipynb` or `notebooks/demo_simple_1d.ipynb`)
+Then, can use the core functions (see simplest example in `notebooks/demo_simple_2d.ipynb` or `notebooks/demo_simple_1d.ipynb`). See [the docs](https://yu-group.github.io/adaptive-wavelet-distillation/) for more information on arguments for these functions.
 
 Given some data, `X` can run the following:
 
 ```python
-from awd.awd.utils import get_wavefun
-from awd.awd.transform2d import DWT2d
+from awd.utils import get_wavefun
+from awd.transform2d import DWT2d
+
 wt = DWT2d(wave='db5', J=4)
-wt.fit(X=X, lr=1e-1, num_epochs=10) # this function alternatively accepts a dataloader
-X_sparse = wt(X) # uses the learned adaptive wavelet
-phi, psi, x = get_wavefun(wt) # can also inspect the learned adaptive wavelet
+wt.fit(X=X, lr=1e-1, num_epochs=10)  # this function alternatively accepts a dataloader
+X_sparse = wt(X)  # uses the learned adaptive wavelet
+phi, psi, x = get_wavefun(wt)  # can also inspect the learned adaptive wavelet
 ```
 
 To distill a pretrained model named `model`, simply pass it as an additional argument to the fit function:

@@ -13,7 +13,6 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 # adaptive-wavelets modules
 from awd import awd
 from awd.mdata.biology import get_dataloader, load_pretrained_model
-from awd.awd.warmstart import warm_start
 
 parser = argparse.ArgumentParser(description='Biology Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')

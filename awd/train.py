@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from awd.awd.wave_attributions import Attributer
+from awd.wave_attributions import Attributer
 from awd.trim import TrimModel
 
 

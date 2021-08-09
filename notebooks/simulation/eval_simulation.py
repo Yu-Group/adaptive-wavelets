@@ -6,8 +6,8 @@ import pandas as pd
 import torch
 
 opj = os.path.join
-from awd.awd.transform1d import DWT1d
-from awd.awd.utils import get_wavefun, dist
+from awd.transform1d import DWT1d
+from awd.utils import get_wavefun, dist
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

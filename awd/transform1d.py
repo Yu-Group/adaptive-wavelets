@@ -1,10 +1,8 @@
-import pywt
 import torch
 import torch.nn as nn
-import numpy as np
-from awd.awd import lowlevel
-from awd.awd.utils import init_filter, low_to_high
-from awd.awd.transform import AbstractWT
+from awd import lowlevel
+from awd.utils import init_filter, low_to_high
+from awd.transform import AbstractWT
 
 class DWT1d(AbstractWT):
     '''Class of 1d wavelet transform 
