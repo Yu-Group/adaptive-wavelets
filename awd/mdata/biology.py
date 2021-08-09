@@ -5,8 +5,6 @@ opj = os.path.join
 import pandas as pd
 from torch.utils.data import TensorDataset, DataLoader
 from copy import deepcopy
-
-sys.path.append('../../data/biology')
 import torch
 from torch import optim
 import numpy as np

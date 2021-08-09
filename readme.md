@@ -21,7 +21,7 @@ Official code for using / reproducing AWD from the paper "Adaptive wavelet disti
 
 - Install by cloning the repo and then from the repo directory running `python setup.py install`
 
-Then, can use the core functions (see simplest example in `notebooks/demo_simple.ipynb`)
+Then, can use the core functions (see simplest example in `notebooks/demo_simple_2d.ipynb` or `notebooks/demo_simple_1d.ipynb`)
 
 Given some data, `X` can run the following:
 
