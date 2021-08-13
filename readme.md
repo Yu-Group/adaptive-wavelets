@@ -23,7 +23,7 @@ Official code for using / reproducing AWD from the paper "Adaptive wavelet disti
 
 Then, can use the core functions (see simplest example in `notebooks/demo_simple_2d.ipynb` or `notebooks/demo_simple_1d.ipynb`). See [the docs](https://yu-group.github.io/adaptive-wavelet-distillation/) for more information on arguments for these functions.
 
-Given some data, `X` can run the following:
+Given some data `X`, you can run the following:
 
 ```python
 from awd.utils import get_wavefun

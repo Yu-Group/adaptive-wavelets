@@ -1,3 +1,0 @@
-usage: profile.py [-h] [-f] [-b] [-j J] [-c] [--no_hp] [-s SIZE] [--reference]
-profile.py: error: unrecognized arguments: --layer xfmifm
-======== Error: Application returned non-zero code 2
