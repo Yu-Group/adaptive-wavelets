@@ -1,27 +1,29 @@
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
+
 from awd.losses import get_loss_f
 from awd.train import Trainer
 
+
 class AbstractWT(nn.Module):
-    
+
     def fit(self,
             X=None,
             train_loader=None,
-            pretrained_model=None, 
-            lr: float=0.001,
-            num_epochs: int=20,
-            seed: int=42,
-            attr_methods = 'Saliency',
-            target = 6,  
-            lamlSum: float=1.,
-            lamhSum: float=1.,
-            lamL2norm: float=1.,
-            lamCMF: float=1.,
-            lamConv: float=1.,
-            lamL1wave: float=1.,
-            lamL1attr: float=1.,):
+            pretrained_model=None,
+            lr: float = 0.001,
+            num_epochs: int = 20,
+            seed: int = 42,
+            attr_methods='Saliency',
+            target=6,
+            lamlSum: float = 1.,
+            lamhSum: float = 1.,
+            lamL2norm: float = 1.,
+            lamCMF: float = 1.,
+            lamConv: float = 1.,
+            lamL1wave: float = 1.,
+            lamL1attr: float = 1.):
         """
         Params
         ------
@@ -50,20 +52,19 @@ class AbstractWT(nn.Module):
             raise ValueError('Either X or train_loader must be passed!')
         elif train_loader is None:
             if 'ndarray' in str(type(X)):
-                device = 'cuda' if self.paramaters()[0].is_cuda else 'cpu'
-                X = torch.Tensor(X).to(device)
-            
+                X = torch.Tensor(X).to(self.device)
+
             # convert to float
             X = X.float()
             if self.wt_type == 'DWT2d':
                 X = X.unsqueeze(1)
-            
+
             # need to pad as if it had y (to match default pytorch dataloaders)
             X = [(X[i], np.nan) for i in range(X.shape[0])]
-            train_loader = torch.utils.data.DataLoader(X, 
-                                                      shuffle=True,
-                                                      batch_size=len(X))
-#             print(iter(train_loader).next())
+            train_loader = torch.utils.data.DataLoader(X,
+                                                       shuffle=True,
+                                                       batch_size=len(X))
+        #             print(iter(train_loader).next())
         params = list(self.parameters())
         optimizer = torch.optim.Adam(params, lr=lr)
         loss_f = get_loss_f(lamlSum=lamlSum, lamhSum=lamhSum,
@@ -76,8 +77,8 @@ class AbstractWT(nn.Module):
                           use_residuals=True,
                           target=target,
                           attr_methods=attr_methods,
-                          n_print=1)
-        
+                          n_print=1, device=self.device)
+
         # actually train
         self.train()
         trainer(train_loader, epochs=num_epochs)

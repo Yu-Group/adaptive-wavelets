@@ -1,13 +1,9 @@
 import numpy as np
 from numpy.fft import *
-import torch
-import torch.nn.functional as F
-import torch.optim as optim
-import sys
-from tqdm import tqdm
+
 
 def to_freq(x):
-    x =  x.cpu().detach().numpy().squeeze()
+    x = x.cpu().detach().numpy().squeeze()
     return np.fft.fftshift(mag(x))
 
 
@@ -22,12 +18,12 @@ def mag(x):
 def freq_band(n=28, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1):
     freq_arr = fftshift(fftfreq(n))
     freq_arr /= np.max(np.abs(freq_arr))
-    mask_bandpass = np.zeros((n,n))
+    mask_bandpass = np.zeros((n, n))
 
     for r in range(n):
         for c in range(n):
-            dist = np.sqrt(freq_arr[r]**2 + freq_arr[c]**2)
+            dist = np.sqrt(freq_arr[r] ** 2 + freq_arr[c] ** 2)
             if dist >= band_center - band_width_lower and dist < band_center + band_width_upper:
                 mask_bandpass[r, c] = 1
-    
+
     return mask_bandpass

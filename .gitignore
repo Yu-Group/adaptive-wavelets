@@ -25,3 +25,5 @@ experiments/fake_news/very_large_data
 **egg*
 notebooks/biology/results/animate_fig
 venv
+*.xml
+.hypothesis
