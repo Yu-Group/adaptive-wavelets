@@ -28,6 +28,8 @@ class AbstractWT(nn.Module):
         Params
         ------
         X: numpy array or torch.Tensor
+            For 1-d signals this should be 3-dimensional, (num_examples, num_curves_per_example, length_of_curve)
+            e.g. for 500 1-dimensional curves of length 40 would be (500, 1, 40)
         train_loader: data_loader
             each element should return tuple of (x, _)
         pretrained_model: nn.Module, optional
