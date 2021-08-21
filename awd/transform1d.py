@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-from awd import lowlevel
+from awd.utils import lowlevel
 from awd.transform import AbstractWT
-from awd.utils import init_filter, low_to_high
+from awd.utils.misc import init_filter, low_to_high
 
 
 class DWT1d(AbstractWT):

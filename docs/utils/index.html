@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.scheduling API documentation</title>
+<title>awd.utils API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,92 +17,50 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.scheduling</code></h1>
+<h1 class="title">Module <code>awd.utils</code></h1>
 </header>
 <section id="section-intro">
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">import os
-
-
-def run_serial(ks, param_combinations, path):
-    &#39;&#39;&#39;run each parameter combination in serial
-    &#39;&#39;&#39;
-    for i in range(len(param_combinations)):
-        param_str = f&#39;python {path} &#39;
-        for j, key in enumerate(ks):
-            param_str += &#39;--&#39; + key + &#39; &#39; + str(param_combinations[i][j]) + &#39; &#39;
-        print(f&#39;running: {param_str}\n\t({i}/{len(param_combinations)})&#39;)
-        os.system(param_str)
-
-
-def run_parallel(ks, param_combinations, path, partition=&#39;low&#39;):
-    &#39;&#39;&#39;run each parameter combination in parallel (requires slurmpy package)
-    &#39;&#39;&#39;
-    from slurmpy import Slurm
-    s = Slurm(&#34;fit_mog&#34;, {&#34;partition&#34;: partition, &#34;time&#34;: &#34;4-0&#34;})
-
-    for i in range(len(param_combinations)):
-        param_str = f&#39;module load python; python3 {path} &#39;
-        for j, key in enumerate(ks):
-            param_str += &#39;--&#39; + key + &#39; &#39; + str(param_combinations[i][j]) + &#39; &#39;
-        print(f&#39;scheduled: {param_str}\n\t({i}/{len(param_combinations)})&#39;)
-        s.run(param_str)</code></pre>
-</details>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt id="awd.scheduling.run_parallel"><code class="name flex">
-<span>def <span class="ident">run_parallel</span></span>(<span>ks, param_combinations, path, partition='low')</span>
-</code></dt>
+<dt><code class="name"><a title="awd.utils.evaluate" href="evaluate.html">awd.utils.evaluate</a></code></dt>
 <dd>
-<section class="desc"><p>run each parameter combination in parallel (requires slurmpy package)</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def run_parallel(ks, param_combinations, path, partition=&#39;low&#39;):
-    &#39;&#39;&#39;run each parameter combination in parallel (requires slurmpy package)
-    &#39;&#39;&#39;
-    from slurmpy import Slurm
-    s = Slurm(&#34;fit_mog&#34;, {&#34;partition&#34;: partition, &#34;time&#34;: &#34;4-0&#34;})
-
-    for i in range(len(param_combinations)):
-        param_str = f&#39;module load python; python3 {path} &#39;
-        for j, key in enumerate(ks):
-            param_str += &#39;--&#39; + key + &#39; &#39; + str(param_combinations[i][j]) + &#39; &#39;
-        print(f&#39;scheduled: {param_str}\n\t({i}/{len(param_combinations)})&#39;)
-        s.run(param_str)</code></pre>
-</details>
+<section class="desc"></section>
 </dd>
-<dt id="awd.scheduling.run_serial"><code class="name flex">
-<span>def <span class="ident">run_serial</span></span>(<span>ks, param_combinations, path)</span>
-</code></dt>
+<dt><code class="name"><a title="awd.utils.lowlevel" href="lowlevel.html">awd.utils.lowlevel</a></code></dt>
 <dd>
-<section class="desc"><p>run each parameter combination in serial</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def run_serial(ks, param_combinations, path):
-    &#39;&#39;&#39;run each parameter combination in serial
-    &#39;&#39;&#39;
-    for i in range(len(param_combinations)):
-        param_str = f&#39;python {path} &#39;
-        for j, key in enumerate(ks):
-            param_str += &#39;--&#39; + key + &#39; &#39; + str(param_combinations[i][j]) + &#39; &#39;
-        print(f&#39;running: {param_str}\n\t({i}/{len(param_combinations)})&#39;)
-        os.system(param_str)</code></pre>
-</details>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.utils.misc" href="misc.html">awd.utils.misc</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.utils.scheduling" href="scheduling.html">awd.utils.scheduling</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.utils.train" href="train.html">awd.utils.train</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.utils.visualize" href="visualize.html">awd.utils.visualize</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.utils.warmstart" href="warmstart.html">awd.utils.warmstart</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="awd.utils.wave_attributions" href="wave_attributions.html">awd.utils.wave_attributions</a></code></dt>
+<dd>
+<section class="desc"></section>
 </dd>
 </dl>
+</section>
+<section>
+</section>
+<section>
 </section>
 <section>
 </section>
@@ -115,13 +73,19 @@ def run_parallel(ks, param_combinations, path, partition=&#39;low&#39;):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd" href="index.html">awd</a></code></li>
+<li><code><a title="awd" href="../index.html">awd</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="awd.scheduling.run_parallel" href="#awd.scheduling.run_parallel">run_parallel</a></code></li>
-<li><code><a title="awd.scheduling.run_serial" href="#awd.scheduling.run_serial">run_serial</a></code></li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="awd.utils.evaluate" href="evaluate.html">awd.utils.evaluate</a></code></li>
+<li><code><a title="awd.utils.lowlevel" href="lowlevel.html">awd.utils.lowlevel</a></code></li>
+<li><code><a title="awd.utils.misc" href="misc.html">awd.utils.misc</a></code></li>
+<li><code><a title="awd.utils.scheduling" href="scheduling.html">awd.utils.scheduling</a></code></li>
+<li><code><a title="awd.utils.train" href="train.html">awd.utils.train</a></code></li>
+<li><code><a title="awd.utils.visualize" href="visualize.html">awd.utils.visualize</a></code></li>
+<li><code><a title="awd.utils.warmstart" href="warmstart.html">awd.utils.warmstart</a></code></li>
+<li><code><a title="awd.utils.wave_attributions" href="wave_attributions.html">awd.utils.wave_attributions</a></code></li>
 </ul>
 </li>
 </ul>

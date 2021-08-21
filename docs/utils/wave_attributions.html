@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.wave_attributions API documentation</title>
+<title>awd.utils.wave_attributions API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.wave_attributions</code></h1>
+<h1 class="title">Module <code>awd.utils.wave_attributions</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -139,7 +139,7 @@ class Attributer(nn.Module):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="awd.wave_attributions.Attributer"><code class="flex name class">
+<dt id="awd.utils.wave_attributions.Attributer"><code class="flex name class">
 <span>class <span class="ident">Attributer</span></span>
 <span>(</span><span>mt, attr_methods='InputXGradient', is_train=True, device='cuda')</span>
 </code></dt>
@@ -266,7 +266,7 @@ Params</p>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.wave_attributions.Attributer.InputXGradient"><code class="name flex">
+<dt id="awd.utils.wave_attributions.Attributer.InputXGradient"><code class="name flex">
 <span>def <span class="ident">InputXGradient</span></span>(<span>self, x, target=1, additional_forward_args=None)</span>
 </code></dt>
 <dd>
@@ -297,7 +297,7 @@ Params</p>
     return attributions</code></pre>
 </details>
 </dd>
-<dt id="awd.wave_attributions.Attributer.IntegratedGradient"><code class="name flex">
+<dt id="awd.utils.wave_attributions.Attributer.IntegratedGradient"><code class="name flex">
 <span>def <span class="ident">IntegratedGradient</span></span>(<span>self, x, target=1, additional_forward_args=None, M=100)</span>
 </code></dt>
 <dd>
@@ -335,7 +335,7 @@ Params</p>
     return tuple(scores)</code></pre>
 </details>
 </dd>
-<dt id="awd.wave_attributions.Attributer.Saliency"><code class="name flex">
+<dt id="awd.utils.wave_attributions.Attributer.Saliency"><code class="name flex">
 <span>def <span class="ident">Saliency</span></span>(<span>self, x, target=1, additional_forward_args=None)</span>
 </code></dt>
 <dd>
@@ -364,7 +364,7 @@ Params</p>
     return attributions</code></pre>
 </details>
 </dd>
-<dt id="awd.wave_attributions.Attributer.forward"><code class="name flex">
+<dt id="awd.utils.wave_attributions.Attributer.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x, target=1, additional_forward_args=None)</span>
 </code></dt>
 <dd>
@@ -406,18 +406,18 @@ registered hooks while the latter silently ignores them.</p>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd" href="index.html">awd</a></code></li>
+<li><code><a title="awd.utils" href="index.html">awd.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="awd.wave_attributions.Attributer" href="#awd.wave_attributions.Attributer">Attributer</a></code></h4>
+<h4><code><a title="awd.utils.wave_attributions.Attributer" href="#awd.utils.wave_attributions.Attributer">Attributer</a></code></h4>
 <ul class="">
-<li><code><a title="awd.wave_attributions.Attributer.InputXGradient" href="#awd.wave_attributions.Attributer.InputXGradient">InputXGradient</a></code></li>
-<li><code><a title="awd.wave_attributions.Attributer.IntegratedGradient" href="#awd.wave_attributions.Attributer.IntegratedGradient">IntegratedGradient</a></code></li>
-<li><code><a title="awd.wave_attributions.Attributer.Saliency" href="#awd.wave_attributions.Attributer.Saliency">Saliency</a></code></li>
-<li><code><a title="awd.wave_attributions.Attributer.forward" href="#awd.wave_attributions.Attributer.forward">forward</a></code></li>
+<li><code><a title="awd.utils.wave_attributions.Attributer.InputXGradient" href="#awd.utils.wave_attributions.Attributer.InputXGradient">InputXGradient</a></code></li>
+<li><code><a title="awd.utils.wave_attributions.Attributer.IntegratedGradient" href="#awd.utils.wave_attributions.Attributer.IntegratedGradient">IntegratedGradient</a></code></li>
+<li><code><a title="awd.utils.wave_attributions.Attributer.Saliency" href="#awd.utils.wave_attributions.Attributer.Saliency">Saliency</a></code></li>
+<li><code><a title="awd.utils.wave_attributions.Attributer.forward" href="#awd.utils.wave_attributions.Attributer.forward">forward</a></code></li>
 </ul>
 </li>
 </ul>

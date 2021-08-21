@@ -4,7 +4,7 @@ import torch
 
 from awd.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
     _conv_loss, _L1_wave_loss, _L1_attribution_loss
-from awd.wave_attributions import Attributer
+from awd.utils.wave_attributions import Attributer
 from awd.trim import TrimModel
 
 

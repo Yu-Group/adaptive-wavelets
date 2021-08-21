@@ -8,6 +8,8 @@ data += '<a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" cla
 
 # remove header
 data = data.replace('<h1 class="title">Module <code>awd</code></h1>', '') # remove header
+data = data.replace('<li><code><a title="awd.tests" href="tests/index.html">awd.tests</a></code></li>', '') # remove tests
+data = data.replace('<dt><code class="name"><a title="awd.tests" href="tests/index.html">awd.tests</a></code>\n</dt>', '')
 
 # Write the file out again
 with open('index.html', 'w') as f:

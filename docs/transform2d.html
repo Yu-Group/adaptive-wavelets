@@ -28,8 +28,8 @@
 import torch.nn as nn
 import torch.optim
 
-from awd import lowlevel
-from awd.utils import init_filter, low_to_high
+from awd.utils import lowlevel
+from awd.utils.misc import init_filter, low_to_high
 from awd.transform import AbstractWT
 
 class DWT2d(AbstractWT):

@@ -6,7 +6,7 @@
 <meta name="generator" content="pdoc 0.7.2" />
 <title>awd API documentation</title>
 <meta name="description" content="&lt;h1 align=&#34;center&#34;&gt;
-&lt;img src=&#34;https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif&#34; width=&#34;15%&#34;&gt; Adaptive wavelet distillation &lt;img …" />
+&lt;img src=&#34;https://yu-group.github.io/adaptive-wavelets/anim.gif&#34; width=&#34;15%&#34;&gt; Adaptive wavelets &lt;img …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -22,8 +22,8 @@
 </header>
 <section id="section-intro">
 <h1 align="center">
-<img src="https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif" width="15%"> Adaptive wavelet distillation <img src="https://yu-group.github.io/adaptive-wavelet-distillation/anim.gif" width="15%"></h1>
-<p align="center"> Wavelets which adapt given data (and optionally a pre-trained model).
+<img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"> Adaptive wavelets <img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"></h1>
+<p align="center"> Wavelets which adapt given data (and optionally a pre-trained model). This yields models which are faster, more compressible, and more interpretable.
 </p>
 <p align="center">
 <img src="https://img.shields.io/badge/license-mit-blue.svg">
@@ -31,17 +31,12 @@
 <img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
 <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
 </p>
-<p align="center"> <i> Adaptive wavelets yield models which are faster, more compressible, and more interpretable. </i></p>
-<p><img alt="" src="docs/awd.jpg"></p>
-<p>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">arXiv</a>).</p>
-<blockquote>
-<p>Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.</p>
-</blockquote>
 <h1 id="quickstart">Quickstart</h1>
-<ul>
-<li>Install by cloning the repo and then from the repo directory running <code>python setup.py install</code></li>
-</ul>
-<p>Then, can use the core functions (see simplest example in <code>notebooks/demo_simple_2d.ipynb</code> or <code>notebooks/demo_simple_1d.ipynb</code>). See <a href="https://yu-group.github.io/adaptive-wavelet-distillation/">the docs</a> for more information on arguments for these functions.</p>
+<blockquote>
+<p><strong>Installation</strong>: <code>pip install git+&lt;https://github.com/Yu-Group/adaptive-wavelets.git</code>&gt;
+or clone the repo and run <code>python setup.py install</code> from the repo directory</p>
+</blockquote>
+<p>Then, can use the core functions (see simplest example in <code>notebooks/demo_simple_2d.ipynb</code> or <code>notebooks/demo_simple_1d.ipynb</code>). See <a href="https://yu-group.github.io/adaptive-wavelets/">the docs</a> for more information on arguments for these functions.</p>
 <p>Given some data <code>X</code>, you can run the following:</p>
 <pre><code class="language-python">from awd.utils import get_wavefun
 from awd.transform2d import DWT2d
@@ -56,6 +51,12 @@ phi, psi, x = get_wavefun(wt)  # can also inspect the learned adaptive wavelet
        lr=1e-1, num_epochs=10,
        lamL1attr=5) # control how much to regularize the model's attributions
 </code></pre>
+<h1 id="background">Background</h1>
+<p><img alt="" src="docs/awd.jpg"></p>
+<p>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">arXiv</a>).</p>
+<blockquote>
+<p>Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.</p>
+</blockquote>
 <h1 id="related-work">Related work</h1>
 <ul>
 <li>TRIM (ICLR 2020 workshop <a href="https://arxiv.org/abs/2003.01926">pdf</a>, <a href="https://github.com/csinva/transformation-importance">github</a>) - using simple reparameterizations, allows for calculating disentangled importances to transformations of the input (e.g. assigning importances to different frequencies)</li>
@@ -78,13 +79,17 @@ year={2021}
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
 .. include:: ../readme.md
-&#34;&#34;&#34;</code></pre>
+&#34;&#34;&#34;
+from .losses import get_loss_f
+from awd.utils.train import Trainer
+from .transform1d import DWT1d
+from .transform2d import DWT2d</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="awd.evaluate" href="evaluate.html">awd.evaluate</a></code></dt>
+<dt><code class="name"><a title="awd.data" href="data/index.html">awd.data</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
@@ -92,27 +97,11 @@ year={2021}
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.lowlevel" href="lowlevel.html">awd.lowlevel</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awd.mdata" href="mdata/index.html">awd.mdata</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
 <dt><code class="name"><a title="awd.models" href="models/index.html">awd.models</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.scheduling" href="scheduling.html">awd.scheduling</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
 <dt><code class="name"><a title="awd.tests" href="tests/index.html">awd.tests</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awd.train" href="train.html">awd.train</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
@@ -132,19 +121,7 @@ year={2021}
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.utils" href="utils.html">awd.utils</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awd.visualize" href="visualize.html">awd.visualize</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awd.warmstart" href="warmstart.html">awd.warmstart</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awd.wave_attributions" href="wave_attributions.html">awd.wave_attributions</a></code></dt>
+<dt><code class="name"><a title="awd.utils" href="utils/index.html">awd.utils</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
@@ -162,28 +139,22 @@ year={2021}
 <div class="toc">
 <ul>
 <li><a href="#quickstart">Quickstart</a></li>
+<li><a href="#background">Background</a></li>
 <li><a href="#related-work">Related work</a></li>
 </ul>
 </div>
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="awd.evaluate" href="evaluate.html">awd.evaluate</a></code></li>
+<li><code><a title="awd.data" href="data/index.html">awd.data</a></code></li>
 <li><code><a title="awd.losses" href="losses.html">awd.losses</a></code></li>
-<li><code><a title="awd.lowlevel" href="lowlevel.html">awd.lowlevel</a></code></li>
-<li><code><a title="awd.mdata" href="mdata/index.html">awd.mdata</a></code></li>
 <li><code><a title="awd.models" href="models/index.html">awd.models</a></code></li>
-<li><code><a title="awd.scheduling" href="scheduling.html">awd.scheduling</a></code></li>
-<li><code><a title="awd.tests" href="tests/index.html">awd.tests</a></code></li>
-<li><code><a title="awd.train" href="train.html">awd.train</a></code></li>
+
 <li><code><a title="awd.transform" href="transform.html">awd.transform</a></code></li>
 <li><code><a title="awd.transform1d" href="transform1d.html">awd.transform1d</a></code></li>
 <li><code><a title="awd.transform2d" href="transform2d.html">awd.transform2d</a></code></li>
 <li><code><a title="awd.trim" href="trim/index.html">awd.trim</a></code></li>
-<li><code><a title="awd.utils" href="utils.html">awd.utils</a></code></li>
-<li><code><a title="awd.visualize" href="visualize.html">awd.visualize</a></code></li>
-<li><code><a title="awd.warmstart" href="warmstart.html">awd.warmstart</a></code></li>
-<li><code><a title="awd.wave_attributions" href="wave_attributions.html">awd.wave_attributions</a></code></li>
+<li><code><a title="awd.utils" href="utils/index.html">awd.utils</a></code></li>
 </ul>
 </li>
 </ul>

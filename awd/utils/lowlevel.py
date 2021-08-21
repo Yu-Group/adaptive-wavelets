@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch.autograd import Function
 
-from awd.utils import reflect
+from awd.utils.misc import reflect
 
 def load_wavelet(wave: str, device=None):
     '''load wavelet from pywt (currently only allow orthogonal wavelets)

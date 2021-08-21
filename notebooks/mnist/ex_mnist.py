@@ -12,13 +12,13 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
 from awd.losses import get_loss_f
-from awd.train import Trainer
+from awd.utils.train import Trainer
 from awd.evaluate import Validator
 from awd.transform2d import DWT2d
 
-from awd.mdata.mnist import get_dataloader, load_pretrained_model
+from awd.data.mnist import get_dataloader, load_pretrained_model
 
-from awd.warmstart import warm_start
+from awd.utils.warmstart import warm_start
 
 parser = argparse.ArgumentParser(description='Mnist Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
