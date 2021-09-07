@@ -5,13 +5,14 @@
   <img src="https://img.shields.io/badge/license-mit-blue.svg">
   <img src="https://img.shields.io/badge/python-3.6--3.8-blue">
   <img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
+  <a href="https://github.com/csinva/imodels/actions"><img src="https://github.com/Yu-Group/adaptive-wavelets/workflows/tests/badge.svg"></a>
   <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
-  <img src="https://img.shields.io/pypi/v/awave?color=brightgreen">
+  <img src="https://img.shields.io/pypi/v/awave?color=orange">
 </p>  
 
 # Quickstart
 
-> **Installation**: `pip install git+https://github.com/Yu-Group/adaptive-wavelets.git`
+> **Installation**: `pip install awave`
 > or clone the repo and run `python setup.py install` from the repo directory
 
 Then, can use the core functions (see simplest example in `notebooks/demo_simple_2d.ipynb` or `notebooks/demo_simple_1d.ipynb`). See [the docs](https://yu-group.github.io/adaptive-wavelets/) for more information on arguments for these functions.
