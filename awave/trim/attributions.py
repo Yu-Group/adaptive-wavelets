@@ -3,11 +3,11 @@ import torch
 import acd
 from copy import deepcopy
 import sys
-from awd.trim.util import *
+from awave.trim.util import *
 from numpy.fft import *
 from torch import nn
 from captum.attr import *
-from awd.trim.trim import *
+from awave.trim.trim import *
 sys.path.append('../..')
 
 

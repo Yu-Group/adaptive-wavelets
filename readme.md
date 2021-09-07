@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/badge/python-3.6--3.8-blue">
   <img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
   <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
+  <img src="https://img.shields.io/pypi/v/awave?color=brightgreen">
 </p>  
 
 # Quickstart
@@ -18,8 +19,8 @@ Then, can use the core functions (see simplest example in `notebooks/demo_simple
 Given some data `X`, you can run the following:
 
 ```python
-from awd.utils import get_wavefun
-from awd.transform2d import DWT2d
+from awave.utils.misc import get_wavefun
+from awave.transform2d import DWT2d
 
 wt = DWT2d(wave='db5', J=4)
 wt.fit(X=X, lr=1e-1, num_epochs=10)  # this function alternatively accepts a dataloader
@@ -41,10 +42,11 @@ wt.fit(X=X, pretrained_model=model,
 ![](docs/awd.jpg)
 
 
-Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" ([arXiv](https://arxiv.org/abs/2107.09145)).
+Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" ([ha et al. 2021](https://arxiv.org/abs/2107.09145)).
 
 > Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.
 
+Also provides an implementation for "Learning Sparse Wavelet Representations"([recoskie & mann, 2018](https://arxiv.org/abs/1802.02961))
 
 # Related work
 

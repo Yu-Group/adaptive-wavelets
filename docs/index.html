@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd API documentation</title>
+<title>awave API documentation</title>
 <meta name="description" content="&lt;h1 align=&#34;center&#34;&gt;
 &lt;img src=&#34;https://yu-group.github.io/adaptive-wavelets/anim.gif&#34; width=&#34;15%&#34;&gt; Adaptive wavelets &lt;img …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -30,6 +30,7 @@
 <img src="https://img.shields.io/badge/python-3.6--3.8-blue">
 <img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
 <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
+<img src="https://img.shields.io/pypi/v/awave?color=brightgreen">
 </p>
 <h1 id="quickstart">Quickstart</h1>
 <blockquote>
@@ -38,8 +39,8 @@ or clone the repo and run <code>python setup.py install</code> from the repo dir
 </blockquote>
 <p>Then, can use the core functions (see simplest example in <code>notebooks/demo_simple_2d.ipynb</code> or <code>notebooks/demo_simple_1d.ipynb</code>). See <a href="https://yu-group.github.io/adaptive-wavelets/">the docs</a> for more information on arguments for these functions.</p>
 <p>Given some data <code>X</code>, you can run the following:</p>
-<pre><code class="language-python">from awd.utils import get_wavefun
-from awd.transform2d import DWT2d
+<pre><code class="language-python">from awave.utils.misc import get_wavefun
+from awave.transform2d import DWT2d
 
 wt = DWT2d(wave='db5', J=4)
 wt.fit(X=X, lr=1e-1, num_epochs=10)  # this function alternatively accepts a dataloader
@@ -53,10 +54,11 @@ phi, psi, x = get_wavefun(wt)  # can also inspect the learned adaptive wavelet
 </code></pre>
 <h1 id="background">Background</h1>
 <p><img alt="" src="docs/awd.jpg"></p>
-<p>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">arXiv</a>).</p>
+<p>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">ha et al. 2021</a>).</p>
 <blockquote>
 <p>Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.</p>
 </blockquote>
+<p>Also provides an implementation for "Learning Sparse Wavelet Representations"(<a href="https://arxiv.org/abs/1802.02961">recoskie &amp; mann, 2018</a>)</p>
 <h1 id="related-work">Related work</h1>
 <ul>
 <li>TRIM (ICLR 2020 workshop <a href="https://arxiv.org/abs/2003.01926">pdf</a>, <a href="https://github.com/csinva/transformation-importance">github</a>) - using simple reparameterizations, allows for calculating disentangled importances to transformations of the input (e.g. assigning importances to different frequencies)</li>
@@ -81,7 +83,7 @@ year={2021}
 .. include:: ../readme.md
 &#34;&#34;&#34;
 from .losses import get_loss_f
-from awd.utils.train import Trainer
+from awave.utils.train import Trainer
 from .transform1d import DWT1d
 from .transform2d import DWT2d</code></pre>
 </details>
@@ -89,39 +91,39 @@ from .transform2d import DWT2d</code></pre>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="awd.data" href="data/index.html">awd.data</a></code></dt>
+<dt><code class="name"><a title="awave.data" href="data/index.html">awave.data</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.losses" href="losses.html">awd.losses</a></code></dt>
+<dt><code class="name"><a title="awave.losses" href="losses.html">awave.losses</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.models" href="models/index.html">awd.models</a></code></dt>
+<dt><code class="name"><a title="awave.models" href="models/index.html">awave.models</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.tests" href="tests/index.html">awd.tests</a></code></dt>
+<dt><code class="name"><a title="awave.tests" href="tests/index.html">awave.tests</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.transform" href="transform.html">awd.transform</a></code></dt>
+<dt><code class="name"><a title="awave.transform" href="transform.html">awave.transform</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.transform1d" href="transform1d.html">awd.transform1d</a></code></dt>
+<dt><code class="name"><a title="awave.transform1d" href="transform1d.html">awave.transform1d</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.transform2d" href="transform2d.html">awd.transform2d</a></code></dt>
+<dt><code class="name"><a title="awave.transform2d" href="transform2d.html">awave.transform2d</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.trim" href="trim/index.html">awd.trim</a></code></dt>
+<dt><code class="name"><a title="awave.trim" href="trim/index.html">awave.trim</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="awd.utils" href="utils/index.html">awd.utils</a></code></dt>
+<dt><code class="name"><a title="awave.utils" href="utils/index.html">awave.utils</a></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
@@ -146,15 +148,15 @@ from .transform2d import DWT2d</code></pre>
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="awd.data" href="data/index.html">awd.data</a></code></li>
-<li><code><a title="awd.losses" href="losses.html">awd.losses</a></code></li>
-<li><code><a title="awd.models" href="models/index.html">awd.models</a></code></li>
+<li><code><a title="awave.data" href="data/index.html">awave.data</a></code></li>
+<li><code><a title="awave.losses" href="losses.html">awave.losses</a></code></li>
+<li><code><a title="awave.models" href="models/index.html">awave.models</a></code></li>
 
-<li><code><a title="awd.transform" href="transform.html">awd.transform</a></code></li>
-<li><code><a title="awd.transform1d" href="transform1d.html">awd.transform1d</a></code></li>
-<li><code><a title="awd.transform2d" href="transform2d.html">awd.transform2d</a></code></li>
-<li><code><a title="awd.trim" href="trim/index.html">awd.trim</a></code></li>
-<li><code><a title="awd.utils" href="utils/index.html">awd.utils</a></code></li>
+<li><code><a title="awave.transform" href="transform.html">awave.transform</a></code></li>
+<li><code><a title="awave.transform1d" href="transform1d.html">awave.transform1d</a></code></li>
+<li><code><a title="awave.transform2d" href="transform2d.html">awave.transform2d</a></code></li>
+<li><code><a title="awave.trim" href="trim/index.html">awave.trim</a></code></li>
+<li><code><a title="awave.utils" href="utils/index.html">awave.utils</a></code></li>
 </ul>
 </li>
 </ul>

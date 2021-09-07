@@ -2,10 +2,10 @@ from copy import deepcopy
 
 import torch
 
-from awd.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
+from awave.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
     _conv_loss, _L1_wave_loss, _L1_attribution_loss
-from awd.utils.wave_attributions import Attributer
-from awd.trim import TrimModel
+from awave.utils.wave_attributions import Attributer
+from awave.trim import TrimModel
 
 
 class Validator():

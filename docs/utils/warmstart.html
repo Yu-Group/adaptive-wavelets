@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.utils.warmstart API documentation</title>
+<title>awave.utils.warmstart API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.utils.warmstart</code></h1>
+<h1 class="title">Module <code>awave.utils.warmstart</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -34,8 +34,8 @@ import pickle as pkl
 
 device = &#39;cuda&#39; if torch.cuda.is_available() else &#39;cpu&#39;
 
-from awd.transform1d import DWT1d
-from awd.transform2d import DWT2d
+from awave.transform1d import DWT1d
+from awave.transform2d import DWT2d
 
 
 def warm_start(p, out_dir):
@@ -89,7 +89,7 @@ def warm_start(p, out_dir):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="awd.utils.warmstart.warm_start"><code class="name flex">
+<dt id="awave.utils.warmstart.warm_start"><code class="name flex">
 <span>def <span class="ident">warm_start</span></span>(<span>p, out_dir)</span>
 </code></dt>
 <dd>
@@ -155,12 +155,12 @@ def warm_start(p, out_dir):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.utils" href="index.html">awd.utils</a></code></li>
+<li><code><a title="awave.utils" href="index.html">awave.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="awd.utils.warmstart.warm_start" href="#awd.utils.warmstart.warm_start">warm_start</a></code></li>
+<li><code><a title="awave.utils.warmstart.warm_start" href="#awave.utils.warmstart.warm_start">warm_start</a></code></li>
 </ul>
 </li>
 </ul>

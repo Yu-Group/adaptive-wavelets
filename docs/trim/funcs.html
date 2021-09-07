@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.trim.funcs API documentation</title>
+<title>awave.trim.funcs API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.trim.funcs</code></h1>
+<h1 class="title">Module <code>awave.trim.funcs</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -69,7 +69,7 @@ def prox_normalization(x):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="awd.trim.funcs.prox_hard_threshold"><code class="name flex">
+<dt id="awave.trim.funcs.prox_hard_threshold"><code class="name flex">
 <span>def <span class="ident">prox_hard_threshold</span></span>(<span>x, k)</span>
 </code></dt>
 <dd>
@@ -88,7 +88,7 @@ def prox_normalization(x):
     return (x * mask).to(device)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.funcs.prox_identity"><code class="name flex">
+<dt id="awave.trim.funcs.prox_identity"><code class="name flex">
 <span>def <span class="ident">prox_identity</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -101,7 +101,7 @@ def prox_normalization(x):
     return x</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.funcs.prox_normalization"><code class="name flex">
+<dt id="awave.trim.funcs.prox_normalization"><code class="name flex">
 <span>def <span class="ident">prox_normalization</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -118,7 +118,7 @@ def prox_normalization(x):
     return x / norm</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.funcs.prox_positive"><code class="name flex">
+<dt id="awave.trim.funcs.prox_positive"><code class="name flex">
 <span>def <span class="ident">prox_positive</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -131,7 +131,7 @@ def prox_normalization(x):
     return torch.nn.functional.threshold(x, 0, 0)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.funcs.prox_soft_threshold"><code class="name flex">
+<dt id="awave.trim.funcs.prox_soft_threshold"><code class="name flex">
 <span>def <span class="ident">prox_soft_threshold</span></span>(<span>x, lamb)</span>
 </code></dt>
 <dd>
@@ -157,16 +157,16 @@ def prox_normalization(x):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.trim" href="index.html">awd.trim</a></code></li>
+<li><code><a title="awave.trim" href="index.html">awave.trim</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="awd.trim.funcs.prox_hard_threshold" href="#awd.trim.funcs.prox_hard_threshold">prox_hard_threshold</a></code></li>
-<li><code><a title="awd.trim.funcs.prox_identity" href="#awd.trim.funcs.prox_identity">prox_identity</a></code></li>
-<li><code><a title="awd.trim.funcs.prox_normalization" href="#awd.trim.funcs.prox_normalization">prox_normalization</a></code></li>
-<li><code><a title="awd.trim.funcs.prox_positive" href="#awd.trim.funcs.prox_positive">prox_positive</a></code></li>
-<li><code><a title="awd.trim.funcs.prox_soft_threshold" href="#awd.trim.funcs.prox_soft_threshold">prox_soft_threshold</a></code></li>
+<li><code><a title="awave.trim.funcs.prox_hard_threshold" href="#awave.trim.funcs.prox_hard_threshold">prox_hard_threshold</a></code></li>
+<li><code><a title="awave.trim.funcs.prox_identity" href="#awave.trim.funcs.prox_identity">prox_identity</a></code></li>
+<li><code><a title="awave.trim.funcs.prox_normalization" href="#awave.trim.funcs.prox_normalization">prox_normalization</a></code></li>
+<li><code><a title="awave.trim.funcs.prox_positive" href="#awave.trim.funcs.prox_positive">prox_positive</a></code></li>
+<li><code><a title="awave.trim.funcs.prox_soft_threshold" href="#awave.trim.funcs.prox_soft_threshold">prox_soft_threshold</a></code></li>
 </ul>
 </li>
 </ul>

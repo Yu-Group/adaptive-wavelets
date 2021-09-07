@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.trim.transforms_torch API documentation</title>
+<title>awave.trim.transforms_torch API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.trim.transforms_torch</code></h1>
+<h1 class="title">Module <code>awave.trim.transforms_torch</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -129,7 +129,7 @@ def batch_ifftshift2d(x):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="awd.trim.transforms_torch.bandpass_filter"><code class="name flex">
+<dt id="awave.trim.transforms_torch.bandpass_filter"><code class="name flex">
 <span>def <span class="ident">bandpass_filter</span></span>(<span>im, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1)</span>
 </code></dt>
 <dd>
@@ -171,7 +171,7 @@ def batch_ifftshift2d(x):
     return im_bandpass</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.transforms_torch.batch_fftshift2d"><code class="name flex">
+<dt id="awave.trim.transforms_torch.batch_fftshift2d"><code class="name flex">
 <span>def <span class="ident">batch_fftshift2d</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -191,7 +191,7 @@ def batch_ifftshift2d(x):
     return torch.stack((real, imag), -1)  # last dim=2 (real&amp;imag)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.transforms_torch.batch_ifftshift2d"><code class="name flex">
+<dt id="awave.trim.transforms_torch.batch_ifftshift2d"><code class="name flex">
 <span>def <span class="ident">batch_ifftshift2d</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -208,7 +208,7 @@ def batch_ifftshift2d(x):
     return torch.stack((real, imag), -1)  # last dim=2 (real&amp;imag)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.transforms_torch.roll_n"><code class="name flex">
+<dt id="awave.trim.transforms_torch.roll_n"><code class="name flex">
 <span>def <span class="ident">roll_n</span></span>(<span>X, axis, n)</span>
 </code></dt>
 <dd>
@@ -225,7 +225,7 @@ def batch_ifftshift2d(x):
     return torch.cat([back, front], axis)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.transforms_torch.tensor_t_augment"><code class="name flex">
+<dt id="awave.trim.transforms_torch.tensor_t_augment"><code class="name flex">
 <span>def <span class="ident">tensor_t_augment</span></span>(<span>im, t)</span>
 </code></dt>
 <dd>
@@ -250,7 +250,7 @@ def batch_ifftshift2d(x):
     return torch.cat((im_copy, im_p), dim=0)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.transforms_torch.transform_bandpass"><code class="name flex">
+<dt id="awave.trim.transforms_torch.transform_bandpass"><code class="name flex">
 <span>def <span class="ident">transform_bandpass</span></span>(<span>im, band_center=0.3, band_width_lower=0.1, band_width_upper=0.1)</span>
 </code></dt>
 <dd>
@@ -263,7 +263,7 @@ def batch_ifftshift2d(x):
     return im - bandpass_filter(im, band_center, band_width_lower, band_width_upper)</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.transforms_torch.wavelet_filter"><code class="name flex">
+<dt id="awave.trim.transforms_torch.wavelet_filter"><code class="name flex">
 <span>def <span class="ident">wavelet_filter</span></span>(<span>im, t, transform_i, idx=2, p=0.5)</span>
 </code></dt>
 <dd>
@@ -311,18 +311,18 @@ def batch_ifftshift2d(x):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.trim" href="index.html">awd.trim</a></code></li>
+<li><code><a title="awave.trim" href="index.html">awave.trim</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="awd.trim.transforms_torch.bandpass_filter" href="#awd.trim.transforms_torch.bandpass_filter">bandpass_filter</a></code></li>
-<li><code><a title="awd.trim.transforms_torch.batch_fftshift2d" href="#awd.trim.transforms_torch.batch_fftshift2d">batch_fftshift2d</a></code></li>
-<li><code><a title="awd.trim.transforms_torch.batch_ifftshift2d" href="#awd.trim.transforms_torch.batch_ifftshift2d">batch_ifftshift2d</a></code></li>
-<li><code><a title="awd.trim.transforms_torch.roll_n" href="#awd.trim.transforms_torch.roll_n">roll_n</a></code></li>
-<li><code><a title="awd.trim.transforms_torch.tensor_t_augment" href="#awd.trim.transforms_torch.tensor_t_augment">tensor_t_augment</a></code></li>
-<li><code><a title="awd.trim.transforms_torch.transform_bandpass" href="#awd.trim.transforms_torch.transform_bandpass">transform_bandpass</a></code></li>
-<li><code><a title="awd.trim.transforms_torch.wavelet_filter" href="#awd.trim.transforms_torch.wavelet_filter">wavelet_filter</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.bandpass_filter" href="#awave.trim.transforms_torch.bandpass_filter">bandpass_filter</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.batch_fftshift2d" href="#awave.trim.transforms_torch.batch_fftshift2d">batch_fftshift2d</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.batch_ifftshift2d" href="#awave.trim.transforms_torch.batch_ifftshift2d">batch_ifftshift2d</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.roll_n" href="#awave.trim.transforms_torch.roll_n">roll_n</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.tensor_t_augment" href="#awave.trim.transforms_torch.tensor_t_augment">tensor_t_augment</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.transform_bandpass" href="#awave.trim.transforms_torch.transform_bandpass">transform_bandpass</a></code></li>
+<li><code><a title="awave.trim.transforms_torch.wavelet_filter" href="#awave.trim.transforms_torch.wavelet_filter">wavelet_filter</a></code></li>
 </ul>
 </li>
 </ul>

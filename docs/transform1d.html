@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.transform1d API documentation</title>
+<title>awave.transform1d API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.transform1d</code></h1>
+<h1 class="title">Module <code>awave.transform1d</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -27,9 +27,9 @@
 <pre><code class="python">import torch
 import torch.nn as nn
 
-from awd.utils import lowlevel
-from awd.transform import AbstractWT
-from awd.utils.misc import init_filter, low_to_high
+from awave.utils import lowlevel
+from awave.transform import AbstractWT
+from awave.utils.misc import init_filter, low_to_high
 
 
 class DWT1d(AbstractWT):
@@ -128,7 +128,7 @@ class DWT1d(AbstractWT):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="awd.transform1d.DWT1d"><code class="flex name class">
+<dt id="awave.transform1d.DWT1d"><code class="flex name class">
 <span>class <span class="ident">DWT1d</span></span>
 <span>(</span><span>wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0, device='cpu')</span>
 </code></dt>
@@ -241,12 +241,12 @@ can be:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="awd.transform.AbstractWT" href="transform.html#awd.transform.AbstractWT">AbstractWT</a></li>
+<li><a title="awave.transform.AbstractWT" href="transform.html#awave.transform.AbstractWT">AbstractWT</a></li>
 <li>torch.nn.modules.module.Module</li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.transform1d.DWT1d.forward"><code class="name flex">
+<dt id="awave.transform1d.DWT1d.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -291,7 +291,7 @@ being the finest scale coefficients.</p></section>
     return (x0,) + highs</code></pre>
 </details>
 </dd>
-<dt id="awd.transform1d.DWT1d.inverse"><code class="name flex">
+<dt id="awave.transform1d.DWT1d.inverse"><code class="name flex">
 <span>def <span class="ident">inverse</span></span>(<span>self, coeffs)</span>
 </code></dt>
 <dd>
@@ -345,9 +345,9 @@ values as zeros (not in an efficient way though).</p></section>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="awd.transform.AbstractWT" href="transform.html#awd.transform.AbstractWT">AbstractWT</a></b></code>:
+<li><code><b><a title="awave.transform.AbstractWT" href="transform.html#awave.transform.AbstractWT">AbstractWT</a></b></code>:
 <ul class="hlist">
-<li><code><a title="awd.transform.AbstractWT.fit" href="transform.html#awd.transform.AbstractWT.fit">fit</a></code></li>
+<li><code><a title="awave.transform.AbstractWT.fit" href="transform.html#awave.transform.AbstractWT.fit">fit</a></code></li>
 </ul>
 </li>
 </ul>
@@ -363,16 +363,16 @@ values as zeros (not in an efficient way though).</p></section>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd" href="index.html">awd</a></code></li>
+<li><code><a title="awave" href="index.html">awave</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="awd.transform1d.DWT1d" href="#awd.transform1d.DWT1d">DWT1d</a></code></h4>
+<h4><code><a title="awave.transform1d.DWT1d" href="#awave.transform1d.DWT1d">DWT1d</a></code></h4>
 <ul class="">
-<li><code><a title="awd.transform1d.DWT1d.forward" href="#awd.transform1d.DWT1d.forward">forward</a></code></li>
-<li><code><a title="awd.transform1d.DWT1d.inverse" href="#awd.transform1d.DWT1d.inverse">inverse</a></code></li>
+<li><code><a title="awave.transform1d.DWT1d.forward" href="#awave.transform1d.DWT1d.forward">forward</a></code></li>
+<li><code><a title="awave.transform1d.DWT1d.inverse" href="#awave.transform1d.DWT1d.inverse">inverse</a></code></li>
 </ul>
 </li>
 </ul>

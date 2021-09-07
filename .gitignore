@@ -27,3 +27,5 @@ notebooks/biology/results/animate_fig
 venv
 *.xml
 .hypothesis
+build
+dist

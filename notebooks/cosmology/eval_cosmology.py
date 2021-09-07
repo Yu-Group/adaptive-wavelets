@@ -7,7 +7,7 @@ import torch
 
 opj = os.path.join
 
-from awd import awd
+from awave import awd
 
 from peak_counting import rmse
 
