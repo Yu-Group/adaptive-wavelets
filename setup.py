@@ -8,9 +8,9 @@ path_to_repo = path.abspath(path.dirname(__file__))
 with open(path.join(path_to_repo, 'readme.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-setuptools.setup(name='AWD',
+setuptools.setup(name='awave',
                  version='0.1',
-                 description='Adaptive wavelet distillation',
+                 description='Adaptive wavelets',
                  long_description=long_description,
                  long_description_content_type="text/markdown",
                  author='Wooseok Ha, Chandan Singh',

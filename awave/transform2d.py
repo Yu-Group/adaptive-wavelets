@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim
 
-from awd import lowlevel
-from awd.utils import init_filter, low_to_high
-from awd.transform import AbstractWT
+from awave.utils import lowlevel
+from awave.utils.misc import init_filter, low_to_high
+from awave.transform import AbstractWT
 
 class DWT2d(AbstractWT):
     '''Class of 2d wavelet transform 

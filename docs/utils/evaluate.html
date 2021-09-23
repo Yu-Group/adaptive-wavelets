@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.evaluate API documentation</title>
+<title>awave.utils.evaluate API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.evaluate</code></h1>
+<h1 class="title">Module <code>awave.utils.evaluate</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -28,10 +28,10 @@
 
 import torch
 
-from awd.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
+from awave.losses import _reconstruction_loss, _lsum_loss, _hsum_loss, _L2norm_loss, _CMF_loss, \
     _conv_loss, _L1_wave_loss, _L1_attribution_loss
-from awd.wave_attributions import Attributer
-from awd.trim import TrimModel
+from awave.utils.wave_attributions import Attributer
+from awave.trim import TrimModel
 
 
 class Validator():
@@ -130,7 +130,7 @@ class Validator():
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="awd.evaluate.Validator"><code class="flex name class">
+<dt id="awave.utils.evaluate.Validator"><code class="flex name class">
 <span>class <span class="ident">Validator</span></span>
 <span>(</span><span>model, data_loader, device=device(type='cuda'), use_residuals=True)</span>
 </code></dt>
@@ -249,13 +249,13 @@ class Validator():
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd" href="index.html">awd</a></code></li>
+<li><code><a title="awave.utils" href="index.html">awave.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="awd.evaluate.Validator" href="#awd.evaluate.Validator">Validator</a></code></h4>
+<h4><code><a title="awave.utils.evaluate.Validator" href="#awave.utils.evaluate.Validator">Validator</a></code></h4>
 </li>
 </ul>
 </li>

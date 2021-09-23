@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.mdata.resize_imgs API documentation</title>
+<title>awave.utils.warmstart API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.mdata.resize_imgs</code></h1>
+<h1 class="title">Module <code>awave.utils.warmstart</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -27,55 +27,59 @@
 <pre><code class="python">import os
 
 import numpy as np
+import torch
 
 opj = os.path.join
-from astropy.io import fits
+import pickle as pkl
 
-data_path = &#39;../../data/cosmology&#39;
+device = &#39;cuda&#39; if torch.cuda.is_available() else &#39;cpu&#39;
+
+from awave.transform1d import DWT1d
+from awave.transform2d import DWT2d
 
 
-def downsample(parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10):
+def warm_start(p, out_dir):
+    &#39;&#39;&#39;load results and initialize model 
     &#39;&#39;&#39;
-    downsample cosmolgy image
-    &#39;&#39;&#39;
-    print(&#39;preprocessing...&#39;)
-    img_size = 256
-    params_ = np.loadtxt(parameter_file)[:ncosmo]
-
-    image = []
-    params = []
-    for idx in range(nsamples):
-        img_name = opj(root_dir, &#39;model%03d/WLconv_z1.00_%04dr.fits&#39; % (idx % len(params_), idx // len(params_)))
-        start1 = np.random.randint(0, img_size - resize - 1, 1)[0]
-        start2 = np.random.randint(0, img_size - resize - 1, 1)[0]
-        end1 = start1 + resize
-        end2 = start2 + resize
-        hdu_list = fits.open(img_name, memmap=False)
-        img_data = hdu_list[0].data
-        image.append(img_data[start1:end1, start2:end2])
-        hdu_list.close()
-        params.append(params_[idx % len(params_), 1:-1])
-        print(&#39;\r idx: {}/{}&#39;.format(idx, nsamples), end=&#39;&#39;)
-
-    image = np.stack(image, axis=0)
-    params = np.stack(params, axis=0)
-    # save
-    np.savez(opj(data_path, &#39;cosmo_resize_{}.npz&#39;.format(resize)), imgs=image, params=params)
-
-
-if __name__ == &#39;__main__&#39;:
-    parameter_file = opj(data_path, &#39;cosmological_parameters.txt&#39;)
-    root_dir = opj(data_path, &#39;z1_256&#39;)
-    resize = 64
-
-    # save
-    downsample(parameter_file, root_dir, resize)
-
-    # load
-    dataset_zip = np.load(opj(data_path, &#39;cosmo_resize_{}.npz&#39;.format(resize)))
-    imgs = dataset_zip[&#39;imgs&#39;]
-    params = dataset_zip[&#39;params&#39;]
-    print(imgs.shape, params.shape)</code></pre>
+    print(&#39;\twarm starting...&#39;)
+    fnames = sorted(os.listdir(out_dir))
+    lamL1attr = []
+    lamL1wave = []
+    models = []
+    if len(fnames) == 0:
+        if p.wt_type == &#39;DWT1d&#39;:
+            model = DWT1d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(
+                device)
+        elif p.wt_type == &#39;DWT2d&#39;:
+            model = DWT2d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(
+                device)
+    else:
+        for fname in fnames:
+            if fname[-3:] == &#39;pkl&#39;:
+                result = pkl.load(open(opj(out_dir, fname), &#39;rb&#39;))
+                lamL1attr.append(result[&#39;lamL1attr&#39;])
+                lamL1wave.append(result[&#39;lamL1wave&#39;])
+            if fname[-3:] == &#39;pth&#39;:
+                if p.wt_type == &#39;DWT1d&#39;:
+                    m = DWT1d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor,
+                              noise_factor=p.noise_factor).to(device)
+                elif p.wt_type == &#39;DWT2d&#39;:
+                    m = DWT2d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor,
+                              noise_factor=p.noise_factor).to(device)
+                m.load_state_dict(torch.load(opj(out_dir, fname)))
+                models.append(m)
+        lamL1attr = np.array(lamL1attr)
+        lamL1wave = np.array(lamL1wave)
+        if p.lamL1attr == 0:
+            lamL1wave_max = np.max(lamL1wave[lamL1attr == 0])
+            idx = np.argwhere((lamL1attr == 0) &amp; (lamL1wave == lamL1wave_max)).item()
+        else:
+            lamL1attr_max = np.max(lamL1attr[lamL1wave == p.lamL1wave])
+            idx = np.argwhere((lamL1attr == lamL1attr_max) &amp; (lamL1wave == p.lamL1wave)).item()
+        model = models[idx]
+        print(&#39;initialized at the model with lamL1wave={:.5f} and lamL1attr={:.5f}&#39;.format(lamL1wave[idx],
+                                                                                           lamL1attr[idx]))
+    return model</code></pre>
 </details>
 </section>
 <section>
@@ -85,42 +89,57 @@ if __name__ == &#39;__main__&#39;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="awd.mdata.resize_imgs.downsample"><code class="name flex">
-<span>def <span class="ident">downsample</span></span>(<span>parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10)</span>
+<dt id="awave.utils.warmstart.warm_start"><code class="name flex">
+<span>def <span class="ident">warm_start</span></span>(<span>p, out_dir)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>downsample cosmolgy image</p></section>
+<section class="desc"><p>load results and initialize model</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def downsample(parameter_file, root_dir, resize=64, nsamples=30000, ncosmo=10):
+<pre><code class="python">def warm_start(p, out_dir):
+    &#39;&#39;&#39;load results and initialize model 
     &#39;&#39;&#39;
-    downsample cosmolgy image
-    &#39;&#39;&#39;
-    print(&#39;preprocessing...&#39;)
-    img_size = 256
-    params_ = np.loadtxt(parameter_file)[:ncosmo]
-
-    image = []
-    params = []
-    for idx in range(nsamples):
-        img_name = opj(root_dir, &#39;model%03d/WLconv_z1.00_%04dr.fits&#39; % (idx % len(params_), idx // len(params_)))
-        start1 = np.random.randint(0, img_size - resize - 1, 1)[0]
-        start2 = np.random.randint(0, img_size - resize - 1, 1)[0]
-        end1 = start1 + resize
-        end2 = start2 + resize
-        hdu_list = fits.open(img_name, memmap=False)
-        img_data = hdu_list[0].data
-        image.append(img_data[start1:end1, start2:end2])
-        hdu_list.close()
-        params.append(params_[idx % len(params_), 1:-1])
-        print(&#39;\r idx: {}/{}&#39;.format(idx, nsamples), end=&#39;&#39;)
-
-    image = np.stack(image, axis=0)
-    params = np.stack(params, axis=0)
-    # save
-    np.savez(opj(data_path, &#39;cosmo_resize_{}.npz&#39;.format(resize)), imgs=image, params=params)</code></pre>
+    print(&#39;\twarm starting...&#39;)
+    fnames = sorted(os.listdir(out_dir))
+    lamL1attr = []
+    lamL1wave = []
+    models = []
+    if len(fnames) == 0:
+        if p.wt_type == &#39;DWT1d&#39;:
+            model = DWT1d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(
+                device)
+        elif p.wt_type == &#39;DWT2d&#39;:
+            model = DWT2d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor, noise_factor=p.noise_factor).to(
+                device)
+    else:
+        for fname in fnames:
+            if fname[-3:] == &#39;pkl&#39;:
+                result = pkl.load(open(opj(out_dir, fname), &#39;rb&#39;))
+                lamL1attr.append(result[&#39;lamL1attr&#39;])
+                lamL1wave.append(result[&#39;lamL1wave&#39;])
+            if fname[-3:] == &#39;pth&#39;:
+                if p.wt_type == &#39;DWT1d&#39;:
+                    m = DWT1d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor,
+                              noise_factor=p.noise_factor).to(device)
+                elif p.wt_type == &#39;DWT2d&#39;:
+                    m = DWT2d(wave=p.wave, mode=p.mode, J=p.J, init_factor=p.init_factor,
+                              noise_factor=p.noise_factor).to(device)
+                m.load_state_dict(torch.load(opj(out_dir, fname)))
+                models.append(m)
+        lamL1attr = np.array(lamL1attr)
+        lamL1wave = np.array(lamL1wave)
+        if p.lamL1attr == 0:
+            lamL1wave_max = np.max(lamL1wave[lamL1attr == 0])
+            idx = np.argwhere((lamL1attr == 0) &amp; (lamL1wave == lamL1wave_max)).item()
+        else:
+            lamL1attr_max = np.max(lamL1attr[lamL1wave == p.lamL1wave])
+            idx = np.argwhere((lamL1attr == lamL1attr_max) &amp; (lamL1wave == p.lamL1wave)).item()
+        model = models[idx]
+        print(&#39;initialized at the model with lamL1wave={:.5f} and lamL1attr={:.5f}&#39;.format(lamL1wave[idx],
+                                                                                           lamL1attr[idx]))
+    return model</code></pre>
 </details>
 </dd>
 </dl>
@@ -136,12 +155,12 @@ if __name__ == &#39;__main__&#39;:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.mdata" href="index.html">awd.mdata</a></code></li>
+<li><code><a title="awave.utils" href="index.html">awave.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="awd.mdata.resize_imgs.downsample" href="#awd.mdata.resize_imgs.downsample">downsample</a></code></li>
+<li><code><a title="awave.utils.warmstart.warm_start" href="#awave.utils.warmstart.warm_start">warm_start</a></code></li>
 </ul>
 </li>
 </ul>

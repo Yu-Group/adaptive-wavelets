@@ -8,8 +8,8 @@ import pickle as pkl
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-from awd.transform1d import DWT1d
-from awd.transform2d import DWT2d
+from awave.transform1d import DWT1d
+from awave.transform2d import DWT2d
 
 
 def warm_start(p, out_dir):

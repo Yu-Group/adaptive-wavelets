@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from awd.transform1d import DWT1d
-from awd.utils import get_wavefun
+from awave.transform1d import DWT1d
+from awave.utils.misc import get_wavefun
 
 
 class TestBasic(unittest.TestCase):

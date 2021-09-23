@@ -3,8 +3,8 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from awd.wave_attributions import Attributer
-from awd.trim import TrimModel
+from awave.utils.wave_attributions import Attributer
+from awave.trim import TrimModel
 
 
 class Trainer():

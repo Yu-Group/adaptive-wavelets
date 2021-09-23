@@ -2,8 +2,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from awd.losses import get_loss_f
-from awd.train import Trainer
+from awave.losses import get_loss_f
+from awave.utils.train import Trainer
 
 
 class AbstractWT(nn.Module):

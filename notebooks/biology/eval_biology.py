@@ -8,7 +8,7 @@ import torch
 
 opj = os.path.join
 
-from awd import awd
+from awave import awd
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

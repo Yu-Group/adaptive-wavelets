@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>awd.trim.trim API documentation</title>
+<title>awave.trim.trim API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>awd.trim.trim</code></h1>
+<h1 class="title">Module <code>awave.trim.trim</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -193,7 +193,7 @@ class DecoderEncoder(nn.Module):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="awd.trim.trim.lay_from_w"><code class="name flex">
+<dt id="awave.trim.trim.lay_from_w"><code class="name flex">
 <span>def <span class="ident">lay_from_w</span></span>(<span>D)</span>
 </code></dt>
 <dd>
@@ -220,7 +220,7 @@ Params</p>
     return lay</code></pre>
 </details>
 </dd>
-<dt id="awd.trim.trim.modularize"><code class="name flex">
+<dt id="awave.trim.trim.modularize"><code class="name flex">
 <span>def <span class="ident">modularize</span></span>(<span>f)</span>
 </code></dt>
 <dd>
@@ -249,7 +249,7 @@ Params</p>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="awd.trim.trim.DecoderEncoder"><code class="flex name class">
+<dt id="awave.trim.trim.DecoderEncoder"><code class="flex name class">
 <span>class <span class="ident">DecoderEncoder</span></span>
 <span>(</span><span>model, use_residuals=False)</span>
 </code></dt>
@@ -294,7 +294,7 @@ Params</p>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.trim.trim.DecoderEncoder.forward"><code class="name flex">
+<dt id="awave.trim.trim.DecoderEncoder.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, s, x_orig=None)</span>
 </code></dt>
 <dd>
@@ -330,7 +330,7 @@ Params</p>
 </dd>
 </dl>
 </dd>
-<dt id="awd.trim.trim.NormLayer"><code class="flex name class">
+<dt id="awave.trim.trim.NormLayer"><code class="flex name class">
 <span>class <span class="ident">NormLayer</span></span>
 <span>(</span><span>mu=0.1307, std=0.3081)</span>
 </code></dt>
@@ -361,7 +361,7 @@ image = (image - mean) / std</p>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.trim.trim.NormLayer.forward"><code class="name flex">
+<dt id="awave.trim.trim.NormLayer.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -384,7 +384,7 @@ registered hooks while the latter silently ignores them.</p>
 </dd>
 </dl>
 </dd>
-<dt id="awd.trim.trim.ReshapeLayer"><code class="flex name class">
+<dt id="awave.trim.trim.ReshapeLayer"><code class="flex name class">
 <span>class <span class="ident">ReshapeLayer</span></span>
 <span>(</span><span>shape)</span>
 </code></dt>
@@ -422,7 +422,7 @@ Params</p>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.trim.trim.ReshapeLayer.forward"><code class="name flex">
+<dt id="awave.trim.trim.ReshapeLayer.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -445,7 +445,7 @@ registered hooks while the latter silently ignores them.</p>
 </dd>
 </dl>
 </dd>
-<dt id="awd.trim.trim.TrimModel"><code class="flex name class">
+<dt id="awave.trim.trim.TrimModel"><code class="flex name class">
 <span>class <span class="ident">TrimModel</span></span>
 <span>(</span><span>model, inv_transform, norm=None, reshape=None, use_residuals=False, use_logits=False)</span>
 </code></dt>
@@ -547,7 +547,7 @@ pass x as a 1d vector whose last entries contain the residual [x, residual]</dd>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="awd.trim.trim.TrimModel.forward"><code class="name flex">
+<dt id="awave.trim.trim.TrimModel.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, s, x_orig=None)</span>
 </code></dt>
 <dd>
@@ -609,39 +609,39 @@ pass x as a 1d vector whose last entries contain the residual [x, residual]</dd>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="awd.trim" href="index.html">awd.trim</a></code></li>
+<li><code><a title="awave.trim" href="index.html">awave.trim</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="awd.trim.trim.lay_from_w" href="#awd.trim.trim.lay_from_w">lay_from_w</a></code></li>
-<li><code><a title="awd.trim.trim.modularize" href="#awd.trim.trim.modularize">modularize</a></code></li>
+<li><code><a title="awave.trim.trim.lay_from_w" href="#awave.trim.trim.lay_from_w">lay_from_w</a></code></li>
+<li><code><a title="awave.trim.trim.modularize" href="#awave.trim.trim.modularize">modularize</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="awd.trim.trim.DecoderEncoder" href="#awd.trim.trim.DecoderEncoder">DecoderEncoder</a></code></h4>
+<h4><code><a title="awave.trim.trim.DecoderEncoder" href="#awave.trim.trim.DecoderEncoder">DecoderEncoder</a></code></h4>
 <ul class="">
-<li><code><a title="awd.trim.trim.DecoderEncoder.forward" href="#awd.trim.trim.DecoderEncoder.forward">forward</a></code></li>
+<li><code><a title="awave.trim.trim.DecoderEncoder.forward" href="#awave.trim.trim.DecoderEncoder.forward">forward</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="awd.trim.trim.NormLayer" href="#awd.trim.trim.NormLayer">NormLayer</a></code></h4>
+<h4><code><a title="awave.trim.trim.NormLayer" href="#awave.trim.trim.NormLayer">NormLayer</a></code></h4>
 <ul class="">
-<li><code><a title="awd.trim.trim.NormLayer.forward" href="#awd.trim.trim.NormLayer.forward">forward</a></code></li>
+<li><code><a title="awave.trim.trim.NormLayer.forward" href="#awave.trim.trim.NormLayer.forward">forward</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="awd.trim.trim.ReshapeLayer" href="#awd.trim.trim.ReshapeLayer">ReshapeLayer</a></code></h4>
+<h4><code><a title="awave.trim.trim.ReshapeLayer" href="#awave.trim.trim.ReshapeLayer">ReshapeLayer</a></code></h4>
 <ul class="">
-<li><code><a title="awd.trim.trim.ReshapeLayer.forward" href="#awd.trim.trim.ReshapeLayer.forward">forward</a></code></li>
+<li><code><a title="awave.trim.trim.ReshapeLayer.forward" href="#awave.trim.trim.ReshapeLayer.forward">forward</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="awd.trim.trim.TrimModel" href="#awd.trim.trim.TrimModel">TrimModel</a></code></h4>
+<h4><code><a title="awave.trim.trim.TrimModel" href="#awave.trim.trim.TrimModel">TrimModel</a></code></h4>
 <ul class="">
-<li><code><a title="awd.trim.trim.TrimModel.forward" href="#awd.trim.trim.TrimModel.forward">forward</a></code></li>
+<li><code><a title="awave.trim.trim.TrimModel.forward" href="#awave.trim.trim.TrimModel.forward">forward</a></code></li>
 </ul>
 </li>
 </ul>
