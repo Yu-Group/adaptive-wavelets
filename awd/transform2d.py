@@ -22,19 +22,19 @@ class DWT2d(AbstractWT):
         'zero', 'symmetric', 'reflect' or 'periodization'. The padding scheme
     '''
 
-    def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0):
+    def __init__(self, wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0, device='cpu'):
         super().__init__()
         h0, _ = lowlevel.load_wavelet(wave)
-        
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
-        
         # parameterize
         self.h0 = nn.Parameter(h0, requires_grad=True)
+        self.h0 = self.h0.to(device)
 
         self.J = J
         self.mode = mode
         self.wt_type = 'DWT2d'
+        self.device = device
 
     def forward(self, x):
         """ Forward pass of the DWT.
