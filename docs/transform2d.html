@@ -48,19 +48,19 @@ class DWT2d(AbstractWT):
         &#39;zero&#39;, &#39;symmetric&#39;, &#39;reflect&#39; or &#39;periodization&#39;. The padding scheme
     &#39;&#39;&#39;
 
-    def __init__(self, wave=&#39;db3&#39;, mode=&#39;zero&#39;, J=5, init_factor=1, noise_factor=0, const_factor=0):
+    def __init__(self, wave=&#39;db3&#39;, mode=&#39;zero&#39;, J=5, init_factor=1, noise_factor=0, const_factor=0, device=&#39;cpu&#39;):
         super().__init__()
         h0, _ = lowlevel.load_wavelet(wave)
-        
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
-        
         # parameterize
         self.h0 = nn.Parameter(h0, requires_grad=True)
+        self.h0 = self.h0.to(device)
 
         self.J = J
         self.mode = mode
         self.wt_type = &#39;DWT2d&#39;
+        self.device = device
 
     def forward(self, x):
         &#34;&#34;&#34; Forward pass of the DWT.
@@ -159,7 +159,7 @@ class DWT2d(AbstractWT):
 <dl>
 <dt id="awave.transform2d.DWT2d"><code class="flex name class">
 <span>class <span class="ident">DWT2d</span></span>
-<span>(</span><span>wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0)</span>
+<span>(</span><span>wave='db3', mode='zero', J=5, init_factor=1, noise_factor=0, const_factor=0, device='cpu')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class of 2d wavelet transform
@@ -198,19 +198,19 @@ can be:
         &#39;zero&#39;, &#39;symmetric&#39;, &#39;reflect&#39; or &#39;periodization&#39;. The padding scheme
     &#39;&#39;&#39;
 
-    def __init__(self, wave=&#39;db3&#39;, mode=&#39;zero&#39;, J=5, init_factor=1, noise_factor=0, const_factor=0):
+    def __init__(self, wave=&#39;db3&#39;, mode=&#39;zero&#39;, J=5, init_factor=1, noise_factor=0, const_factor=0, device=&#39;cpu&#39;):
         super().__init__()
         h0, _ = lowlevel.load_wavelet(wave)
-        
         # initialize
         h0 = init_filter(h0, init_factor, noise_factor, const_factor)
-        
         # parameterize
         self.h0 = nn.Parameter(h0, requires_grad=True)
+        self.h0 = self.h0.to(device)
 
         self.J = J
         self.mode = mode
         self.wt_type = &#39;DWT2d&#39;
+        self.device = device
 
     def forward(self, x):
         &#34;&#34;&#34; Forward pass of the DWT.
