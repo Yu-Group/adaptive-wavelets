@@ -15,7 +15,7 @@ setuptools.setup(name='awave',
                  long_description_content_type="text/markdown",
                  author='Wooseok Ha, Chandan Singh',
                  author_email='haywse@berkeley.edu',
-                 url='https://github.com/Yu-Group/adaptive-wavelet-distillation',
+                 url='https://github.com/Yu-Group/adaptive-wavelets',
                  packages=setuptools.find_packages(exclude=['tests']),
                  install_requires=[
                      'torch>=1.0',

@@ -1,6 +1,12 @@
 <h1 align="center">   <img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"> Adaptive wavelets <img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"></h1>
 <p align="center"> Wavelets which adapt given data (and optionally a pre-trained model). This yields models which are faster, more compressible, and more interpretable.
 </p>
+
+
+<p align="center">
+  <a href="https://yu-group.github.io/adaptive-wavelets/">📚 docs</a> •
+  <a href="https://github.com/Yu-Group/adaptive-wavelets/tree/master/notebooks">📖 demo notebooks</a>
+</p>
 <p align="center">
   <img src="https://img.shields.io/badge/license-mit-blue.svg">
   <img src="https://img.shields.io/badge/python-3.6--3.8-blue">
@@ -8,6 +14,7 @@
   <a href="https://github.com/csinva/imodels/actions"><img src="https://github.com/Yu-Group/adaptive-wavelets/workflows/tests/badge.svg"></a>
   <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
   <img src="https://img.shields.io/pypi/v/awave?color=orange">
+  <img src="https://static.pepy.tech/personalized-badge/awave?period=total&units=none&left_color=gray&right_color=orange&left_text=downloads&kill_cache=1">
 </p>  
 
 # Quickstart
@@ -39,15 +46,25 @@ wt.fit(X=X, pretrained_model=model,
 
 # Background
 
+<details>
+<summary>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">Ha et al. NeurIPS, 2021</a>).
+</summary>
 
-![](docs/awd.jpg)
+<img src="https://yu-group.github.io/adaptive-wavelets/awd.jpg">
+
+<blockquote>
+<b>Abstract</b>: Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.</blockquote>
+</details>
+
+<details>
+<summary>Also provides an implementation for "Learning Sparse Wavelet Representations" (<a href="https://arxiv.org/abs/1802.02961">Recoskie & Mann, 2018</a>)
+</summary>
+
+<blockquote>
+<b>Abstract</b>: In this work we propose a method for learning wavelet filters directly from data. We accomplish this by framing the discrete wavelet transform as a modified convolutional neural network. We introduce an autoencoder wavelet transform network that is trained using gradient descent. We show that the model is capable of learning structured wavelet filters from synthetic and real data. The learned wavelets are shown to be similar to traditional wavelets that are derived using Fourier methods. Our method is simple to implement and easily incorporated into neural network architectures. A major advantage to our model is that we can learn from raw audio data.</blockquote>
+</details>
 
 
-Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" ([ha et al. 2021](https://arxiv.org/abs/2107.09145)).
-
-> Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.
-
-Also provides an implementation for "Learning Sparse Wavelet Representations"([recoskie & mann, 2018](https://arxiv.org/abs/1802.02961))
 
 # Related work
 
