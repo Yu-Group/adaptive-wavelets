@@ -11,7 +11,7 @@ import argparse
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # adaptive-wavelets modules
-from awave import awd
+import awave 
 from awave.data.biology import get_dataloader, load_pretrained_model
 
 parser = argparse.ArgumentParser(description='Biology Example')
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     torch.manual_seed(p.seed)
 
 #     if p.warm_start is None:
-    wt = awd.DWT1d(wave=p.wave, mode=p.mode, J=p.J,
+    wt = awave.DWT1d(wave=p.wave, mode=p.mode, J=p.J,
                    init_factor=p.init_factor,
                    noise_factor=p.noise_factor,
                    const_factor=p.const_factor).to(device)
@@ -140,9 +140,9 @@ if __name__ == '__main__':
     # train
     params = list(wt.parameters())
     optimizer = torch.optim.Adam(params, lr=p.lr)
-    loss_f = awd.get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF,
+    loss_f = awave.get_loss_f(lamlSum=p.lamlSum, lamhSum=p.lamhSum, lamL2norm=p.lamL2norm, lamCMF=p.lamCMF,
                             lamConv=p.lamConv, lamL1wave=p.lamL1wave, lamL1attr=p.lamL1attr)
-    trainer = awd.Trainer(model, wt, optimizer, loss_f, target=p.target,
+    trainer = awave.Trainer(model, wt, optimizer, loss_f, target=p.target,
                           use_residuals=True, attr_methods=p.attr_methods, device=device, n_print=5)
 
     # run
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # calculate losses
     print('calculating losses and metric...')
     model.train()  # cudnn RNN backward can only be called in training mode
-    validator = awd.Validator(model, test_loader)
+    validator = awave.Validator(model, test_loader)
     rec_loss, lsum_loss, hsum_loss, L2norm_loss, CMF_loss, conv_loss, L1wave_loss, L1saliency_loss, L1inputxgrad_loss = validator(
         wt, target=p.target)
     s.train_losses = trainer.train_losses
