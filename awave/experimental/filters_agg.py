@@ -8,6 +8,8 @@ from awave.experimental.util import coef_interpolate
 
 
 def edge_edge_connect(size, ang1, ang2):
+    '''Connect 2 edge filters
+    '''
     F_edge, F_surround = edge_filter(size, ang2)
     ang_diff = int(ang1 - ang2) % 180
     ang_diff = min(ang_diff, 180 - ang_diff)
@@ -16,6 +18,8 @@ def edge_edge_connect(size, ang1, ang2):
 
 
 def curve_curve_connect(size, ang1, ang2, r):
+    '''Connect 2 curve filters
+    '''
     if isinstance(r, list):
         return np.mean([curve_curve_connect(size, ang1, ang2, r_) for r_ in r], axis=0)
 
@@ -32,6 +36,8 @@ def curve_curve_connect(size, ang1, ang2, r):
 
 
 def edge_curve_connect(size, ang1, ang2, r):
+    '''Connect an edge and a curve filter
+    '''
     if isinstance(r, list):
         return np.mean([edge_curve_connect(size, ang1, ang2, r_) for r_ in r], axis=0)
 
@@ -39,11 +45,11 @@ def edge_curve_connect(size, ang1, ang2, r):
     ang_diff = tangent_angles - ang1
 
     coef1 = coef_interpolate(
-        {0: 1, 10: 0.8, 20: 0.2, 30: -0.1, 40: -0.8, 50: -0.5, 60: -0.1},
-        mirror=90)(ang_diff.astype("int32"))
+        {0: 1, 10: 0.8, 20: 0.2, 30: -0.1, 40: -0.8, 50: -0.5, 60: -0.1
+         }, mirror=90)(ang_diff.astype("int32"))
     coef2 = coef_interpolate(
-        {0: 1, 5: 1, 10: 0.5, 15: -1, 20: -1, 30: -1, 40: -0.8, 50: -0.4, 60: -0.1},
-        mirror=90)(ang_diff.astype("int32"))
+        {0: 1, 5: 1, 10: 0.5, 15: -1, 20: -1, 30: -1, 40: -0.8, 50: -0.4, 60: -0.1
+         }, mirror=90)(ang_diff.astype("int32"))
 
     coef = np.where(
         np.logical_xor(np.less_equal((ang1 - ang2) % 180, 90),
@@ -53,6 +59,3 @@ def edge_curve_connect(size, ang1, ang2, r):
         coef1, coef2)
 
     return F * coef - 0.1 * (1 - F) * np.maximum(0, coef)
-
-
-
