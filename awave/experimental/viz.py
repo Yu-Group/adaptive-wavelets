@@ -42,6 +42,9 @@ def imshow(im, annot: str = None):
             bbox=dict(facecolor='white', alpha=1, pad=padding),
             va='top',
             ha='left')
+        
+def norm(x):
+    return (x - x.min()) / (x.max() - x.min())
 
 
 def plot_grid(images, ylabs=[], annot_list=None, suptitle=None, emphasize_col: int = None, fontsize_ylab=25, cmap=None):
@@ -60,7 +63,7 @@ def plot_grid(images, ylabs=[], annot_list=None, suptitle=None, emphasize_col: i
         # print(images.shape)
     # check if wasn't passed a grid
     if len(images.shape) == 4:
-        if ylabs is not None:
+        if len(ylabs) > 0:
             R = len(ylabs)
             N_IMS = images.shape[0]
             C = N_IMS // R
@@ -81,7 +84,7 @@ def plot_grid(images, ylabs=[], annot_list=None, suptitle=None, emphasize_col: i
     for r in range(R):
         for c in range(C):
             ax = plt.subplot(R, C, i + 1)
-            imshow(images[r * C + c].squeeze(), annot=annot_list[i])
+            imshow(norm(images[r * C + c].squeeze()), annot=annot_list[i])
 
             if c == 0 and len(ylabs) > r:
                 show_ylab(ax, ylabs[r], fontsize_ylab=fontsize_ylab)

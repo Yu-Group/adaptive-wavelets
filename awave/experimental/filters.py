@@ -29,13 +29,15 @@ def gabor_filter(filter_size: int, angle: float, shift=0):
     return F / np.abs(F).max()
 
 
-def edge_filter(filter_size: int, angle: float):
+def edge_filter(filter_size: int, angle: float, thickness_cutoff=1):
     '''
     Params
     ------
     filter_size
     angle: float
         in degrees
+    thickness_cutoff: float
+        higher is thicker
 
     Returns
     -------
@@ -50,7 +52,7 @@ def edge_filter(filter_size: int, angle: float):
     X, Y = X - filter_size // 2, Y - filter_size // 2
     X_ = np.cos(angle) * X + np.sin(angle) * Y
     k = 4 * np.pi / filter_size
-    F = np.clip(1.1 - np.abs(X_), 0, 1)
+    F = np.clip(thickness_cutoff + 0.1 - np.abs(X_), 0, 1)
     F /= np.maximum(np.abs(F).max(), 1e-6)
     return F, mask * (1 - F)
 
