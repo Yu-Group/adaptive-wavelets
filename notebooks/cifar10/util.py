@@ -1,11 +1,14 @@
 import torch
+from os.path import join as oj
+import os
 
 def train_epoch(model, device, train_loader, optimizer, epoch, criterion):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
-        loss = criterion(model(data), target)
+        outputs = model(data)
+        loss = criterion(outputs, target)
         
         loss.backward()
         optimizer.step()
@@ -29,10 +32,27 @@ def test_epoch(model, device, test_loader, criterion):
     test_loss /= len(test_loader.dataset)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))    
+        100. * correct / len(test_loader.dataset)))
+    return test_loss
     
-def train(model, device, train_loader, test_loader, optimizer, num_epochs, criterion):
+def train(model, device, train_loader, test_loader, optimizer, num_epochs, criterion, save_dir=None):
     print('training...')
+    
+    if save_dir is not None:
+        os.makedirs(save_dir, exist_ok=True)
+    
+    best_loss = 1e10
+    test_losses = []
     for epoch in range(num_epochs):
         train_epoch(model, device, train_loader, optimizer, epoch+1, criterion)
-        test_epoch(model, device, test_loader, criterion)
+        test_loss = test_epoch(model, device, test_loader, criterion)
+        test_losses.append(test_loss)
+        
+        # saving
+        if test_loss < best_loss:
+            best_loss = test_loss
+            if save_dir is not None:
+                torch.save(model.state_dict(),
+                           oj(save_dir, f'checkpoint_{epoch}.pth'))
+
+            

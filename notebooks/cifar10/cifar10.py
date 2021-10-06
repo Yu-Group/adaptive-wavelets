@@ -39,10 +39,12 @@ def get_dataloader(root_dir='../../data', shuffle=True, pin_memory=True, batch_s
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=batch_size, 
                                                shuffle=shuffle,
+                                               num_workers=4,
                                                pin_memory=pin_memory)
     test_loader = torch.utils.data.DataLoader(test_dataset,
                                               batch_size=batch_size, 
                                               shuffle=False,
+                                              num_workers=4,
                                               pin_memory=pin_memory)
     
     return train_loader, test_loader
