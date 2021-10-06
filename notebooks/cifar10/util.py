@@ -31,7 +31,7 @@ def test_epoch(model, device, test_loader, criterion):
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))    
     
-def train(net, device, train_loader, test_loader, optimizer, num_epochs, criterion):
+def train(model, device, train_loader, test_loader, optimizer, num_epochs, criterion):
     for epoch in range(num_epochs):
-        train_epoch(net, device, train_loader, optimizer, epoch+1, criterion)
-        test_epoch(net, device, test_loader, criterion)
+        train_epoch(model, device, train_loader, optimizer, epoch+1, criterion)
+        test_epoch(model, device, test_loader, criterion)
