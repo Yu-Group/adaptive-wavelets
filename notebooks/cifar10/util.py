@@ -32,6 +32,7 @@ def test_epoch(model, device, test_loader, criterion):
         100. * correct / len(test_loader.dataset)))    
     
 def train(model, device, train_loader, test_loader, optimizer, num_epochs, criterion):
+    print('training...')
     for epoch in range(num_epochs):
         train_epoch(model, device, train_loader, optimizer, epoch+1, criterion)
         test_epoch(model, device, test_loader, criterion)

@@ -3,7 +3,7 @@
 
 import numpy as np
 
-from awave.experimental.filters import edge_filter, curve_filter
+from awave.experimental.filters import edge_filter, curve_filter, gabor_filter
 from awave.experimental.util import coef_interpolate
 
 
@@ -59,3 +59,35 @@ def edge_curve_connect(size, ang1, ang2, r):
         coef1, coef2)
 
     return F * coef - 0.1 * (1 - F) * np.maximum(0, coef)
+
+def make_weight_connection(size, in_spec, out_spec, r=None):
+    if in_spec[0] == "color" and out_spec[0] == "gabor":
+        F = gabor_filter(size, angle=out_spec[1], shift=out_spec[2])
+
+    elif in_spec[0] in ("gabor", "edge") and out_spec[0] == "edge":
+        F = edge_edge_connect(size, ang1=in_spec[1], ang2=out_spec[1])
+
+    elif in_spec[0] == "edge" and out_spec[0] == "curve":
+        assert r != None
+        F = edge_curve_connect(size, ang1=in_spec[1], ang2=out_spec[1], r=r)
+
+    elif in_spec[0] == "curve" and out_spec[0] == "curve":
+        assert r != None
+        F = curve_curve_connect(size, ang1=in_spec[1], ang2=out_spec[1], r=r)
+
+    else:
+        if (in_spec[0], out_spec[0]) not in _warned:
+            print("Warning: no registered map", in_spec[0], '->', out_spec[0])
+            # _warned.append((in_spec[0], out_spec[0]))
+        F = np.zeros([size, size])
+    return F[..., None, None]
+
+
+def make_weights(size, in_specs, out_specs, r=None):
+    '''Note: these weights output are W X H x input_channels x output_channels (would usually transpose this)
+    '''
+    W = np.concatenate([
+        np.concatenate([make_weight_connection(size, in_spec, out_spec, r=r) for in_spec in in_specs], axis=-2)
+        for out_spec in out_specs], axis=-1)
+    # W /= np.sqrt((W**2).sum(axis=(0,1,2), keepdims=True) + 1e-3)
+    return W
