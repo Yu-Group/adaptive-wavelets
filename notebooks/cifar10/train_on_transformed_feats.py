@@ -49,10 +49,12 @@ class LinearClassifier(LightningModule):
 if __name__ == '__main__':
     
     # specify the features
-    W_conv2d0 = make_weights(7, [("color", i) for i in range(3)],
+    W_conv2d0 = make_weights(7,
+                             [("color", i) for i in range(3)],
                              [("gabor", orientation,  offset)
                               for orientation in range(0, 180, 5)
-                              for offset in [0, 7./8., 7./4, 7.*3/8.]])
+                              for offset in [0, 7./8., 7./4, 7.*3/8.]]
+                            )
     conv2d0 = nn.Conv2d(in_channels=3, out_channels=W_conv2d0.shape[-1], kernel_size=W_conv2d0.shape[0])
     conv2d0.weight.value = torch.Tensor(W_conv2d0.transpose())
     conv2d0.bias.value = 0

@@ -7,7 +7,8 @@ import torch
 
 opj = os.path.join
 
-from awave import awd
+import awave
+from awave.utils.misc import get_wavefun
 
 from peak_counting import rmse
 
@@ -31,7 +32,7 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
                 if fname[-3:] == 'pkl':
                     results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
                 if fname[-3:] == 'pth':
-                    wt = awd.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(
+                    wt = awave.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(
                         device)
                     wt.load_state_dict(torch.load(opj(out_dir, fname)))
                     models_list.append(wt)
@@ -40,7 +41,7 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
                     if fname[-3:] == 'pkl':
                         results_list.append(pkl.load(open(opj(out_dir, fname), 'rb')))
                     if fname[-3:] == 'pth':
-                        wt = awd.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(
+                        wt = awave.DWT2d(wave=wave, mode='zero', J=4, init_factor=1, noise_factor=0.0).to(
                             device)
                         wt.load_state_dict(torch.load(opj(out_dir, fname)))
                         models_list.append(wt)
@@ -74,7 +75,7 @@ def load_results(dirs, wave='db5', include_interp_loss=True):
                     loc = np.argwhere(loc).flatten()[0]
                     dic['index'][(r, c)] = loc
                     wt = mos[loc]
-                    _, psi, x = awd.get_wavefun(wt)
+                    _, psi, x = get_wavefun(wt)
 
                     dic['wt'][(r, c)] = wt
                     dic['psi'][(r, c)] = psi

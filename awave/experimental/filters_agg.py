@@ -76,8 +76,8 @@ def make_weight_connection(size, in_spec, out_spec, r=None):
         F = curve_curve_connect(size, ang1=in_spec[1], ang2=out_spec[1], r=r)
 
     else:
-        if (in_spec[0], out_spec[0]) not in _warned:
-            print("Warning: no registered map", in_spec[0], '->', out_spec[0])
+#         if (in_spec[0], out_spec[0]) not in _warned:
+        print("Warning: no registered map", in_spec[0], '->', out_spec[0])
             # _warned.append((in_spec[0], out_spec[0]))
         F = np.zeros([size, size])
     return F[..., None, None]
