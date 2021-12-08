@@ -17,14 +17,14 @@ from awave.utils.warmstart import warm_start
 
 parser = argparse.ArgumentParser(description='Cosmology Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
+parser.add_argument('--subsample', type=int, default=0, help='indication of whether to subsample the original data (default: 0)')
 parser.add_argument('--wave', type=str, default='db5', help='type of wavelet')
 parser.add_argument('--J', type=int, default=4, help='level of resolution')
 parser.add_argument('--mode', type=str, default='zero', help='mode of wavelet boundary')
 parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N',
-                    help='input batch size for training (default: 100)')
+parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
@@ -51,6 +51,7 @@ class p:
     # parameters for generating data
     seed = 1
     img_size = (1, 256, 256)
+    subsample = False
 
     # parameters for wavelet initialization
     wave = 'db5'
@@ -114,7 +115,8 @@ if __name__ == '__main__':
     train_loader, test_loader = get_dataloader(p.data_path,
                                                img_size=p.img_size[2],
                                                split_train_test=True,
-                                               batch_size=p.batch_size)
+                                               batch_size=p.batch_size,
+                                               subsample=p.subsample)
 
     model = load_pretrained_model(model_name='resnet18', device=device, data_path=p.model_path)
 

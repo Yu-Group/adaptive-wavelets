@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 import pickle as pkl
 
-from awd.models.models import LSTMNet
+from awave.models.models import LSTMNet
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Ignore warnings
@@ -20,7 +20,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, is_continuous=False, **kwargs):
+def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, is_continuous=False, subsample=False, **kwargs):
     """A generic data loader
 
     Parameters
@@ -51,6 +51,11 @@ def get_dataloader(root_dir, shuffle=True, pin_memory=True, batch_size=64, is_co
 
     inputs = torch.tensor(X, dtype=torch.float)
     labels = torch.tensor(y.reshape(-1, 1), dtype=torch.float)
+    if subsample: # subsample training data
+        b = inputs.size(0)
+        indices = torch.randperm(b)[:int(0.8*b)]
+        inputs = inputs[indices,...]
+        labels = labels[indices,...]
     dataset = TensorDataset(inputs, labels)
     train_loader = DataLoader(dataset,
                               batch_size=batch_size,

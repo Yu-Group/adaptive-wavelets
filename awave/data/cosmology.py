@@ -15,7 +15,7 @@ classes = ['Mnu', 'Omegam', 'As', 'Sigma8', 'Unknown']
 
 
 def get_dataloader(root_dir, img_size=64, shuffle=True, split_train_test=True, pin_memory=True,
-                   batch_size=64, **kwargs):
+                   batch_size=64, subsample=False, **kwargs):
     """A generic data loader
 
     Parameters
@@ -29,7 +29,9 @@ def get_dataloader(root_dir, img_size=64, shuffle=True, split_train_test=True, p
     pin_memory = pin_memory and torch.cuda.is_available  # only pin if GPU available
     dataset = MassMapsDatasetResized(root_dir, img_size)
     if split_train_test is True:
-        train_loader = DataLoader(torch.utils.data.Subset(dataset, indices=range(20000)),
+        b = 20000
+        indices = torch.randperm(b)[:int(0.8*b)] if subsample else range(b)
+        train_loader = DataLoader(torch.utils.data.Subset(dataset, indices=indices),
                                   batch_size=batch_size,
                                   shuffle=shuffle,
                                   pin_memory=pin_memory,

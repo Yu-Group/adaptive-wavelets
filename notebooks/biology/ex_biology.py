@@ -13,17 +13,18 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 # adaptive-wavelets modules
 import awave 
 from awave.data.biology import get_dataloader, load_pretrained_model
+from awave.utils.warmstart import warm_start
 
 parser = argparse.ArgumentParser(description='Biology Example')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
+parser.add_argument('--subsample', type=int, default=0, help='indication of whether to subsample the original data (default: 0)')
 parser.add_argument('--wave', type=str, default='db5', help='type of wavelet')
 parser.add_argument('--J', type=int, default=4, help='level of resolution')
 parser.add_argument('--mode', type=str, default='zero', help='mode of wavelet boundary')
 parser.add_argument('--init_factor', type=float, default=1, metavar='N', help='initialization parameter')
 parser.add_argument('--noise_factor', type=float, default=0.1, metavar='N', help='initialization parameter')
 parser.add_argument('--const_factor', type=float, default=0.0, metavar='N', help='initialization parameter')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N',
-                    help='input batch size for training (default: 100)')
+parser.add_argument('--batch_size', type=int, default=100, metavar='N', help='input batch size for training (default: 100)')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
 parser.add_argument('--attr_methods', type=str, default='Saliency', help='type of attribution methods to penalize')
@@ -50,6 +51,7 @@ class p:
     # parameters for generating data
     seed = 1
     is_continuous = True
+    subsample = False
 
     # parameters for initialization
     wave = 'db5'
@@ -112,7 +114,8 @@ if __name__ == '__main__':
     # load data and model
     train_loader, test_loader = get_dataloader(p.data_path,
                                                batch_size=p.batch_size,
-                                               is_continuous=p.is_continuous)
+                                               is_continuous=p.is_continuous,
+                                               subsample=p.subsample)
 
     model = load_pretrained_model(p.model_path, device=device)
 
@@ -121,15 +124,15 @@ if __name__ == '__main__':
     np.random.seed(p.seed)
     torch.manual_seed(p.seed)
 
-#     if p.warm_start is None:
-    wt = awave.DWT1d(wave=p.wave, mode=p.mode, J=p.J,
-                   init_factor=p.init_factor,
-                   noise_factor=p.noise_factor,
-                   const_factor=p.const_factor).to(device)
-    wt.train()
-#     else:
-#         wt = warm_start(p, out_dir).to(device)
-#         wt.train()
+    if p.warm_start is None:
+        wt = awave.DWT1d(wave=p.wave, mode=p.mode, J=p.J,
+                       init_factor=p.init_factor,
+                       noise_factor=p.noise_factor,
+                       const_factor=p.const_factor).to(device)
+        wt.train()
+    else:
+        wt = warm_start(p, out_dir).to(device)
+        wt.train()
 
     # check if we have multiple GPUs
     if torch.cuda.device_count() > 1:

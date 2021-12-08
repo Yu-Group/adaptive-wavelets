@@ -192,11 +192,8 @@ def _CMF_loss(w_transform):
     h0 = w_transform.h0
     n = h0.size(2)
     assert n % 2 == 0, "length of lowpass filter should be even"
-    try:
-        h_f = torch.fft.fft(torch.stack((h0, torch.zeros_like(h0)), dim=3), 1)
-    except:
-        h_f = torch.fft(torch.stack((h0, torch.zeros_like(h0)), dim=3), 1)
-    mod = (h_f ** 2).sum(axis=3)
+    h_f = torch.fft.fft(h0)
+    mod = abs(h_f) ** 2
     cmf_identity = mod[0, 0, :n // 2] + mod[0, 0, n // 2:]
     loss = .5 * torch.sum((cmf_identity - 2) ** 2)
 
