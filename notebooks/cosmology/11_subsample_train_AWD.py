@@ -10,7 +10,8 @@ DIR_FILE = os.path.dirname(os.path.realpath(__file__))  # directory of the confi
 
 if __name__ == '__main__':
     params_to_vary = {
-        'seed': [1],
+        'seed': [i for i in range(1,11)],
+        'subsample': [1],
         'wave': ['db5'],
         'J': [4],
         'mode': ['zero'],
@@ -19,12 +20,12 @@ if __name__ == '__main__':
         'const_factor': [0],
         'batch_size': [100],
         'lr': [0.001],
-        'num_epochs': [50],
+        'num_epochs': [100],
         'attr_methods': ['Saliency'],
-        'lamL1wave': [0.005, 0.01, 0.02],
-        'lamL1attr': np.round([0] + list(np.geomspace(0.001, 0.05, 10)), 5),
-        'dirname': ['db5_saliency_warmstart_seed=1_new'],
-        'warm_start': [True]
+        'lamL1wave': [0.02],
+        'lamL1attr': [0.00368],
+        'dirname': ['db5_saliency_subsample'],
+#         'warm_start': [False]
     }
     ks = sorted(params_to_vary.keys())
     vals = [params_to_vary[k] for k in ks]
