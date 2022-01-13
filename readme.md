@@ -19,6 +19,8 @@
 
 # Quickstart
 
+<img align="center" width=100% src="https://yu-group.github.io/adaptive-wavelets/anim2.gif"> </img>
+
 > **Installation**: `pip install awave`
 > or clone the repo and run `python setup.py install` from the repo directory
 
@@ -80,7 +82,9 @@ If this package is useful for you, please cite the following!
 ```r
 @article{ha2021adaptive,
   title={Adaptive wavelet distillation from neural networks through interpretations},
-  author={Ha, Wooseok and Singh, Chandan and Lanusse, Francois and Song, Eli and Dang, Song and He, Kangmin and Upadhyayula, Srigokul and Yu, Bin},
-  journal={arXiv preprint arXiv:2107.09145},
+  author={Ha, Wooseok and Singh, Chandan and Lanusse, Francois and Upadhyayula, Srigokul and Yu, Bin},
+  journal={Advances in Neural Information Processing Systems},
+  volume={34},
   year={2021}
 }
+```

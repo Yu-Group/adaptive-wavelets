@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Ha"
+  given-names: "Wooseok"
+- family-names: "Singh"
+  given-names: "Chandan"
+- family-names: "Lanusse"
+  given-names: "Francois"
+- family-names: "Upadhyayula"
+  given-names: "Srigokul"
+- family-names: "Yu"
+  given-names: "Bin"
+title: "Adaptive wavelet distillation from neural networks through interpretations"
+journal: "Advances in Neural Information Processing Systems"
+date-released: 2021-11-21
+url: "https://openreview.net/pdf?id=meTWnAamntJ"
