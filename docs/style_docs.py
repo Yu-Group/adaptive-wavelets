@@ -11,6 +11,10 @@ data = data.replace('<h1 class="title">Module <code>awave</code></h1>', '') # re
 data = data.replace('<li><code><a title="awave.tests" href="tests/index.html">awave.tests</a></code></li>', '') # remove tests
 data = data.replace('<dt><code class="name"><a title="awave.tests" href="tests/index.html">awave.tests</a></code>\n</dt>', '')
 
+# add wave animation
+data = data.replace('</nav>', '<div class="ocean"><div class="wave"></div><div class="wave"></div></div></nav>')
+data = data.append('\n<link href="wave.css" rel="stylesheet">\n')
+
 # Write the file out again
 with open('index.html', 'w') as f:
     f.write(data)

@@ -1,51 +1,464 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
-<title>awave API documentation</title>
-<meta name="description" content="&lt;h1 align=&#34;center&#34;&gt;
-&lt;img src=&#34;https://yu-group.github.io/adaptive-wavelets/anim.gif&#34; width=&#34;15%&#34;&gt; Adaptive wavelets &lt;img …" />
-<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
-<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
-<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"/>
+    <meta name="generator" content="pdoc 0.7.2"/>
+    <title>awave API documentation</title>
+    <meta name="description" content="&lt;h1 align=&#34;center&#34;&gt;
+&lt;img src=&#34;https://yu-group.github.io/adaptive-wavelets/anim.gif&#34; width=&#34;15%&#34;&gt; Adaptive wavelets &lt;img …"/>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+    <style>.flex {
+        display: flex !important
+    }
+
+    body {
+        line-height: 1.5em
+    }
+
+    #content {
+        padding: 20px
+    }
+
+    #sidebar {
+        padding: 30px;
+        overflow: hidden
+    }
+
+    .http-server-breadcrumbs {
+        font-size: 130%;
+        margin: 0 0 15px 0
+    }
+
+    #footer {
+        font-size: .75em;
+        padding: 5px 30px;
+        border-top: 1px solid #ddd;
+        text-align: right
+    }
+
+    #footer p {
+        margin: 0 0 0 1em;
+        display: inline-block
+    }
+
+    #footer p:last-child {
+        margin-right: 30px
+    }
+
+    h1, h2, h3, h4, h5 {
+        font-weight: 300
+    }
+
+    h1 {
+        font-size: 2.5em;
+        line-height: 1.1em
+    }
+
+    h2 {
+        font-size: 1.75em;
+        margin: 1em 0 .50em 0
+    }
+
+    h3 {
+        font-size: 1.4em;
+        margin: 25px 0 10px 0
+    }
+
+    h4 {
+        margin: 0;
+        font-size: 105%
+    }
+
+    a {
+        color: #058;
+        text-decoration: none;
+        transition: color .3s ease-in-out
+    }
+
+    a:hover {
+        color: #e82
+    }
+
+    .title code {
+        font-weight: bold
+    }
+
+    h2[id^="header-"] {
+        margin-top: 2em
+    }
+
+    .ident {
+        color: #900
+    }
+
+    pre code {
+        background: #f8f8f8;
+        font-size: .8em;
+        line-height: 1.4em
+    }
+
+    code {
+        background: #f2f2f1;
+        padding: 1px 4px;
+        overflow-wrap: break-word
+    }
+
+    h1 code {
+        background: transparent
+    }
+
+    pre {
+        background: #f8f8f8;
+        border: 0;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        margin: 1em 0;
+        padding: 1ex
+    }
+
+    #http-server-module-list {
+        display: flex;
+        flex-flow: column
+    }
+
+    #http-server-module-list div {
+        display: flex
+    }
+
+    #http-server-module-list dt {
+        min-width: 10%
+    }
+
+    #http-server-module-list p {
+        margin-top: 0
+    }
+
+    .toc ul, #index {
+        list-style-type: none;
+        margin: 0;
+        padding: 0
+    }
+
+    #index code {
+        background: transparent
+    }
+
+    #index h3 {
+        border-bottom: 1px solid #ddd
+    }
+
+    #index ul {
+        padding: 0
+    }
+
+    #index h4 {
+        font-weight: bold
+    }
+
+    #index h4 + ul {
+        margin-bottom: .6em
+    }
+
+    @media (min-width: 200ex) {
+        #index .two-column {
+            column-count: 2
+        }
+    }
+
+    @media (min-width: 300ex) {
+        #index .two-column {
+            column-count: 3
+        }
+    }
+
+    dl {
+        margin-bottom: 2em
+    }
+
+    dl dl:last-child {
+        margin-bottom: 4em
+    }
+
+    dd {
+        margin: 0 0 1em 3em
+    }
+
+    #header-classes + dl > dd {
+        margin-bottom: 3em
+    }
+
+    dd dd {
+        margin-left: 2em
+    }
+
+    dd p {
+        margin: 10px 0
+    }
+
+    .name {
+        background: #eee;
+        font-weight: bold;
+        font-size: .85em;
+        padding: 5px 10px;
+        display: inline-block;
+        min-width: 40%
+    }
+
+    .name:hover {
+        background: #e0e0e0
+    }
+
+    .name > span:first-child {
+        white-space: nowrap
+    }
+
+    .name.class > span:nth-child(2) {
+        margin-left: .4em
+    }
+
+    .inherited {
+        color: #999;
+        border-left: 5px solid #eee;
+        padding-left: 1em
+    }
+
+    .inheritance em {
+        font-style: normal;
+        font-weight: bold
+    }
+
+    .desc h2 {
+        font-weight: 400;
+        font-size: 1.25em
+    }
+
+    .desc h3 {
+        font-size: 1em
+    }
+
+    .desc dt code {
+        background: inherit
+    }
+
+    .source summary, .git-link-div {
+        color: #666;
+        text-align: right;
+        font-weight: 400;
+        font-size: .8em;
+        text-transform: uppercase
+    }
+
+    .source summary > * {
+        white-space: nowrap;
+        cursor: pointer
+    }
+
+    .git-link {
+        color: inherit;
+        margin-left: 1em
+    }
+
+    .source pre {
+        max-height: 500px;
+        overflow: auto;
+        margin: 0
+    }
+
+    .source pre code {
+        font-size: 12px;
+        overflow: visible
+    }
+
+    .hlist {
+        list-style: none
+    }
+
+    .hlist li {
+        display: inline
+    }
+
+    .hlist li:after {
+        content: ',\2002'
+    }
+
+    .hlist li:last-child:after {
+        content: none
+    }
+
+    .hlist .hlist {
+        display: inline;
+        padding-left: 1em
+    }
+
+    img {
+        max-width: 100%
+    }
+
+    .admonition {
+        padding: .1em .5em;
+        margin-bottom: 1em
+    }
+
+    .admonition-title {
+        font-weight: bold
+    }
+
+    .admonition.note, .admonition.info, .admonition.important {
+        background: #aef
+    }
+
+    .admonition.todo, .admonition.versionadded, .admonition.tip, .admonition.hint {
+        background: #dfd
+    }
+
+    .admonition.warning, .admonition.versionchanged, .admonition.deprecated {
+        background: #fd4
+    }
+
+    .admonition.error, .admonition.danger, .admonition.caution {
+        background: lightpink
+    }</style>
+    <style media="screen and (min-width: 700px)">@media screen and (min-width: 700px) {
+        #sidebar {
+            width: 30%
+        }
+
+        #content {
+            width: 70%;
+            max-width: 100ch;
+            padding: 3em 4em;
+            border-left: 1px solid #ddd
+        }
+
+        pre code {
+            font-size: 1em
+        }
+
+        .item .name {
+            font-size: 1em
+        }
+
+        main {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end
+        }
+
+        .toc ul ul, #index ul {
+            padding-left: 1.5em
+        }
+
+        .toc > ul > li {
+            margin-top: .5em
+        }
+    }</style>
+    <style media="print">@media print {
+        #sidebar h1 {
+            page-break-before: always
+        }
+
+        .source {
+            display: none
+        }
+    }
+
+    @media print {
+        * {
+            background: transparent !important;
+            color: #000 !important;
+            box-shadow: none !important;
+            text-shadow: none !important
+        }
+
+        a[href]:after {
+            content: " (" attr(href) ")";
+            font-size: 90%
+        }
+
+        a[href][title]:after {
+            content: none
+        }
+
+        abbr[title]:after {
+            content: " (" attr(title) ")"
+        }
+
+        .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after {
+            content: ""
+        }
+
+        pre, blockquote {
+            border: 1px solid #999;
+            page-break-inside: avoid
+        }
+
+        thead {
+            display: table-header-group
+        }
+
+        tr, img {
+            page-break-inside: avoid
+        }
+
+        img {
+            max-width: 100% !important
+        }
+
+        @page {
+            margin: 0.5cm
+        }
+
+        p, h2, h3 {
+            orphans: 3;
+            widows: 3
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            page-break-after: avoid
+        }
+    }</style>
 </head>
 <body>
 <main>
-<article id="content">
-<header>
+    <article id="content">
+        <header>
 
-</header>
-<section id="section-intro">
-<h1 align="center">
-<img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"> Adaptive wavelets <img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"></h1>
-<p align="center"> Wavelets which adapt given data (and optionally a pre-trained model). This yields models which are faster, more compressible, and more interpretable.
-</p>
-<p align="center">
-<a href="https://yu-group.github.io/adaptive-wavelets/">📚 docs</a> •
-<a href="https://github.com/Yu-Group/adaptive-wavelets/tree/master/notebooks">📖 demo notebooks</a>
-</p>
-<p align="center">
-<img src="https://img.shields.io/badge/license-mit-blue.svg">
-<img src="https://img.shields.io/badge/python-3.6--3.8-blue">
-<img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
-<a href="https://github.com/csinva/imodels/actions"><img src="https://github.com/Yu-Group/adaptive-wavelets/workflows/tests/badge.svg"></a>
-<img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
-<img src="https://img.shields.io/pypi/v/awave?color=orange">
-<img src="https://static.pepy.tech/personalized-badge/awave?period=total&units=none&left_color=gray&right_color=orange&left_text=downloads&kill_cache=1">
-</p>
-<h1 id="quickstart">Quickstart</h1>
-<blockquote>
-<p><strong>Installation</strong>: <code>pip install awave</code>
-or clone the repo and run <code>python setup.py install</code> from the repo directory</p>
-</blockquote>
-<p>Then, can use the core functions (see simplest example in <code>notebooks/demo_simple_2d.ipynb</code> or <code>notebooks/demo_simple_1d.ipynb</code>). See <a href="https://yu-group.github.io/adaptive-wavelets/">the docs</a> for more information on arguments for these functions.</p>
-<p>Given some data <code>X</code>, you can run the following:</p>
-<pre><code class="language-python">from awave.utils.misc import get_wavefun
+        </header>
+        <section id="section-intro">
+            <h1 align="center">
+                <img src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"> Adaptive wavelets <img
+                    src="https://yu-group.github.io/adaptive-wavelets/anim.gif" width="15%"></h1>
+            <p align="center"> Wavelets which adapt given data (and optionally a pre-trained model). This yields models
+                which are faster, more compressible, and more interpretable.
+            </p>
+            <p align="center">
+                <a href="https://yu-group.github.io/adaptive-wavelets/">📚 docs</a> •
+                <a href="https://github.com/Yu-Group/adaptive-wavelets/tree/master/notebooks">📖 demo notebooks</a>
+            </p>
+            <p align="center">
+                <img src="https://img.shields.io/badge/license-mit-blue.svg">
+                <img src="https://img.shields.io/badge/python-3.6--3.8-blue">
+                <img src="https://img.shields.io/badge/pytorch-1.0%2B-blue">
+                <a href="https://github.com/csinva/imodels/actions"><img
+                        src="https://github.com/Yu-Group/adaptive-wavelets/workflows/tests/badge.svg"></a>
+                <img src="https://img.shields.io/github/checks-status/Yu-Group/adaptive-wavelets/master">
+                <img src="https://img.shields.io/pypi/v/awave?color=orange">
+                <img src="https://static.pepy.tech/personalized-badge/awave?period=total&units=none&left_color=gray&right_color=orange&left_text=downloads&kill_cache=1">
+            </p>
+            <h1 id="quickstart">Quickstart</h1>
+            <blockquote>
+                <p><strong>Installation</strong>: <code>pip install awave</code>
+                    or clone the repo and run <code>python setup.py install</code> from the repo directory</p>
+            </blockquote>
+            <p>Then, can use the core functions (see simplest example in <code>notebooks/demo_simple_2d.ipynb</code> or
+                <code>notebooks/demo_simple_1d.ipynb</code>). See <a
+                        href="https://yu-group.github.io/adaptive-wavelets/">the docs</a> for more information on
+                arguments for these functions.</p>
+            <p>Given some data <code>X</code>, you can run the following:</p>
+            <pre><code class="language-python">from awave.utils.misc import get_wavefun
 from awave.transform2d import DWT2d
 
 wt = DWT2d(wave='db5', J=4)
@@ -53,127 +466,283 @@ wt.fit(X=X, lr=1e-1, num_epochs=10)  # this function alternatively accepts a dat
 X_sparse = wt(X)  # uses the learned adaptive wavelet
 phi, psi, x = get_wavefun(wt)  # can also inspect the learned adaptive wavelet
 </code></pre>
-<p>To distill a pretrained model named <code>model</code>, simply pass it as an additional argument to the fit function:</p>
-<pre><code class="language-python">wt.fit(X=X, pretrained_model=model,
+            <p>To distill a pretrained model named <code>model</code>, simply pass it as an additional argument to the
+                fit function:</p>
+            <pre><code class="language-python">wt.fit(X=X, pretrained_model=model,
        lr=1e-1, num_epochs=10,
        lamL1attr=5) # control how much to regularize the model's attributions
 </code></pre>
-<h1 id="background">Background</h1>
-<details>
-<summary>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">Ha et al. NeurIPS, 2021</a>).
-</summary>
-<img src="https://yu-group.github.io/adaptive-wavelets/awd.jpg">
-<blockquote>
-<b>Abstract</b>: Recent deep-learning models have achieved impressive prediction performance, but often sacrifice interpretability and computational efficiency. Interpretability is crucial in many disciplines, such as science and medicine, where models must be carefully vetted or where interpretation is the goal itself. Moreover, interpretable models are concise and often yield computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims to distill information from a trained neural network into a wavelet transform. Specifically, AWD penalizes feature attributions of a neural network in the wavelet domain to learn an effective multi-resolution wavelet transform. The resulting model is highly predictive, concise, computationally efficient, and has properties (such as a multi-scale structure) which make it easy to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges in two real-world settings: cosmological parameter inference and molecular-partner prediction. In both cases, AWD yields a scientifically interpretable and concise model which gives predictive performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive features that are scientifically meaningful in the context of respective domains.</blockquote>
-</details>
-<details>
-<summary>Also provides an implementation for "Learning Sparse Wavelet Representations" (<a href="https://arxiv.org/abs/1802.02961">Recoskie & Mann, 2018</a>)
-</summary>
-<blockquote>
-<b>Abstract</b>: In this work we propose a method for learning wavelet filters directly from data. We accomplish this by framing the discrete wavelet transform as a modified convolutional neural network. We introduce an autoencoder wavelet transform network that is trained using gradient descent. We show that the model is capable of learning structured wavelet filters from synthetic and real data. The learned wavelets are shown to be similar to traditional wavelets that are derived using Fourier methods. Our method is simple to implement and easily incorporated into neural network architectures. A major advantage to our model is that we can learn from raw audio data.</blockquote>
-</details>
-<h1 id="related-work">Related work</h1>
-<ul>
-<li>TRIM (ICLR 2020 workshop <a href="https://arxiv.org/abs/2003.01926">pdf</a>, <a href="https://github.com/csinva/transformation-importance">github</a>) - using simple reparameterizations, allows for calculating disentangled importances to transformations of the input (e.g. assigning importances to different frequencies)</li>
-<li>ACD (ICLR 2019 <a href="https://openreview.net/pdf?id=SkEqro0ctQ">pdf</a>, <a href="https://github.com/csinva/hierarchical-dnn-interpretations">github</a>) - extends CD to CNNs / arbitrary DNNs, and aggregates explanations into a hierarchy</li>
-<li>CDEP (ICML 2020 <a href="https://arxiv.org/abs/1909.13584">pdf</a>, <a href="https://github.com/laura-rieger/deep-explanation-penalization">github</a>) - penalizes CD / ACD scores during training to make models generalize better</li>
-<li>DAC (arXiv 2019 <a href="https://arxiv.org/abs/1905.07631">pdf</a>, <a href="https://github.com/csinva/disentangled-attribution-curves">github</a>) - finds disentangled interpretations for random forests</li>
-<li>PDR framework (PNAS 2019 <a href="https://arxiv.org/abs/1901.04592">pdf</a>) - an overarching framewwork for guiding and framing interpretable machine learning</li>
-</ul>
-<p>If this package is useful for you, please cite the following!</p>
-<p>```r
-@article{ha2021adaptive,
-title={Adaptive wavelet distillation from neural networks through interpretations},
-author={Ha, Wooseok and Singh, Chandan and Lanusse, Francois and Song, Eli and Dang, Song and He, Kangmin and Upadhyayula, Srigokul and Yu, Bin},
-journal={arXiv preprint arXiv:2107.09145},
-year={2021}
-}</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;
+            <h1 id="background">Background</h1>
+            <details>
+                <summary>Official code for using / reproducing AWD from the paper "Adaptive wavelet distillation from
+                    neural networks through interpretations" (<a href="https://arxiv.org/abs/2107.09145">Ha et al.
+                        NeurIPS, 2021</a>).
+                </summary>
+                <img src="https://yu-group.github.io/adaptive-wavelets/awd.jpg">
+                <blockquote>
+                    <b>Abstract</b>: Recent deep-learning models have achieved impressive prediction performance, but
+                    often sacrifice interpretability and computational efficiency. Interpretability is crucial in many
+                    disciplines, such as science and medicine, where models must be carefully vetted or where
+                    interpretation is the goal itself. Moreover, interpretable models are concise and often yield
+                    computational efficiency. Here, we propose adaptive wavelet distillation (AWD), a method which aims
+                    to distill information from a trained neural network into a wavelet transform. Specifically, AWD
+                    penalizes feature attributions of a neural network in the wavelet domain to learn an effective
+                    multi-resolution wavelet transform. The resulting model is highly predictive, concise,
+                    computationally efficient, and has properties (such as a multi-scale structure) which make it easy
+                    to interpret. In close collaboration with domain experts, we showcase how AWD addresses challenges
+                    in two real-world settings: cosmological parameter inference and molecular-partner prediction. In
+                    both cases, AWD yields a scientifically interpretable and concise model which gives predictive
+                    performance better than state-of-the-art neural networks. Moreover, AWD identifies predictive
+                    features that are scientifically meaningful in the context of respective domains.
+                </blockquote>
+            </details>
+            <details>
+                <summary>Also provides an implementation for "Learning Sparse Wavelet Representations" (<a
+                        href="https://arxiv.org/abs/1802.02961">Recoskie & Mann, 2018</a>)
+                </summary>
+                <blockquote>
+                    <b>Abstract</b>: In this work we propose a method for learning wavelet filters directly from data.
+                    We accomplish this by framing the discrete wavelet transform as a modified convolutional neural
+                    network. We introduce an autoencoder wavelet transform network that is trained using gradient
+                    descent. We show that the model is capable of learning structured wavelet filters from synthetic and
+                    real data. The learned wavelets are shown to be similar to traditional wavelets that are derived
+                    using Fourier methods. Our method is simple to implement and easily incorporated into neural network
+                    architectures. A major advantage to our model is that we can learn from raw audio data.
+                </blockquote>
+            </details>
+            <h1 id="related-work">Related work</h1>
+            <ul>
+                <li>TRIM (ICLR 2020 workshop <a href="https://arxiv.org/abs/2003.01926">pdf</a>, <a
+                        href="https://github.com/csinva/transformation-importance">github</a>) - using simple
+                    reparameterizations, allows for calculating disentangled importances to transformations of the input
+                    (e.g. assigning importances to different frequencies)
+                </li>
+                <li>ACD (ICLR 2019 <a href="https://openreview.net/pdf?id=SkEqro0ctQ">pdf</a>, <a
+                        href="https://github.com/csinva/hierarchical-dnn-interpretations">github</a>) - extends CD to
+                    CNNs / arbitrary DNNs, and aggregates explanations into a hierarchy
+                </li>
+                <li>CDEP (ICML 2020 <a href="https://arxiv.org/abs/1909.13584">pdf</a>, <a
+                        href="https://github.com/laura-rieger/deep-explanation-penalization">github</a>) - penalizes CD
+                    / ACD scores during training to make models generalize better
+                </li>
+                <li>DAC (arXiv 2019 <a href="https://arxiv.org/abs/1905.07631">pdf</a>, <a
+                        href="https://github.com/csinva/disentangled-attribution-curves">github</a>) - finds
+                    disentangled interpretations for random forests
+                </li>
+                <li>PDR framework (PNAS 2019 <a href="https://arxiv.org/abs/1901.04592">pdf</a>) - an overarching
+                    framewwork for guiding and framing interpretable machine learning
+                </li>
+            </ul>
+            <p>If this package is useful for you, please cite the following!</p>
+            <p>```r
+                @article{ha2021adaptive,
+                title={Adaptive wavelet distillation from neural networks through interpretations},
+                author={Ha, Wooseok and Singh, Chandan and Lanusse, Francois and Song, Eli and Dang, Song and He,
+                Kangmin and Upadhyayula, Srigokul and Yu, Bin},
+                journal={arXiv preprint arXiv:2107.09145},
+                year={2021}
+                }</p>
+            <details class="source">
+                <summary>
+                    <span>Expand source code</span>
+                </summary>
+                <pre><code class="python">&#34;&#34;&#34;
 .. include:: ../readme.md
 &#34;&#34;&#34;
 from .losses import get_loss_f
 from awave.utils.train import Trainer
 from .transform1d import DWT1d
 from .transform2d import DWT2d</code></pre>
-</details>
-</section>
-<section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="awave.losses" href="losses.html">awave.losses</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.models" href="models/index.html">awave.models</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.tests" href="tests/index.html">awave.tests</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.transform" href="transform.html">awave.transform</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.transform1d" href="transform1d.html">awave.transform1d</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.transform2d" href="transform2d.html">awave.transform2d</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.trim" href="trim/index.html">awave.trim</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="awave.utils" href="utils/index.html">awave.utils</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-</dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
-</section>
-</article>
-<nav id="sidebar">
-<h1>Index</h1>
-<div class="toc">
-<ul>
-<li><a href="#quickstart">Quickstart</a></li>
-<li><a href="#background">Background</a></li>
-<li><a href="#related-work">Related work</a></li>
-</ul>
-</div>
-<ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="awave.losses" href="losses.html">awave.losses</a></code></li>
-<li><code><a title="awave.models" href="models/index.html">awave.models</a></code></li>
+            </details>
+        </section>
+        <section>
+            <h2 class="section-title" id="header-submodules">Sub-modules</h2>
+            <dl>
+                <dt><code class="name"><a title="awave.losses" href="losses.html">awave.losses</a></code></dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.models" href="models/index.html">awave.models</a></code></dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.tests" href="tests/index.html">awave.tests</a></code></dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.transform" href="transform.html">awave.transform</a></code></dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.transform1d" href="transform1d.html">awave.transform1d</a></code>
+                </dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.transform2d" href="transform2d.html">awave.transform2d</a></code>
+                </dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.trim" href="trim/index.html">awave.trim</a></code></dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+                <dt><code class="name"><a title="awave.utils" href="utils/index.html">awave.utils</a></code></dt>
+                <dd>
+                    <section class="desc"></section>
+                </dd>
+            </dl>
+        </section>
+        <section>
+        </section>
+        <section>
+        </section>
+        <section>
+        </section>
+    </article>
+    <nav id="sidebar">
+        <h1>Index</h1>
 
-<li><code><a title="awave.transform" href="transform.html">awave.transform</a></code></li>
-<li><code><a title="awave.transform1d" href="transform1d.html">awave.transform1d</a></code></li>
-<li><code><a title="awave.transform2d" href="transform2d.html">awave.transform2d</a></code></li>
-<li><code><a title="awave.trim" href="trim/index.html">awave.trim</a></code></li>
-<li><code><a title="awave.utils" href="utils/index.html">awave.utils</a></code></li>
-</ul>
-</li>
-</ul>
-</nav>
+        <div class="toc">
+            <ul>
+                <li><a href="#quickstart">Quickstart</a></li>
+                <li><a href="#background">Background</a></li>
+                <li><a href="#related-work">Related work</a></li>
+            </ul>
+        </div>
+        <ul id="index">
+            <li><h3><a href="#header-submodules">Sub-modules</a></h3>
+                <ul>
+                    <li><code><a title="awave.losses" href="losses.html">awave.losses</a></code></li>
+                    <li><code><a title="awave.models" href="models/index.html">awave.models</a></code></li>
+
+                    <li><code><a title="awave.transform" href="transform.html">awave.transform</a></code></li>
+                    <li><code><a title="awave.transform1d" href="transform1d.html">awave.transform1d</a></code></li>
+                    <li><code><a title="awave.transform2d" href="transform2d.html">awave.transform2d</a></code></li>
+                    <li><code><a title="awave.trim" href="trim/index.html">awave.trim</a></code></li>
+                    <li><code><a title="awave.utils" href="utils/index.html">awave.utils</a></code></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="ocean">
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+    </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+    <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
+
 </body>
-</html><a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" class="github-corner" aria-label="View source on GitHub"><svg width="120" height="120" viewBox="0 0 250 250" style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style><a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" class="github-corner" aria-label="View source on GitHub"><svg width="120" height="120" viewBox="0 0 250 250" style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style><a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" class="github-corner" aria-label="View source on GitHub"><svg width="120" height="120" viewBox="0 0 250 250" style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+</html><a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" class="github-corner"
+          aria-label="View source on GitHub">
+    <svg width="120" height="120" viewBox="0 0 250 250"
+         style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out
+}
+
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0)
+    }
+    20%, 60% {
+        transform: rotate(-25deg)
+    }
+    40%, 80% {
+        transform: rotate(10deg)
+    }
+}
+
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none
+    }
+
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out
+    }
+}</style><a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" class="github-corner"
+            aria-label="View source on GitHub">
+    <svg width="120" height="120" viewBox="0 0 250 250"
+         style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out
+}
+
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0)
+    }
+    20%, 60% {
+        transform: rotate(-25deg)
+    }
+    40%, 80% {
+        transform: rotate(10deg)
+    }
+}
+
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none
+    }
+
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out
+    }
+}</style><a href="https://github.com/Yu-Group/adaptive-wavelet-distillation" class="github-corner"
+            aria-label="View source on GitHub">
+    <svg width="120" height="120" viewBox="0 0 250 250"
+         style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out
+}
+
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0)
+    }
+    20%, 60% {
+        transform: rotate(-25deg)
+    }
+    40%, 80% {
+        transform: rotate(10deg)
+    }
+}
+
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none
+    }
+
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out
+    }
+}</style>
+
+<link href="wave.css" rel="stylesheet">
